@@ -1,0 +1,585 @@
+NITA,INFO   ,    1,Beginning Program Execution: NITA v5.51.a.001
+NITA,INFO   ,    1,EXECUTION DATE: 07/22/2022   EXECUTION START TIME: 15:50:30
+NITA,INFO   ,    1,The command line with arguments read in is "../../src/bins/NITA.exe /f:NITA_CONTROL.csv". Will attempt to parse.
+NITA,INFO   ,    1,The current command line argument being processed is "/f:NITA_CONTROL.csv".
+NITA,INFO   ,    1,An "f" was found in command line argument string indicating the location and filename of the control file that will be used.
+NITA,INFO   ,    1,Checking existence of NITA control file:
+NITA,INFO   ,    1,Opened input file: NITA_CONTROL.csv
+NITA,INFO   ,    1,Reading records from "NITA.CSV" control file.
+NITA,INFO   ,    1,Input record: FILENAME,UNITS_OUT,COMBINE
+NITA,INFO   ,    1,Input record: OH011_nasis.csv,1,1
+NITA,INFO   ,    1,NASIS Input Filename: OH011_nasis.csv
+NITA,INFO   ,    1,Input record: OH107_nasis.csv,1,1
+NITA,INFO   ,    1,NASIS Input Filename: OH107_nasis.csv
+NITA,INFO   ,    1,The input filename has a .csv extension. Assuming csv-formatted input.
+NITA,INFO   ,    1,The input filename has a .csv extension. Assuming csv-formatted input.
+NITA,INFO   ,    1,Finished reading control file.
+NITA,INFO   ,    1,Opened input file: OH011_nasis.csv
+NITA,INFO   ,    1,Opened input file: OH107_nasis.csv
+NITA,INFO   ,    1,Opened output file: AnnAGNPS_Combined_Group_1_Soil_Data.csv
+NITA,INFO   ,    1,Opened output file: AnnAGNPS_Combined_Group_1_Soil_Layers_Data.csv
+NITA,INFO   ,    1,Reading NITA input file...
+NITA,INFO   ,    1,Finished reading NITA input file.
+NITA,INFO   ,    1,Parsing NITA input strings into soil arrays:
+NITA,WARNING,    2,Soil ID "Ca","kwfact",(k-factor) on record "   75" is blank in the input data. The default value of 0.04 will be used.
+NITA,WARNING,    2,Soil ID "Cb","kwfact",(k-factor) on record "   76" is blank in the input data. The default value of 0.04 will be used.
+NITA,WARNING,    2,Soil ID "Cb","kwfact",(k-factor) on record "   78" is blank in the input data. The default value of 0.04 will be used.
+NITA,WARNING,    2,Soil ID "Cb","kwfact",(k-factor) on record "   80" is blank in the input data. The default value of 0.04 will be used.
+NITA,WARNING,    2,Soil ID "Cb","kwfact",(k-factor) on record "   85" is blank in the input data. The default value of 0.04 will be used.
+NITA,WARNING,    2,Soil ID "Cb","claytotal_r"; "silttotal_r"; "sandtotal_r", for record "   85", are all blank in the input data. At least one must be non-blank. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Me","kwfact",(k-factor) on record "  341" is blank in the input data. The default value of 0.04 will be used.
+NITA,WARNING,    2,Soil ID "Me","kwfact",(k-factor) on record "  345" is blank in the input data. The default value of 0.04 will be used.
+NITA,WARNING,    2,Soil ID "Me","kwfact",(k-factor) on record "  349" is blank in the input data. The default value of 0.04 will be used.
+NITA,WARNING,    2,Soil ID "Mnl3A","kwfact",(k-factor) on record "  378" is blank in the input data. The default value of 0.04 will be used.
+NITA,WARNING,    2,Soil ID "Mu","kwfact",(k-factor) on record "  418" is blank in the input data. The default value of 0.04 will be used.
+NITA,WARNING,    2,Soil ID "Mu","wthirdbar_r",(field capacity) for record "  419" is blank in the input data. This is a required field. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Wa","kwfact",(k-factor) on record "  620" is blank in the input data. The default value of 0.04 will be used.
+NITA,WARNING,    2,Soil ID "Ca","kwfact",(k-factor) on record "  730" is blank in the input data. The default value of 0.04 will be used.
+NITA,WARNING,    2,Soil ID "Ca","kwfact",(k-factor) on record "  732" is blank in the input data. The default value of 0.04 will be used.
+NITA,WARNING,    2,Soil ID "Ca","kwfact",(k-factor) on record "  734" is blank in the input data. The default value of 0.04 will be used.
+NITA,WARNING,    2,Soil ID "Ca","kwfact",(k-factor) on record "  737" is blank in the input data. The default value of 0.04 will be used.
+NITA,WARNING,    2,Soil ID "Ca","claytotal_r"; "silttotal_r"; "sandtotal_r", for record "  737", are all blank in the input data. At least one must be non-blank. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ed","kwfact",(k-factor) on record "  749" is blank in the input data. The default value of 0.04 will be used.
+NITA,WARNING,    2,Soil ID "Ed","wthirdbar_r",(field capacity) for record "  750" is blank in the input data. This is a required field. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mh","kwfact",(k-factor) on record " 1014" is blank in the input data. The default value of 0.04 will be used.
+NITA,WARNING,    2,Soil ID "Mh","claytotal_r"; "silttotal_r"; "sandtotal_r", for record " 1014", are all blank in the input data. At least one must be non-blank. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mnl3A","kwfact",(k-factor) on record " 1024" is blank in the input data. The default value of 0.04 will be used.
+NITA,WARNING,    2,Soil ID "On","wthirdbar_r",(field capacity) for record " 1093" is blank in the input data. This is a required field. This record will be ignored.
+NITA,INFO   ,    1,Sorting soil layer data
+NITA,INFO   ,    1,Finished sorting record "    100" out of "   1252
+NITA,INFO   ,    1,Finished sorting record "    200" out of "   1252
+NITA,INFO   ,    1,Finished sorting record "    300" out of "   1252
+NITA,INFO   ,    1,Finished sorting record "    400" out of "   1252
+NITA,INFO   ,    1,Finished sorting record "    500" out of "   1252
+NITA,INFO   ,    1,Finished sorting record "    600" out of "   1252
+NITA,INFO   ,    1,Finished sorting soil layer data
+NITA,INFO   ,    1,Finished parsing NITA input strings into soil arrays.
+NITA,INFO   ,    1,Converting parameters to AnnAGNPS units:
+NITA,INFO   ,    1,Finished converting parameters to AnnAGNPS units:
+NITA,INFO   ,    1,Cleaning soil data:
+NITA,INFO   ,    1,Checking that the sum of clay + silt + sand = 1. (100 %):
+NITA,INFO   ,    1,Finished checking that the sum of clay + silt + sand = 1. (100 %)
+NITA,INFO   ,    1,Checking that the very fine sand ratio is not greater than the sand ratio:
+NITA,INFO   ,    1,Finished checking that the very fine sand ratio is not greater than the sand ratio:
+NITA,INFO   ,    1,Checking for duplicate or decreasing layer depths:
+NITA,WARNING,    2,Soil ID "BdUXB",soil name "Glynwood",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BdUXB",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BdUXB",soil name "Blount",layer depth "23.",This record has soil layer depth that is less than that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BdUXB",soil name "Glynwood",layer depth "23.",This record has soil layer depth that is less than that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BdUXB",soil name "Pewamo",layer depth "28.",This record has soil layer depth that is less than that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BdUXB",soil name "Glynwood",layer depth "74.",This record has soil layer depth that is less than that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BdUXB",soil name "Blount",layer depth "81.",This record has soil layer depth that is less than that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BdUXB",soil name "Pewamo",layer depth "86.",This record has soil layer depth that is less than that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BdUXB",soil name "Glynwood",layer depth "91.",This record has soil layer depth that is less than that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BdUXB",soil name "Blount",layer depth "94.",This record has soil layer depth that is less than that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BdUXB",soil name "Pewamo",layer depth "145.",This record has soil layer depth that is less than that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BdUXB",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BdUXB",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BdUXB",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BdUXB",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1A1",soil name "Glynwood",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1A1",soil name "Blount",layer depth "25.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1A1",soil name "Pewamo",layer depth "30.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1A1",soil name "Glynwood",layer depth "74.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1A1",soil name "Blount",layer depth "83.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1A1",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1A1",soil name "Glynwood",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1A1",soil name "Blount",layer depth "99.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1A1",soil name "Pewamo",layer depth "145.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1A1",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1A1",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1A1",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1A1",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1A1",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1B1",soil name "Glynwood",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1B1",soil name "Glynwood",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1B1",soil name "Blount",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1B1",soil name "Pewamo",layer depth "30.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1B1",soil name "Glynwood",layer depth "74.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1B1",soil name "Blount",layer depth "81.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1B1",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1B1",soil name "Glynwood",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1B1",soil name "Blount",layer depth "94.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1B1",soil name "Pewamo",layer depth "145.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1B1",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1B1",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1B1",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1B1",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ble1B1",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1A1",soil name "Glynwood",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1A1",soil name "Blount",layer depth "25.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1A1",soil name "Pewamo",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1A1",soil name "Glynwood",layer depth "74.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1A1",soil name "Blount",layer depth "83.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1A1",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1A1",soil name "Glynwood",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1A1",soil name "Blount",layer depth "99.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1A1",soil name "Pewamo",layer depth "145.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1A1",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1A1",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1A1",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1A1",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1A1",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1B1",soil name "Blount",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1B1",soil name "Blount",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1B1",soil name "Glynwood",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1B1",soil name "Pewamo",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1B1",soil name "Glynwood",layer depth "74.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1B1",soil name "Blount",layer depth "81.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1B1",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1B1",soil name "Glynwood",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1B1",soil name "Blount",layer depth "94.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1B1",soil name "Pewamo",layer depth "145.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1B1",soil name "Blount",layer depth "200.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1B1",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1B1",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1B1",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg1B1",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg2A1",soil name "Glynwood",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg2A1",soil name "Haskins",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg2A1",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg2A1",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Blg2A1",soil name "Haskins",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BoB2",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BoB2",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BuUXA",soil name "Glynwood",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BuUXA",soil name "Blount",layer depth "25.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BuUXA",soil name "Pewamo",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BuUXA",soil name "Glynwood",layer depth "74.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BuUXA",soil name "Blount",layer depth "83.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BuUXA",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BuUXA",soil name "Glynwood",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BuUXA",soil name "Blount",layer depth "99.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BuUXA",soil name "Pewamo",layer depth "145.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BuUXA",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BuUXA",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BuUXA",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BuUXA",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "BuUXA",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ca",soil name "Pewamo",layer depth "200.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "Ca",soil name "Linwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Cb",soil name "Linwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Cb",soil name "Carlisle",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "DmA",soil name "Digby",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "DmA",soil name "Digby",layer depth "152.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "DmB",soil name "Digby",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "DmB",soil name "Digby",layer depth "152.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ee",soil name "Shoals",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ee",soil name "Shoals",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Ee",soil name "Sloan",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GdM5B3",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GdM5B3",soil name "Mississinewa",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GdM5B3",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GdUXB",soil name "Blount",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GdUXB",soil name "Glynwood",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GdUXB",soil name "Blount",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GdUXB",soil name "Pewamo",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GdUXB",soil name "Glynwood",layer depth "74.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GdUXB",soil name "Blount",layer depth "81.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GdUXB",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GdUXB",soil name "Glynwood",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GdUXB",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GdUXB",soil name "Blount",layer depth "94.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GdUXB",soil name "Pewamo",layer depth "145.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GdUXB",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GdUXB",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GdUXB",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GdUXB",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GdUXB",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GgM5B3",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GgM5B3",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GgM5B3",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gn",soil name "Shoals",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gn",soil name "Genesee",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gn",soil name "Shoals",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gn",soil name "Eel",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gn",soil name "Sloan",layer depth "30.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gn",soil name "Eel",layer depth "38.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gn",soil name "Genesee",layer depth "81.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gn",soil name "Shoals",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gn",soil name "Sloan",layer depth "106.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gn",soil name "Eel",layer depth "135.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gn",soil name "Eel",layer depth "183.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gn",soil name "Shoals",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gn",soil name "Genesee",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gn",soil name "Genesee",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gn",soil name "Sloan",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gn",soil name "Shoals",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GuA",soil name "Genesee",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GuA",soil name "Sloan",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GuA",soil name "Genesee",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwd1C1",soil name "Glynwood",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwd1C1",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwd1C1",soil name "Glynwood",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwd1C1",soil name "Pewamo",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwd5C2",soil name "Glynwood",layer depth "18.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwd5C2",soil name "Morley",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwd5C2",soil name "Blount",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwd5C2",soil name "Glynwood",layer depth "61.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwd5C2",soil name "Morley",layer depth "64.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwd5C2",soil name "Glynwood",layer depth "74.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwd5C2",soil name "Glynwood",layer depth "74.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwd5C2",soil name "Morley",layer depth "74.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwd5C2",soil name "Blount",layer depth "76.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwd5C2",soil name "Blount",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwd5C2",soil name "Blount",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwd5C2",soil name "Glynwood",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwd5C2",soil name "Glynwood",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwd5C2",soil name "Blount",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwd5C2",soil name "Morley",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B1",soil name "Glynwood",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B1",soil name "Blount",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B1",soil name "Pewamo",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B1",soil name "Glynwood",layer depth "74.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B1",soil name "Blount",layer depth "81.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B1",soil name "Glynwood",layer depth "86.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B1",soil name "Glynwood",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B1",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B1",soil name "Blount",layer depth "94.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B1",soil name "Pewamo",layer depth "145.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B1",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B1",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B1",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B1",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B1",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B2",soil name "Glynwood",layer depth "18.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B2",soil name "Blount",layer depth "25.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B2",soil name "Pewamo",layer depth "33.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B2",soil name "Glynwood",layer depth "66.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B2",soil name "Glynwood",layer depth "76.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B2",soil name "Blount",layer depth "81.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B2",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B2",soil name "Blount",layer depth "94.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B2",soil name "Pewamo",layer depth "145.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B2",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B2",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B2",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B2",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwe1B2",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B1",soil name "Glynwood",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B1",soil name "Glynwood",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B1",soil name "Blount",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B1",soil name "Pewamo",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B1",soil name "Glynwood",layer depth "74.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B1",soil name "Blount",layer depth "81.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B1",soil name "Glynwood",layer depth "86.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B1",soil name "Glynwood",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B1",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B1",soil name "Blount",layer depth "94.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B1",soil name "Pewamo",layer depth "145.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B1",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B1",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B1",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B1",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B1",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B2",soil name "Glynwood",layer depth "18.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B2",soil name "Blount",layer depth "25.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B2",soil name "Pewamo",layer depth "33.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B2",soil name "Glynwood",layer depth "64.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B2",soil name "Glynwood",layer depth "74.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B2",soil name "Blount",layer depth "81.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B2",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B2",soil name "Blount",layer depth "94.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B2",soil name "Pewamo",layer depth "145.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B2",soil name "Glynwood",layer depth "200.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B2",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B2",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B2",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg1B2",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C2",soil name "Glynwood",layer depth "18.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C2",soil name "Blount",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C2",soil name "Pewamo",layer depth "25.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C2",soil name "Glynwood",layer depth "61.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C2",soil name "Glynwood",layer depth "74.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C2",soil name "Blount",layer depth "76.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C2",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C2",soil name "Blount",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C2",soil name "Pewamo",layer depth "145.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C2",soil name "Blount",layer depth "203.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C2",soil name "Glynwood",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C2",soil name "Glynwood",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C2",soil name "Pewamo",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C2",soil name "Blount",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C3",soil name "Glynwood",layer depth "15.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C3",soil name "Blount",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C3",soil name "Pewamo",layer depth "25.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C3",soil name "Glynwood",layer depth "51.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C3",soil name "Glynwood",layer depth "64.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C3",soil name "Blount",layer depth "76.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C3",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C3",soil name "Blount",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C3",soil name "Pewamo",layer depth "145.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C3",soil name "Glynwood",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C3",soil name "Pewamo",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C3",soil name "Glynwood",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C3",soil name "Blount",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gwg5C3",soil name "Pewamo",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GwM5C3",soil name "Morley",layer depth "64.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GwM5C3",soil name "Blount",layer depth "203.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "GwM5C3",soil name "Glynwood",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GwM5C3",soil name "Morley",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GwUXC2",soil name "Morley",layer depth "74.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GwUXC2",soil name "Glynwood",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GwUXC2",soil name "Morley",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gye1B2",soil name "Mississinewa",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gye1B2",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gye1B2",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gyg1B2",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gyg1B2",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gyg1B2",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "HkA",soil name "Rawson",layer depth "25.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "HkA",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "HkA",soil name "Haskins",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "HkA",soil name "Rawson",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "HkB",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "HkB",soil name "Haskins",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "HkB",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "HnA",soil name "Haskins",layer depth "25.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "HnA",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "HnA",soil name "Rawson",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "HnA",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "HnB",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "HnB",soil name "Haskins",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "HnB",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Me",soil name "Milford",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mf",soil name "Millgrove",layer depth "152.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mnl3A",soil name "Wallkill",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mnl3A",soil name "Blount",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mnl3A",soil name "Minster",layer depth "25.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mnl3A",soil name "Wallkill",layer depth "51.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mnl3A",soil name "Blount",layer depth "76.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mnl3A",soil name "Minster",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mnl3A",soil name "Minster",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mnl3A",soil name "Blount",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mnl3A",soil name "Minster",layer depth "145.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mnl3A",soil name "Minster",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mnl3A",soil name "Minster",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mnl3A",soil name "Blount",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mns3A",soil name "McGary",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mns3A",soil name "Minster",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mns3A",soil name "Saranac",layer depth "30.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mns3A",soil name "Minster",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mns3A",soil name "McGary",layer depth "104.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mns3A",soil name "Minster",layer depth "142.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mns3A",soil name "Saranac",layer depth "163.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mns3A",soil name "McGary",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mns3A",soil name "Minster",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mns3A",soil name "McGary",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mns3A",soil name "Saranac",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mns3A",soil name "Minster",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MnUXA",soil name "Minster",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MnUXA",soil name "McGary",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mny3A",soil name "Minster",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mny3A",soil name "Westland",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Morley",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Morley",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Glynwood",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Blount",layer depth "25.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Pewamo",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Morley",layer depth "43.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Glynwood",layer depth "69.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Morley",layer depth "71.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Glynwood",layer depth "81.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Blount",layer depth "83.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Morley",layer depth "84.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Blount",layer depth "99.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Pewamo",layer depth "145.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Morley",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Morley",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrD2",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrE2",soil name "Glynwood",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrE2",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrE2",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MrE2",soil name "Hennepin",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MsD3",soil name "Glynwood",layer depth "18.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MsD3",soil name "Glynwood",layer depth "64.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MsD3",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MsD3",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MsD3",soil name "Hennepin",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Pm",soil name "Minster",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Pm",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Pm",soil name "Minster",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Po",soil name "Minster",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Po",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Po",soil name "Minster",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Pt",soil name "Minster",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Pt",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Pt",soil name "Minster",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "PuA",soil name "Blount",layer depth "25.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "PuA",soil name "Minster",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "PuA",soil name "Minster",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "PuA",soil name "Pewamo",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "PuA",soil name "Blount",layer depth "83.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "PuA",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "PuA",soil name "Minster",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "PuA",soil name "Blount",layer depth "99.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "PuA",soil name "Pewamo",layer depth "120.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "PuA",soil name "Minster",layer depth "142.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "PuA",soil name "Pewamo",layer depth "145.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "PuA",soil name "Blount",layer depth "200.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "PuA",soil name "Minster",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "PuA",soil name "Minster",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "PuA",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "PuA",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sac3AF",soil name "Saranac",layer depth "18.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sac3AF",soil name "Shoals",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sac3AF",soil name "Sloan",layer depth "30.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sac3AF",soil name "Shoals",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sac3AF",soil name "Sloan",layer depth "106.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sac3AF",soil name "Saranac",layer depth "112.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sac3AF",soil name "Saranac",layer depth "175.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sac3AF",soil name "Shoals",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sac3AF",soil name "Sloan",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sac3AF",soil name "Shoals",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "SaS3AF",soil name "Shoals",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "SaS3AF",soil name "Saranac",layer depth "30.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "SaS3AF",soil name "Saranac",layer depth "30.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "SaS3AF",soil name "Saranac",layer depth "30.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "SaS3AF",soil name "Spencerville",layer depth "38.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "SaS3AF",soil name "Shoals",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "SaS3AF",soil name "Spencerville",layer depth "122.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "SaS3AF",soil name "Saranac",layer depth "163.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "SaS3AF",soil name "Saranac",layer depth "163.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "SaS3AF",soil name "Saranac",layer depth "163.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "SaS3AF",soil name "Saranac",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "SaS3AF",soil name "Spencerville",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "SaS3AF",soil name "Saranac",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "SaS3AF",soil name "Saranac",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "SaS3AF",soil name "Saranac",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "SaS3AF",soil name "Shoals",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "SaS3AF",soil name "Spencerville",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho1AO",soil name "Eel",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho1AO",soil name "Shoals",layer depth "25.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho1AO",soil name "Sloan",layer depth "30.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho1AO",soil name "Eel",layer depth "102.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho1AO",soil name "Sloan",layer depth "106.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho1AO",soil name "Shoals",layer depth "107.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho1AO",soil name "Eel",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho1AO",soil name "Sloan",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho1AO",soil name "Sloan",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho1AO",soil name "Shoals",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho1AO",soil name "Eel",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho3AF",soil name "Shoals",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho3AF",soil name "Eel",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho3AF",soil name "Sloan",layer depth "30.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho3AF",soil name "Shoals",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho3AF",soil name "Eel",layer depth "102.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho3AF",soil name "Sloan",layer depth "106.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho3AF",soil name "Eel",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho3AF",soil name "Shoals",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho3AF",soil name "Sloan",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho3AF",soil name "Eel",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Sho3AF",soil name "Shoals",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "ShUXAF",soil name "Sloan",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "ShUXAF",soil name "Eel",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "ShUXAO",soil name "Eel",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "ShUXAO",soil name "Sloan",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "So",soil name "Shoals",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "So",soil name "Sloan",layer depth "30.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "So",soil name "Sloan",layer depth "36.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "So",soil name "Shoals",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "So",soil name "Sloan",layer depth "106.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "So",soil name "Sloan",layer depth "106.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "So",soil name "Sloan",layer depth "106.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "So",soil name "Shoals",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "So",soil name "Sloan",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "So",soil name "Sloan",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "So",soil name "Sloan",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "So",soil name "Shoals",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UbBXB",soil name "Glynwood",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UbBXB",soil name "Blount",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UbBXB",soil name "Glynwood",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UbBXB",soil name "Pewamo",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UbBXB",soil name "Glynwood",layer depth "74.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UbBXB",soil name "Blount",layer depth "81.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UbBXB",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UbBXB",soil name "Glynwood",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UbBXB",soil name "Blount",layer depth "94.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UbBXB",soil name "Pewamo",layer depth "145.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UbBXB",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UbBXB",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UbBXB",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UbBXB",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UbBXB",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UeGXB",soil name "Blount",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UeGXB",soil name "Blount",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UeGXB",soil name "Glynwood",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UeGXB",soil name "Pewamo",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UeGXB",soil name "Glynwood",layer depth "74.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UeGXB",soil name "Blount",layer depth "81.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UeGXB",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UeGXB",soil name "Glynwood",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UeGXB",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UeGXB",soil name "Blount",layer depth "94.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UeGXB",soil name "Pewamo",layer depth "145.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UeGXB",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UeGXB",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UeGXB",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UeGXB",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UeGXB",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UgBXA",soil name "Glynwood",layer depth "23.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UgBXA",soil name "Blount",layer depth "25.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UgBXA",soil name "Pewamo",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UgBXA",soil name "Glynwood",layer depth "74.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UgBXA",soil name "Blount",layer depth "83.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UgBXA",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UgBXA",soil name "Glynwood",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UgBXA",soil name "Blount",layer depth "99.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UgBXA",soil name "Pewamo",layer depth "145.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UgBXA",soil name "Blount",layer depth "200.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "UgBXA",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UgBXA",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UgBXA",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UgBXA",soil name "Glynwood",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UnHXAF",soil name "Sloan",layer depth "203.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "UnHXAF",soil name "Shoals",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UnHXAO",soil name "Eel",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UnHXAO",soil name "Sloan",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UnMXA",soil name "Saranac",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UnMXA",soil name "Minster",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UnSXAF",soil name "Shoals",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UpA",soil name "Blount",layer depth "25.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UpA",soil name "Minster",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UpA",soil name "Pewamo",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UpA",soil name "Minster",layer depth "28.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UpA",soil name "Blount",layer depth "83.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UpA",soil name "Pewamo",layer depth "86.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UpA",soil name "Minster",layer depth "91.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UpA",soil name "Blount",layer depth "99.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UpA",soil name "Pewamo",layer depth "120.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UpA",soil name "Minster",layer depth "142.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UpA",soil name "Pewamo",layer depth "145.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UpA",soil name "Minster",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UpA",soil name "Blount",layer depth "200.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "UpA",soil name "Pewamo",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UpA",soil name "Minster",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "UpA",soil name "Blount",layer depth "200.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,INFO   ,    1,Finished checking for duplicate or decreasing layer depths:
+NITA,INFO   ,    1,Assigning the shallowest impervious depth to the soil id:
+NITA,INFO   ,    1,Finished assigning the shallowest impervious depth to the soil id.
+NITA,INFO   ,    1,Assigning bulk density values to blanks, where possible:
+NITA,WARNING,    2,Soil ID "CyA",soil name "Cygnet",layer depth "203.",The bulk density for this layer is blank. There is no valid bulk density from a previous valid layer that can be used. This record will be ignored
+NITA,WARNING,    2,Soil ID "GzB",soil name "Glynwood",layer depth "203.",The bulk density for this layer is blank. There is no valid bulk density from a previous valid layer that can be used. This record will be ignored
+NITA,INFO   ,    1,Finished assigning bulk density values to blanks.
+NITA,INFO   ,    1,Checking for records where field capacity is less than wilting point:
+NITA,INFO   ,    1,Finished Checking for records where field capacity is less than wilting point.
+NITA,INFO   ,    1,Updating the number of soils and soil layers:
+NITA,INFO   ,    1,Finished updating the number of soils and soil layers:
+NITA,INFO   ,    1,Finished cleaning soil data:
+NITA,INFO   ,    1,Writing AnnAGNPS soil output files:
+NITA,INFO   ,    1,Writing AnnAGNPS soil data section file:
+NITA,INFO   ,    1,Finished writing AnnAGNPS soil data section file:
+NITA,INFO   ,    1,Writing AnnAGNPS soil layers data section file:
+NITA,INFO   ,    1,Finished writing AnnAGNPS soil layers data section file:
+NITA,INFO   ,    1,Finished writing AnnAGNPS soil output files:
+NITA,INFO   ,    1,Number of input records ignored "   505".
+NITA,INFO   ,    1,Finished processing all combined files "OH107_nasis.csv".
+NITA,INFO   ,    1,Successful "NITA" execution!
+NITA,INFO   ,    1,Finished Program Execution:  NITA v5.51.a.001
+NITA,INFO   ,    1,EXECUTION END TIME: 15:50:31
+NITA,INFO   ,    1,Total time in execution (seconds):       1
