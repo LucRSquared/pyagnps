@@ -103,11 +103,15 @@ if __name__ == "__main__":
     # - path_to_NITA_exe is the relative path to the executable with respect to filefolder
 
     path_to_NITA_exe = '../../src/bins/NITA.exe' # With respect to the nita_files
-    county_codes = ['OH107','OH011']
+    # county_codes = ['OH107','OH011']
 
-    combine_list = [1, 1]
-    units_out = [1, 1]
+    # combine_list = [1, 1]
+    # units_out = [1, 1]
 
-    filefolder = './outputs/soil'
+    county_codes = ['MS107']
+    combine_list = [1]
+    units_out = [1]
+
+    filefolder = './outputs/soil_MS107'
     main(county_codes,filefolder,combine_list,units_out,path_to_NITA_exe)
 
