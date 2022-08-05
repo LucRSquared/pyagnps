@@ -58,7 +58,7 @@ def relabel_topagnps_subgraph(G, outlet):
     for old_key in preorder:
         relabel_dict[old_key] = old_key - outlet + 2 # +2 because the last "actual reach" with non-zero length has label 2
 
-    relabel_dict[1] = 'OUTLET' # This is always true and reach 1 has 0 length
+    # relabel_dict[1] = 'OUTLET' # This is always true and reach 1 has 0 length
 
     G = G.reverse()
 
@@ -179,7 +179,7 @@ def subset_and_rename_reach_IDs_asc(relabel_dict, path_to_reach_ids_asc, outpath
 def write_csv_data_section(df, out_path):
 
     df.to_csv(out_path, sep=',', float_format='%.5f', index=False)
-    
+
     return
 
 
