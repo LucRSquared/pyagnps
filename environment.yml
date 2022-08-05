@@ -5,3 +5,11 @@ channels:
 dependencies:
   - requests
   - pandas
+  - rasterstats
+  - ipykernel
+  - geopandas
+  - rioxarray
+  - pygeoogc
+  - plotly_express
+  - nbformat
+  - altair
