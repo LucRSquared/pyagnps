@@ -85,16 +85,6 @@ def run_nita(filefolder, path_to_NITA_exe, combine_list=None, units_out=None):
 
     os.chdir(filefolder)
     subprocess.call(command)
-
-def main(county_codes, filefolder, combine_list=None, units_out=None, path_to_NITA_exe='NITA.exe'):
-
-    if not(os.path.isdir(filefolder)):
-        os.mkdir(filefolder)
-    
-    run_batch_write_files(county_codes, outpath=filefolder)
-
-    run_nita(filefolder, path_to_NITA_exe, combine_list, units_out)
-
         
 
 if __name__ == "__main__":
@@ -113,5 +103,11 @@ if __name__ == "__main__":
     units_out = [1]
 
     filefolder = './outputs/soil_MS107'
-    main(county_codes,filefolder,combine_list,units_out,path_to_NITA_exe)
+
+    if not(os.path.isdir(filefolder)):
+        os.mkdir(filefolder)
+    
+    run_batch_write_files(county_codes, outpath=filefolder)
+
+    run_nita(filefolder, path_to_NITA_exe, combine_list, units_out)
 
