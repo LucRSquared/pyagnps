@@ -1,3 +1,5 @@
+"""This script shows how to run a query to write AnnAGNPS compatible soil data for one or several County Codes"""
+
 import sys, os
 sys.path.append('..')
 
