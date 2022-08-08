@@ -1,7 +1,90 @@
 import requests
 import pandas as pd
+import geopandas as gpd
+from shapely import wkt
 import glob, os, subprocess
 from pathlib import Path
+
+def download_soil_geodataframe(bbox=None):
+    # bbox = (minlon,minlat, maxlon, maxlat) In EPSG:4326 CRS
+    # e.g. bbox = (-89.94724,34.22708,-89.76632,34.31553)
+
+    if bbox is None:
+        raise Exception('Please provide a bounding box in EPSG:4326 coordinate format (minlon,minlat, maxlon, maxlat)')
+
+    # Prepare the JSON query
+    body = {
+    "format": "JSON",
+    "query": f"select Ma.*, M.mupolygonkey, M.areasymbol, M.nationalmusym, M.mupolygongeo from mupolygon M, muaggatt Ma where M.mupolygonkey in \
+    (select * from SDA_Get_Mupolygonkey_from_intersection_with_WktWgs84('polygon(\
+        ({bbox[0]} {bbox[1]}, {bbox[2]} {bbox[1]}, {bbox[2]} {bbox[3]}, {bbox[0]} {bbox[3]}, {bbox[0]} {bbox[1]})\
+    )')) and M.mukey=Ma.mukey",
+    }
+
+    url = "https://sdmdataaccess.sc.egov.usda.gov/TABULAR/post.rest"
+
+    # Send the query and collect the response
+    soil_response = requests.post(url, json=body).json()
+
+    # Reshaping Data
+    data = {"musym":[],
+        "muname":[],
+        "mustatus":[],
+        "slopegraddcp":[], 
+        "slopegradwta":[], 
+        "brockdepmin":[],
+        "wtdepannmin":[],
+        "wtdepaprjunmin":[],
+        "flodfreqdcd":[],
+        "flodfreqmax":[],
+        "pondfreqprs":[],
+        "aws025wta":[],
+        "aws050wta":[],
+        "aws0100wta":[],
+        "aws0150wta":[],
+        "drclassdcd":[],
+        "drclasswettest":[],
+        "hydgrpdcd":[],
+        "iccdcd":[],
+        "iccdcdpct":[],
+        "niccdcd":[],
+        "niccdcdpct":[],
+        "engdwobdcd":[],
+        "engdwbdcd":[],
+        "engdwbll":[],
+        "engdwbml":[],
+        "engstafdcd":[],
+        "engstafll":[],
+        "engstafml":[],
+        "engsldcd":[],
+        "engsldcp":[],
+        "englrsdcd":[],
+        "engcmssdcd":[],
+        "engcmssmp":[],
+        "urbrecptdcd":[],
+        "urbrecptwta":[],
+        "forpehrtdcp":[],
+        "hydclprs":[],
+        "awmmfpwwta":[],
+        "mukey":[],
+        "mupolygonkey":[],
+        "areasymbol":[],
+        "nationalmusym":[],
+        "geometry":[]
+}
+
+    for d in soil_response['Table']:
+        for i, kv in enumerate(data.items()):
+            data[kv[0]].append(d[i])
+
+    df = pd.DataFrame(data)
+
+    df['geometry'] = df['geometry'].apply(wkt.loads)
+    gdf = gpd.GeoDataFrame(df, crs='epsg:4326')
+
+    gdf = gpd.clip(gdf, bbox)
+
+    return gdf
 
 def run_one_query(county_code):
 
@@ -85,29 +168,3 @@ def run_nita(filefolder, path_to_NITA_exe, combine_list=None, units_out=None):
 
     os.chdir(filefolder)
     subprocess.call(command)
-        
-
-if __name__ == "__main__":
-    # This code assumes that in your current working directory
-    # - a filefolder subdirectory will be created 
-    # - path_to_NITA_exe is the relative path to the executable with respect to filefolder
-
-    path_to_NITA_exe = '../../src/bins/NITA.exe' # With respect to the nita_files
-    # county_codes = ['OH107','OH011']
-
-    # combine_list = [1, 1]
-    # units_out = [1, 1]
-
-    county_codes = ['MS107']
-    combine_list = [1]
-    units_out = [1]
-
-    filefolder = './outputs/soil_MS107'
-
-    if not(os.path.isdir(filefolder)):
-        os.mkdir(filefolder)
-    
-    run_batch_write_files(county_codes, outpath=filefolder)
-
-    run_nita(filefolder, path_to_NITA_exe, combine_list, units_out)
-
