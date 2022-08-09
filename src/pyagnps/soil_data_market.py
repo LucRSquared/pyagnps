@@ -86,7 +86,48 @@ def download_soil_geodataframe(bbox=None):
 
     return gdf
 
+def assign_soil_to_annagnps_cells(cell_data_section, cells_geometry, soil_data, outpath_cell_data_section=None, write_csv=False):
 
+    # - cell_data_section: GeoDataFrame or path to csv AnnAGNPS_Cell_Data_Section.csv
+    # - cell_geometry: GeoDataFrame or path to shapefile AnnAGNPS_Cell_IDs.shp
+    # - soil_data: GeoDataFrame of path to SSURGO shapefile
+    # - outpath_cell_data_section: path to modified AnnAGNPS_Cell_Data_Section.csv (if different from cell_data_section) 
+
+    if ~isinstance(cell_data_section, pd.DataFrame):
+        cell_data_section = pd.read_csv(cell_data_section)
+        outpath_cell_data_section = cell_data_section
+    elif outpath_cell_data_section is None:
+        outpath_cell_data_section = 'AnnAGNPS_Cell_Data_Section.csv' # Default name and will write the file in the current directory
+    
+    if ~isinstance(cells_geometry, gpd.GeoDataFrame):
+        cells_geometry = gpd.read_file(cells_geometry)
+
+    if ~isinstance(soil_data, gpd.GeoDataFrame):
+        soil_data = gpd.read_file(soil_data) # SSURGO data
+
+    utm_crs = cells_geometry.estimate_utm_crs()
+
+    soil_data = soil_data.to_crs(utm_crs)
+
+    for _, cell in cells_geometry.iterrows():
+        gdf_cell = gpd.GeoDataFrame(pd.DataFrame(data={'DN':[cell[0]], 
+                                                'geometry':[cell[1]]}), 
+                                                crs=cells_geometry.crs)
+        gdf_cell = gdf_cell.to_crs(utm_crs)
+
+        intersection = soil_data.overlay(gdf_cell, how='intersection', keep_geom_type=False)
+        intersection['area'] = intersection.geometry.area
+        intersection = pd.pivot_table(intersection, index=['musym'], values=['area'], aggfunc='sum') # !!! TEST THIS (to make sure if there are multiple intersections with the same soil group it's counted as one)
+        musymmajority = intersection['area'].idxmax()
+        # del intersection
+
+        # musymmajority = intersection.loc[intersection['area'].idxmax(),'musym']
+        cell_data_section.loc[cell_data_section['Cell_ID'] == cell[0],'Soil_ID'] = musymmajority
+
+    if write_csv:
+        cell_data_section.to_csv(outpath_cell_data_section, sep=',', index=False)
+
+    return cell_data_section
 
 def run_one_query(county_code):
 
