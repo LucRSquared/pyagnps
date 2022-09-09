@@ -1,6 +1,7 @@
 import rasterio
 from rasterio import features
 from shapely.geometry import shape
+from shapely.geometry.polygon import Polygon, LinearRing
 import geopandas as gpd
 
 def polygonize_cell_reach_IDs_asc(path_to_cell_IDs_asc, path_to_cell_IDs_shp, outepsg=4326, return_gdf=False):
@@ -26,3 +27,16 @@ def polygonize_cell_reach_IDs_asc(path_to_cell_IDs_asc, path_to_cell_IDs_shp, ou
         return gdf
     else:
         return
+
+def get_geometry_boundary(geom):
+    if isinstance(geom, LinearRing):
+        return geom
+    elif isinstance(geom, Polygon):
+        return geom.exterior
+    elif isinstance(geom, gpd.geoseries.GeoSeries):
+        if geom.shape[0] == 1:
+            return geom.values[0].exterior
+        else:
+            raise Exception('Geoseries has more than one object')
+    else:
+        raise Exception('Invalid geometry object')
