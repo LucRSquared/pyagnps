@@ -1,0 +1,22 @@
+********************************************************************************
+Beginning Module Execution:  AgBuf             64-bit execution
+EXECUTION DATE: 09/08/2022   EXECUTION START TIME: 12:56:18
+********************************************************************************
+********************************************************************************
+
+Checking existence of AgBuf input files:
+
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE    ERROR   EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+| The required input file "AGBUF.CSV" nor "AGBUF.XML" was not found in the    |
+| executable path. Skipping execution of AgBuf.                               |
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+
+
+Closing all files...
+
+********************************************************************************
+Completed Module Execution:  AgBuf             64-bit execution
+EXECUTION END TIME: 12:56:19
+Total time in execution (seconds):       1
+********************************************************************************
+********************************************************************************

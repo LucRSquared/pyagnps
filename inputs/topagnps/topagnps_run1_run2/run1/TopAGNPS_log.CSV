@@ -1,0 +1,181 @@
+TopAGNPS,INFO   , 1000,Opened message file: TopAGNPS_log.CSV
+TopAGNPS,INFO   , 1000,Opened message file: TopAGNPS_wrn.CSV
+TopAGNPS,INFO   , 1000,Opened message file: TopAGNPS_err.CSV
+TopAGNPS,INFO   ,    0,EXECUTION START DATE: 09/08/2022
+TopAGNPS,INFO   ,    0,EXECUTION START TIME: 12:52:29 - Module: TopAGNPS
+TopAGNPS,INFO   , 1003,*** BEGIN EXECUTION: TopAGNPS v6.00.b.017_2022.08.30  64-bit execution ***
+TopAGNPS,INFO   , 1008,No command line arguments were detected; all modules will be executed in sequence unless superceded by a "MODULE" keyword in the control file.
+TopAGNPS,INFO   , 1000,Control file "TOPAGNPS.XML" exists and will be processed.
+TopAGNPS,INFO   , 1000,Opened control file: TOPAGNPS.XML
+TopAGNPS,INFO   , 1001,Keyword "DEMPROC" was found with a value of "2".
+TopAGNPS,INFO   , 1001,Keyword "FORMAT" was found with a value of "0".
+TopAGNPS,INFO   , 1001,Keyword "CSA" was found with a value of "    10.000".
+TopAGNPS,INFO   , 1001,Keyword "MSCL" was found with a value of "   250.000".
+TopAGNPS,INFO   , 1001,Keyword "KEEPFILES" was found with a value of "1".
+TopAGNPS,INFO   , 1001,Keyword "FILENAME" was found with a value of "huc12_dem_10m.asc".
+TopAGNPS,WARNING, 2002,Keyword "DEMEDGE" was not found in "TOPAGNPS.XML". The default value of "0" (warn and continue) will be assumed.
+TopAGNPS,WARNING, 2002,Keyword "DNMCNT" was not found in "TOPAGNPS.XML". The default value of "0" (do not use "DNMCNT.INP") will be assumed.
+TopAGNPS,WARNING, 2002,Keyword "OUTFORMAT" was not found in "TOPAGNPS.XML". The default value of "0" (outlet location in row, column format) will be assumed.
+TopAGNPS,WARNING, 2002,Keyword "OUTSNAP" was not found in "TOPAGNPS.XML". The default value of "2" will be assumed.
+TopAGNPS,WARNING, 2002,Keyword "READOUT" was not found in "TOPAGNPS.XML". The default value of "0" (do not read intermediate files) will be assumed.
+TopAGNPS,WARNING, 2002,Keyword "VERBOSE" was not found in "TOPAGNPS.XML". The default value of "0" (more log messages) will be assumed.
+TopAGNPS,INFO   ,    0,Opened projection input file: huc12_dem_10m.prj
+TopAGNPS,INFO   , 1007,Completed reading "  2" records from the projection file "huc12_dem_10m.prj".
+TopAGNPS,INFO   ,    0,Opened DEM file: huc12_dem_10m.asc
+TopAGNPS,INFO   ,    0,Read header line: ncols 2262
+TopAGNPS,INFO   ,    0,Read header line: nrows 2289
+TopAGNPS,INFO   ,    0,Read header line: xllcorner 644875.106741681579
+TopAGNPS,INFO   ,    0,Read header line: yllcorner 4549303.914861403406
+TopAGNPS,INFO   ,    0,Read header line: cellsize 10.000000000000
+TopAGNPS,INFO   ,    0,Read header line: NODATA_value -999
+TopAGNPS,INFO   ,    0,The yllcorner (lower-left) value in the DEM header has been converted to the "UTM Northing" (upper-left) for processing. The DEM value of "   4549304" has been converted to "   4572194".
+DEDNM,INFO   , 1003,Executing module "DEDNM"
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:52:30 - Module: DEDNM: Start
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):       1  ---  Incremental lapse time (seconds):       1
+DEDNM,INFO   ,    0,DEDNM control parameter values:
+DEDNM,INFO   ,    0,TITLE 1:, TopAGNPS v6.00.b.017_2022.08.30
+DEDNM,INFO   ,    0,TITLE 2:, DNMCNT.INP" not selected for use with this execution
+DEDNM,INFO   ,    0,TITLE 3:, Parameter values are set by user or internal defaults.
+DEDNM,INFO   ,    0,UTM Zone:,   0
+DEDNM,INFO   ,    0,UTM Easting:,     644875
+DEDNM,INFO   ,    0,UTM Northing:,    4572194
+DEDNM,INFO   ,    0,Rows:,  2289
+DEDNM,INFO   ,    0,Columns:,  2262
+DEDNM,INFO   ,    0,Minimum elevation:,    158.000
+DEDNM,INFO   ,    0,Maximum elevation:,    240.000
+DEDNM,INFO   ,    0,Indeterminate elevation:,   -999.000
+DEDNM,INFO   ,    0,Length of cell (resolution):,  10.0
+DEDNM,INFO   ,    0,DEM orientation:,    0
+DEDNM,INFO   ,    0,Outlet row:,  -999
+DEDNM,INFO   ,    0,Outlet column:,  -999
+DEDNM,INFO   ,    0,Aggregation/Resampling option:,  0
+DEDNM,INFO   ,    0,Aggregation/Resampling level:,   1
+DEDNM,INFO   ,    0,Smoothing option:,  0
+DEDNM,INFO   ,    0,Number of smoothing passes:,    1
+DEDNM,INFO   ,    0,1st weighting record:,    1
+DEDNM,INFO   ,    0,2nd weighting record:,    1
+DEDNM,INFO   ,    0,3rd weighting record:,    1
+DEDNM,INFO   ,    0,Depression outlet analysis option:,  1
+DEDNM,INFO   ,    0,DEM processing option:,  2
+DEDNM,INFO   ,    0,Spatial variable option:,  0
+DEDNM,INFO   ,    0,CSA & MSCL #1:,     10.000,   250.000
+DEDNM,INFO   ,    0,CSA & MSCL #2:,     -1.000,    -1.000
+DEDNM,INFO   ,    0,CSA & MSCL #3:,     -1.000,    -1.000
+DEDNM,INFO   ,    0,CSA & MSCL #4:,     -1.000,    -1.000
+DEDNM,INFO   ,    0,CSA & MSCL #5:,     -1.000,    -1.000
+DEDNM,INFO   ,    0,CSA & MSCL #6:,     -1.000,    -1.000
+DEDNM,INFO   ,    0,CSA & MSCL #7:,     -1.000,    -1.000
+DEDNM,INFO   ,    0,CSA & MSCL #8:,     -1.000,    -1.000
+DEDNM,INFO   ,    0,CSA & MSCL #9:,     -1.000,    -1.000
+DEDNM,INFO   ,    0,Calibration option:,  0
+DEDNM,INFO   ,    0,Raster checking option:,  1
+DEDNM,INFO   ,    0,Program capabilities to "DEDNM.RPT" option:,  1
+DEDNM,INFO   ,    0,Input data report to "DEDNM.RPT" option:,  1
+DEDNM,INFO   ,    0,Drainage network table "NETW.TAB" option:,  0
+DEDNM,INFO   ,    0,Subcatchment area table "SBCT.TAB" option:,  0
+DEDNM,INFO   ,    0,Subcatchment window table "CATWIN.TAB" option:,  0
+DEDNM,WARNING, 2008,The number of rows or columns in the aggregated/resampled DEM is large. Processing will continue!
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:52:30 - Module: DEDNM: START INDEM
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):       1  ---  Incremental lapse time (seconds):       0
+DEDNM,INFO   , 1002,Final number of rows is " 2289" and columns is " 2262". This reflects aggregation/resampling that may have been applied.
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:52:30 - Module: DEDNM: END INDEM
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):       1  ---  Incremental lapse time (seconds):       0
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:52:30 - Module: DEDNM: START INDTAR
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):       1  ---  Incremental lapse time (seconds):       0
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:52:30 - Module: DEDNM: END INDTAR
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):       1  ---  Incremental lapse time (seconds):       0
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:52:30 - Module: DEDNM: START FILDEP
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):       1  ---  Incremental lapse time (seconds):       0
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:52:38 - Module: DEDNM: END FILDEP
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):       9  ---  Incremental lapse time (seconds):       8
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:52:38 - Module: DEDNM: START RELIEF
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):       9  ---  Incremental lapse time (seconds):       0
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:52:58 - Module: DEDNM: END RELIEF
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):      29  ---  Incremental lapse time (seconds):      20
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:52:58 - Module: DEDNM: START FLOVEC
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):      29  ---  Incremental lapse time (seconds):       0
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:52:59 - Module: DEDNM: END FLOVEC
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):      30  ---  Incremental lapse time (seconds):       1
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:52:59 - Module: DEDNM: START FLOPAT
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):      30  ---  Incremental lapse time (seconds):       0
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:52:59 - Module: DEDNM: END FLOPAT
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):      30  ---  Incremental lapse time (seconds):       0
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:52:59 - Module: DEDNM: START UPAREA
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):      30  ---  Incremental lapse time (seconds):       0
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:53:24 - Module: DEDNM: END UPAREA
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):      55  ---  Incremental lapse time (seconds):      25
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:53:25 - Module: DEDNM: START NETFUL
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):      56  ---  Incremental lapse time (seconds):       1
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:53:25 - Module: DEDNM: END NETFUL
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):      56  ---  Incremental lapse time (seconds):       0
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:53:25 - Module: DEDNM: START PRUNE
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):      56  ---  Incremental lapse time (seconds):       0
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:53:25 - Module: DEDNM: END PRUNE
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):      56  ---  Incremental lapse time (seconds):       0
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:53:25 - Module: DEDNM: START PRUNE1
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):      56  ---  Incremental lapse time (seconds):       0
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:53:26 - Module: DEDNM: END PRUNE1
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):      57  ---  Incremental lapse time (seconds):       1
+DEDNM,INFO   , 1003,Completed module "DEDNM"
+DEDNM,INFO   ,    0,EXECUTION LAPSE TIME: 12:53:26 - Module: DEDNM
+DEDNM,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):      57  ---  Incremental lapse time (seconds):       0
+RASFOR,INFO   , 1003,Executing module "RASFOR"
+RASFOR,INFO   ,    0,EXECUTION LAPSE TIME: 12:53:26 - Module: RASFOR: Start
+RASFOR,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):      57  ---  Incremental lapse time (seconds):       0
+RASFOR,INFO   ,    0,RASFOR control parameter values:
+RASFOR,INFO   ,    0,Input data report to "RASFOR.RPT" option:,  1
+RASFOR,INFO   ,    0,Reformat "INELEV.OUT" option:,  0
+RASFOR,INFO   ,    0,Reformat "SMOOTH.OUT" option:,  0
+RASFOR,INFO   ,    0,Reformat "FILDEP.OUT" option:,  0
+RASFOR,INFO   ,    0,Reformat "RELIEF.OUT" option:,  1
+RASFOR,INFO   ,    0,Reformat "FLOVEC.OUT" option:,  1
+RASFOR,INFO   ,    0,Reformat "FLOPAT.OUT" option:,  0
+RASFOR,INFO   ,    0,Reformat "INDTAR.OUT" option:,  0
+RASFOR,INFO   ,    0,Reformat "UPAREA.OUT" option:,  1
+RASFOR,INFO   ,    0,Reformat "NTGCOD.OUT" option:,  1
+RASFOR,INFO   ,    0,Reformat "NTGCSA.OUT" option:,  0
+RASFOR,INFO   ,    0,Reformat "NTGSCL.OUT" option:,  0
+RASFOR,INFO   ,    0,Reformat "NETFUL.OUT" option:,  1
+RASFOR,INFO   ,    0,Reformat "BOUND.OUT" option:,  1
+RASFOR,INFO   ,    0,Reformat "NETW.OUT" option:,  1
+RASFOR,INFO   ,    0,Reformat "SUBWTA.OUT" option:,  1
+RASFOR,INFO   ,    0,Reformat "DEPFLT.OUT" option:,  1
+RASFOR,INFO   ,    0,Reformat "ELVCLA.OUT" option:,  0
+RASFOR,INFO   ,    0,Reformat "FVASPE.OUT" option:,  1
+RASFOR,INFO   ,    0,Reformat "TASPEC.OUT" option:,  1
+RASFOR,INFO   ,    0,Reformat "FVSLOP.OUT" option:,  1
+RASFOR,INFO   ,    0,Reformat "HSLOPE.OUT" option:,  1
+RASFOR,INFO   ,    0,Reformat "TSLOPE.OUT" option:,  1
+RASFOR,INFO   ,    0,Reformat "NETWE.OUT" option:,  0
+RASFOR,INFO   ,    0,Reformat "SUBBDA.OUT" option:,  0
+RASFOR,INFO   ,    0,Reformat "SUBWTB.OUT" option:,  0
+RASFOR,INFO   ,    0,Reformat "SUBBDB.OUT" option:,  0
+RASFOR,INFO   ,    0,Reformat "DISCHA.OUT" option:,  0
+RASFOR,INFO   ,    0,Reformat "DISOUT.OUT" option:,  0
+RASFOR,INFO   ,    0,Reformat "ELDCHA.OUT" option:,  0
+RASFOR,INFO   ,    0,Reformat "ELDOUT.OUT" option:,  0
+RASFOR,INFO   ,    0,Opened projection output file: RELIEF.PRJ
+RASFOR,INFO   ,    0,Opened projection output file: FLOVEC.PRJ
+RASFOR,INFO   ,    0,Opened projection output file: UPAREA.PRJ
+RASFOR,INFO   ,    0,Opened projection output file: NTGCOD.PRJ
+RASFOR,INFO   ,    0,Opened projection output file: NETFUL.PRJ
+RASFOR,INFO   , 1003,Completed module "RASFOR"
+RASFOR,INFO   ,    0,EXECUTION LAPSE TIME: 12:53:29 - Module: RASFOR: End
+RASFOR,INFO   ,    0,Accumulative lapse time from beginning of execution (seconds):      60  ---  Incremental lapse time (seconds):       3
+TopAGNPS,INFO   ,    0,Completed TopAGNPS Execution:
+TopAGNPS,INFO   ,    0,EXECUTION END DATE: 09/08/2022
+TopAGNPS,INFO   ,    0,EXECUTION END TIME: 12:53:29 - Module: TopAGNPS
+TopAGNPS,INFO   ,    0,Total time in execution (seconds):      60
+TopAGNPS,INFO   , 1003,Executing module "TopAGNPS_Clean_Up"
+TopAGNPS,INFO   ,    0,Successfully deleted file "BOUND.OUT"
+TopAGNPS,INFO   ,    0,Successfully deleted file "NETW.OUT"
+TopAGNPS,INFO   ,    0,Successfully deleted file "SUBWTA.OUT"
+TopAGNPS,INFO   ,    0,Successfully deleted file "CATWIN.TAB"
+TopAGNPS,INFO   ,    0,Successfully deleted file "NETW.TAB"
+TopAGNPS,INFO   ,    0,Successfully deleted file "SBCT.TAB"
+TopAGNPS,INFO   ,    0,Successfully deleted file "OUTCAT.UNF"
+TopAGNPS,INFO   ,    0,Successfully deleted file "OUTCHA.UNF"
+TopAGNPS,INFO   , 1003,Completed module "TopAGNPS_Clean_Up"
+TopAGNPS,INFO   ,    0,Opened status file: TopAGNPS_status.CSV
+TopAGNPS,INFO   ,    0,Status reported as: Normal; Warnings
+TopAGNPS,INFO   , 1003,*** ENDING EXECUTION: TopAGNPS v6.00.b.017_2022.08.30  64-bit execution ***

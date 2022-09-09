@@ -1,0 +1,22 @@
+********************************************************************************
+Beginning Module Execution:  Pothole             64-bit execution
+EXECUTION DATE: 09/08/2022   EXECUTION START TIME: 12:56:20
+********************************************************************************
+********************************************************************************
+
+Checking existence of Pothole input files:
+
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE    ERROR   EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+| The required input file "POTHOLE.CSV" nor "POTHOLE.XML" was not found in    |
+| the executable path. Skipping execution of Pothole.                         |
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+
+
+Closing all files...
+
+********************************************************************************
+Completed Module Execution:  Pothole             64-bit execution
+EXECUTION END TIME: 12:56:21
+Total time in execution (seconds):       1
+********************************************************************************
+********************************************************************************

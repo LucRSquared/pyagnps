@@ -1,0 +1,22 @@
+********************************************************************************
+Beginning Module Execution:  PEG             64-bit execution
+EXECUTION DATE: 09/08/2022   EXECUTION START TIME: 12:56:17
+********************************************************************************
+********************************************************************************
+
+Checking existence of input files:
+
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE    ERROR   EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+| The required input file "PEG.CSV" nor "PEG.XML" was not found in the        |
+| executable path. Skipping execution of PEG.                                 |
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+
+
+Closing all PEG files...
+
+********************************************************************************
+Completed Module Execution:  PEG             64-bit execution
+EXECUTION END TIME: 12:56:18
+Total time in execution (seconds):       1
+********************************************************************************
+********************************************************************************

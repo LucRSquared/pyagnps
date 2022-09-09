@@ -1,0 +1,241 @@
+"AGFCNT.INP" was not found; using internal defaults:
+********************************************************************************
+Version number line : VERSION 3.10 - 18 February 2003
+1st description line: Example
+2nd description line: verification dataset for AGNPS
+3rd description line: Using default values for LS-factor parameters
+TopAGNPS input path :
+TopAGNPS output path:
+AgFlow output path  :
+The input format for the AgFlow control file is for VERSION 3.1
+LS-factor control column headings: ---------------- LS Factor ------------------ -Sub_Wta- Optimize Internal
+LS-factor control control values : Slope ---------- Maximum ---------- - Files - - Files - Storage
+LS-factor control control values :  Code      Area    Length     Slope Read Writ  ASC  DAT Acc.
+LS-factor control control values :     1       .99      300.              F    F    T    F    F
+
+Run Date:  9/ 8/2022                                  Run Time: 12:56: 8
+************************************************************** 
+       PROGRAM AgFlow - AnnAGNPS FLOW NETWORK GENERATOR        
+                 AgFlow Version 3.11.h.15_08/02/2016           
+************************************************************** 
+                      DISCLAIMER                               
+THIS PROGRAM AND ITS SUBROUTINES ARE ACCEPTED AND USED BY THE  
+RECIPIENT UPON THE EXPRESS UNDERSTANDING THAT THE DEVELOPERS   
+MAKE NO WARRANTIES, EXPRESSED OR IMPLIED, CONCERNING THE       
+ACCURACY, COMPLETENESS, RELIABILITY OR SUITABILITY FOR ANY ONE 
+PURPOSE, AND THAT THE DEVELOPERS SHALL BE UNDER NO LIABILITY   
+TO ANY PERSON BY REASON OF ANY USE MADE THEREOF.               
+************************************************************** 
+
+        *** START PROGRAM: AgFlow ***
+
+*** BEGIN SUBROUTINE: Open_TopAGNPS_Files
+
+  ++++ contents of : AGFCNT.INP
+Version number line : VERSION 3.10 - 18 February 2003
+1st description line: Example
+2nd description line: verification dataset for AGNPS
+3rd description line: Using default values for LS-factor parameters
+TopAGNPS input path :
+TopAGNPS output path:
+AgFlow output path  :
+LS-factor control column headings: ---------------- LS Factor ------------------ -Sub_Wta- Optimize Internal
+LS-factor input control values   : Slope ---------- Maximum ---------- - Files - - Files - Storage
+Slope file to be used for LS-factor calculations is the actual slopes along the flow vectors
+*** FINISHED SUBROUTINE: Open_TopAGNPS_Files
+Incremental Lapse Time :   0 hr    0 min   0 sec   2 ms
+Accumulative Lapse Time:   0 hr    0 min   0 sec  21 ms
+
+*** BEGIN SUBROUTINE: DEM_Attributes
+  ++++ reading TopAGNPS files for raster attribute data
+
+*** BEGIN SUBROUTINE: Read_ASC_Files
+  allocating DEM_raster_aspect bytes:          20710872; total bytes:  20710872
+  allocating DEM_raster_subarea_id bytes:      20710872; total bytes:  41421744
+  allocating DEM_raster_reach_id bytes:        20710872; total bytes:  62132616
+  allocating DEM_raster_flow_vector bytes:     20710872; total bytes:  82843488
+  allocating DEM_raster_relief bytes:          20710872; total bytes: 124265232
+  allocating DEM_raster_slope_hyd bytes:       20710872; total bytes: 144976104
+  allocating DEM_raster_slope_terrain bytes:   20710872; total bytes: 165686976
+  allocating DEM_raster_slope_vector bytes:    20710872; total bytes: 186397848
+Raster horizontal resolution: 10.0 meters
+Number of DEM rows:   2289
+Number of DEM cols:   2262
+          raster distance along flow vector
+          raster distance along slope vector
+          raster hydraulic distance
+          raster relief elevation
+          raster cell IDs
+          raster aspects
+          raster terrain slope
+          number of upstream rasters
+*** FINISHED SUBROUTINE: Read_ASC_Files
+  number of DEM rasters within the watershed are :  2959882
+  number of DEM rasters outside the watershed are:  2217836
+  total number of DEM rasters are                :   5177718
+  ++++ finding watershed outlet raster
+  watershed outlet raster found and its cell ID is:     24
+  outlet row number =   1363
+  outlet col number =   2105
+*** FINISHED SUBROUTINE: DEM_Attributes
+Incremental Lapse Time :   0 hr    0 min   3 sec 346 ms
+Accumulative Lapse Time:   0 hr    0 min   3 sec 368 ms
+
+*** BEGIN SUBROUTINE: Watershed_Rasters
+  ++++ circumscribing watershed boundaries
+  DEM ws_northing row number is  :      35
+  DEM ws_westing column number is:       6
+  DEM ws_southing row number is  :    2285
+  DEM ws_easting column number is:    2106
+  number of circumscribed watershed rows is   :    2251
+  number of circumscribed watershed colums is :    2101
+  outlet row of circumscribed watershed is    :    1329
+  outlet column of circumscribed watershed is :    2100
+  ++++ transferring original DEM attributes from internal array to circumscribed watershed array
+  allocating ws_raster_aspect bytes:           18917404; total bytes: 205315252
+  allocating ws_raster_cell_id bytes:          47293510; total bytes: 252608762
+  allocating ws_raster_cell_index bytes:       18917404; total bytes: 271526166
+  allocating ws_raster_elev bytes:             18917404; total bytes: 290443570
+  allocating ws_raster_flag_LS bytes:           4729351; total bytes: 295172921
+  allocating ws_raster_flag_orphan bytes:       4729351; total bytes: 299902272
+  allocating ws_raster_flag_outlet bytes:       4729351; total bytes: 304631623
+  allocating ws_raster_flag_sink bytes:         4729351; total bytes: 309360974
+  allocating ws_raster_flag_source bytes:       4729351; total bytes: 314090325
+  allocating ws_raster_flag_thalweg bytes:      4729351; total bytes: 318819676
+  allocating ws_raster_flag_watershed bytes:    4729351; total bytes: 323549027
+  allocating ws_raster_flow_vector bytes:       4729351; total bytes: 328278378
+  allocating ws_raster_LS_factor bytes:        18917404; total bytes: 347195782
+  allocating ws_raster_num_flow_paths bytes:    4729351; total bytes: 351925133
+  allocating ws_raster_num_LS_sums bytes:       4729351; total bytes: 356654484
+  allocating ws_raster_num_current_uparea_ras  18917404; total bytes: 375571888
+  allocating ws_raster_num_uparea_rasters byt  18917404; total bytes: 394489292
+  allocating ws_raster_rec_col bytes:          18917404; total bytes: 413406696
+  allocating ws_raster_rec_row bytes:          18917404; total bytes: 432324100
+  allocating ws_raster_slope_land bytes:       18917404; total bytes: 451241504
+  allocating ws_raster_slope_LS bytes:         18917404; total bytes: 470158908
+  allocating ws_raster_slope_thalweg bytes:    18917404; total bytes: 489076312
+  allocating ws_raster_subarea_id bytes:       18917404; total bytes: 507993716
+  allocating ws_raster_sum_upstream_LS bytes:  18917404; total bytes: 526911120
+     initializing watershed arrays
+  The raster with a cell ID of: 24 at row number: 1329 & column number: 2100
+  has the watershed outlet as its receiving raster.
+  ++++ done transferring DEM attributes to circumscribed watershed array
+  number watershed rasters within circumscribed watershed are:     2959882
+  number non-watershed rasters within circumscribed watershed are: 1769469
+  total number rasters within circumscribed watershed are:         4729351
+  ++++ extracting flow vector information
+  number of rasters within the watershed are:        2959882
+  number of outlet rasters within the watershed are:       1
+  number of sink rasters within the watershed are:         0
+  number of source rasters within the watershed are: 1058897
+  number of rasters with 1 flow paths into it are:   1170422
+  number of rasters with 2 flow paths into it are:    476229
+  number of rasters with 3 flow paths into it are:    195979
+  number of rasters with 4 flow paths into it are:     42710
+  number of rasters with 5 flow paths into it are:     15645
+  number of rasters with 6 flow paths into it are:         0
+  number of rasters with 7 flow paths into it are:         0
+  number of rasters with 8 flow paths into it are:         0
+  number of rasters with 9 flow paths into it are:         0
+  number of nonsource watershed rasters are:         1900985
+  number of circumscribed non-watershed rasters are: 1769469
+*** FINISHED SUBROUTINE: Watershed_Rasters
+Incremental Lapse Time :   0 hr    0 min   0 sec 657 ms
+Accumulative Lapse Time:   0 hr    0 min   4 sec  26 ms
+
+*** BEGIN SUBROUTINE: Watershed_Subareas
+  ++++ determining number of subareas in the watershed
+  maximum possible number of subareas is      :   1074
+  ++++ determining the existence of source, leftside, rightside, &
+       channel cells within each subarea in the watershed
+Warning Message No. 1--the subarea ID "747" was not found within the circumscribed watershed!
+  total number of rasters in the watershed is : 2959882
+  total number of cells in the watershed is   :    2675
+  total number of reaches in the watershed is :    1073
+  total number of subareas in the watershed is:    1073
+  ++++ reassigning channel raster cell IDs to same subarea, upland cell IDs
+  total number of channel rasters     : 68038
+  number of channel rasters reassigned: 68038
+*** FINISHED SUBROUTINE: Watershed_Subareas
+Incremental Lapse Time :   0 hr    0 min   0 sec 374 ms
+Accumulative Lapse Time:   0 hr    0 min   4 sec 401 ms
+
+*** BEGIN SUBROUTINE: LS_Factor_Raster
+Number of rasters within the watershed are:                          2959882
+Number of watershed outlet rasters within the watershed are:               1
+Number of source rasters within the watershed are:                   1058897
+Number of nonsource watershed rasters within the watershed are:      1900985
+Number of rasters upstream of the watershed outlet are:              2959881
+Number of upstream rasters summed at the watershed outlet are:       2959881
+*** FINISHED SUBROUTINE: LS_Factor_file_dat
+Incremental Lapse Time :   0 hr    0 min   0 sec 929 ms
+Accumulative Lapse Time:   0 hr    0 min   5 sec 332 ms
+
+*** BEGIN SUBROUTINE: Watershed_Cells
+  ++++ creating watershed's cell ID array
+  ++++ locating cell ID index for each raster
+  ++++ determining cell areas
+  total number watershed rasters is:2959882
+  total drainage area is:  29598.81
+  ++++ determining cells' average elevation, land slope, LS-factor, & aspect
+  ++++ determining cells' aspect correlation
+*** FINISHED SUBROUTINE: Watershed_Cells
+Incremental Lapse Time :   0 hr    0 min   1 sec 973 ms
+Accumulative Lapse Time:   0 hr    0 min   7 sec 306 ms
+
+*** BEGIN SUBROUTINE: Tc_Flow_Path
+  ++++ finding each cell's hydraulic most distant raster
+  ++++ determining the slope & length of each Tc profile segment
+*** FINISHED SUBROUTINE: Tc_Flow_Path
+Incremental Lapse Time :   0 hr    0 min   0 sec 428 ms
+Accumulative Lapse Time:   0 hr    0 min   7 sec 734 ms
+
+*** BEGIN SUBROUTINE: Watershed_Reaches
+  ++++ determining up- & downstream reach rasters
+  total number of channel rasters is:   68038
+  ++++ determining reach parameters
+*** FINISHED SUBROUTINE: Watershed_Reaches
+Incremental Lapse Time :   0 hr    0 min   0 sec  60 ms
+Accumulative Lapse Time:   0 hr    0 min   7 sec 795 ms
+
+***********  Executing 'AnnAGNPS_Subarea_Report'
+  ++++ calculating each subarea's average LS-factors & its slope
+  ++++ setting flags for presence of source, left, & right side cells
+  ++++ writing subarea report
+*** FINISHED SUBROUTINE: AnnAGNPS_Subarea_Report
+Incremental Lapse Time :   0 hr    0 min   0 sec  57 ms
+Accumulative Lapse Time:   0 hr    0 min   7 sec 853 ms
+
+*** BEGIN SUBROUTINE: AnnAGNPS_Cell_Data
+Each raster's flow vector slope was used to calculate the raster's LS-factor prior to determining its respective
+ cell's average LS-factor.
+Each raster along its respective cell's hydraulically most distant path used the raster's flow vector slope to
+ calculate the cell's TC profile segment slope & lengths.
+Each raster's terrain slope was used to calculate its respective cell's average land slope.
+Orphan raster code:  F-means that no orphan channel raster(s) are involved for this cell ID;
+Orphan raster code:  T-means that orphan channel raster(s) make up this cell.  The entire subarea for this new cell ID
+                       is made up of reassigned channel raster(s) to a rightside cell whose subarea did not previously
+                       have any rasters that were assigned to any related source, right-, or leftside cells.
+*** FINISHED SUBROUTINE: AnnAGNPS_Cell_Data
+Incremental Lapse Time :   0 hr    0 min   0 sec  40 ms
+Accumulative Lapse Time:   0 hr    0 min   7 sec 895 ms
+
+*** BEGIN SUBROUTINE: AnnAGNPS_Cell_Data_csv
+*** FINISHED SUBROUTINE: AnnAGNPS_Cell_Data_csv
+Incremental Lapse Time :   0 hr    0 min   0 sec  25 ms
+Accumulative Lapse Time:   0 hr    0 min   7 sec 920 ms
+
+*** BEGIN SUBROUTINE: AnnAGNPS_Reach_Data
+The channel raster's flow vector slopes within each reach were used to calculate the respective reach slope.
+*** FINISHED SUBROUTINE: AnnAGNPS_Reach_Data
+Incremental Lapse Time :   0 hr    0 min   0 sec  18 ms
+Accumulative Lapse Time:   0 hr    0 min   7 sec 938 ms
+
+*** BEGIN SUBROUTINE: AnnAGNPS_Reach_Data_csv
+*** FINISHED SUBROUTINE: AnnAGNPS_Reach_Data_csv
+Incremental Lapse Time :   0 hr    0 min   0 sec  21 ms
+Accumulative Lapse Time:   0 hr    0 min   7 sec 961 ms
+        *** FINISHED PROGRAM: AgFlow ***
+
+Total execution time for 'AgFlow' program is
+Accumulative Lapse Time:   0 hr    0 min   7 sec 963 ms

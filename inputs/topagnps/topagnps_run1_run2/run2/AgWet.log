@@ -1,0 +1,22 @@
+********************************************************************************
+Beginning Module Execution:  AgWet             64-bit execution
+EXECUTION DATE: 09/08/2022   EXECUTION START TIME: 12:56:19
+********************************************************************************
+********************************************************************************
+
+Checking existence of AgWet input files:
+
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE    ERROR   EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+| The required input file "AGWET.CSV" nor "AGWET.XML" was not found in the    |
+| executable path. Skipping execution of AgWet.                               |
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+
+
+Closing all files...
+
+********************************************************************************
+Completed Module Execution:  AgWet             64-bit execution
+EXECUTION END TIME: 12:56:20
+Total time in execution (seconds):       1
+********************************************************************************
+********************************************************************************
