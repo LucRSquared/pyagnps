@@ -1,17 +1,241 @@
 # from osgeo import gdal
+from importlib.resources import path
 from lxml import etree as ET
 import geopandas as gpd
 import numpy as np
 import rasterio
+import rioxarray
+import py3dep
+from osgeo import gdal
+import os, subprocess
 
-def create_topagnps_dictionary(**kwargs):
-    pass
-
-def create_topagnps_xml_control_file(dico, savepath):
-    pass
+import logging
 
 def run_topagnps(topbinpath, path_to_control_file):
     pass
+
+def create_topagnps_directory(root_dir, topagnps_dir):
+    path_to_dir = root_dir+'/'+topagnps_dir
+
+    if not(os.path.exists(path_to_dir)):
+        os.mkdir(path_to_dir)
+        
+    return path_to_dir
+
+def create_topagnps_xml_control_file(dico, savepath):
+
+    root = ET.Element('TOPAGNPS')
+    
+    for key, value in dico.items():
+        line = ET.SubElement(root, "KEYWORD")
+        line.text = str(value)
+        line.set('ID', str(key))
+
+    tree = ET.ElementTree(root)
+    tree.write(savepath, pretty_print=True)
+
+    return
+
+def run_topagnps(path_to_xml_dir, path_to_bin):
+    previousdir = os.getcwd()
+    os.chdir(path_to_xml_dir)
+    try:
+        with open('command_line_output.txt', 'w') as clo:
+            subprocess.call([path_to_bin, " /f:TOPAGNPS.XML"], stdout=clo)
+    except:
+        os.chdir(previousdir)
+    os.chdir(previousdir)
+
+def download_dem(gdf, path_to_dir, name='dem_thuc', resolution_m=10, buffer_m=500, keeptif=False):
+    """ This function downloads the DEM from USGS PY3DEP service directly """
+    # gdf : GeoDataFrame of the area (containing one polygon)
+    # path_to_dir : path to the directory containing the topagnps simulations
+
+    if not(path_to_dir.endswith('/')):
+        path_to_dir = path_to_dir+'/'
+
+    if isinstance(gdf, str):
+        gdf = gpd.read_file(gdf)
+    
+    if gdf.shape[0] > 1:
+        raise Exception('Please provide a GeoDataFrame containing only one line')
+
+    path_to_asc = f"{path_to_dir}{name}_res_{resolution_m}_m.asc"
+    path_to_tif = f"{path_to_dir}{name}_res_{resolution_m}_m.tif"
+
+    output_crs = gdf.estimate_utm_crs()
+    gdf_buffered = gdf.to_crs(output_crs).buffer(buffer_m).to_crs("epsg:4326")
+
+    bbox = gdf_buffered.bounds
+
+    dem = py3dep.get_map("DEM", (bbox['minx'].values[0],
+                                 bbox['miny'].values[0],
+                                 bbox['maxx'].values[0],
+                                 bbox['maxy'].values[0]), resolution=resolution_m, geo_crs="epsg:4326", crs="epsg:4326")
+
+    dem.name = "dem"
+    dem.attrs["units"] = "meters"
+    dem = dem.rio.reproject(output_crs)
+
+    dem.rio.to_raster(path_to_tif) # Write first to tif file because rasterio cannot directly write to 
+
+    opts = gdal.WarpOptions(format="AAIGrid", srcNodata="nan", dstNodata=-999, xRes=resolution_m, yRes=resolution_m, resampleAlg=gdal.GRA_NearestNeighbour)
+
+    with open(path_to_asc, 'w'):
+        gdal.Warp(path_to_asc, path_to_tif, options=opts)
+
+    if os.path.exists(path_to_tif) and not(keeptif): # delete temporary
+        os.remove(path_to_tif)
+    else:
+        print(f"The file {path_to_tif} does not exist")
+
+    return dem, path_to_asc
+
+def get_dem_from_raster(gdf, path_to_input_raster, path_to_dir, name='dem_thuc', resolution_m=10, buffer_m=500, keeptif=False):
+    """ This function retrieves the DEM from a provided raster that contains the shape specified by a GeoDataFrame"""
+    # gdf : GeoDataFrame of the area (containing one polygon)
+    # path_to_dir : path to the directory containing the topagnps simulations
+
+    if not(path_to_dir.endswith('/')):
+        path_to_dir = path_to_dir+'/'
+
+    if isinstance(gdf, str):
+        gdf = gpd.read_file(gdf)
+    
+    if gdf.shape[0] > 1:
+        raise Exception('Please provide a GeoDataFrame containing only one line')
+
+    path_to_asc = f"{path_to_dir}{name}_res_{resolution_m}_m.asc"
+    path_to_tif = f"{path_to_dir}{name}_res_{resolution_m}_m.tif"
+
+    output_crs = gdf.estimate_utm_crs()
+
+    with rioxarray.open_rasterio(path_to_input_raster, masked=True) as raster_dem:
+
+        raster_crs = raster_dem.rio.crs        
+        encoded_nodata = raster_dem.rio.encoded_nodata
+
+        gdf_buffered = gdf.to_crs(output_crs).buffer(buffer_m).to_crs(raster_crs)
+
+        bbox = gdf_buffered.bounds
+
+        dem = raster_dem.rio.clip_box(minx=bbox['minx'].values[0],
+                                      miny=bbox['miny'].values[0],
+                                      maxx=bbox['maxx'].values[0],
+                                      maxy=bbox['maxy'].values[0])
+
+        # nodata = dem._FillValue
+        # dem = dem.rio.write_nodata(nodata, encoded=True)
+        # dem = dem.where(dem != dem.rio.nodata)
+        # dem = dem.rio.write_nodata(np.nan)
+
+    if 'hydrodem' in path_to_input_raster:
+        # Data was stored in centimeters
+        dem = dem/100.0
+    
+    dem = dem.rio.write_nodata(encoded_nodata)
+
+    # Check if nodata is gone or not
+    
+    dem.name = "dem"
+    dem.attrs["units"] = "meters"
+
+    # dem = dem.rio.reproject(output_crs)
+
+    dem.rio.to_raster(path_to_tif) # Write first to tif file because rasterio cannot directly write to 
+
+    with rioxarray.open_rasterio(path_to_tif, masked=True) as tmp_tif: 
+        nodataval = tmp_tif.rio.nodata
+
+    opts = gdal.WarpOptions(format="AAIGrid", srcNodata=nodataval, dstNodata=-999, xRes=resolution_m, yRes=resolution_m, resampleAlg=gdal.GRA_NearestNeighbour)
+
+    with open(path_to_asc, 'w'):
+        gdal.Warp(path_to_asc, path_to_tif, options=opts)
+
+    if os.path.exists(path_to_tif) and not(keeptif): # delete temporary
+        os.remove(path_to_tif)
+
+    return dem, path_to_asc
+
+def process_hydrodem_for_topagnps(path_to_raster_dir, path_to_write_dir=None, wall_threshold_m=4800, unwall=True, unfill=False, applyshift=True):
+    '''
+    INPUTS:
+    path_to_raster_dir : this folder needs to contain the files hydrodem.tif, elev_cm.tif, and filldepth.tif
+    path_to_write_dir  : default is path_to_raster_dir, if specified: directory to write processed dem from 
+    wall_threshold_m   : if elevation is greater than wall_threshold_m then replace with elevation from elev_cm.tif
+    unfill             : True = remove the filling applied
+    unwall             : True = removes walls
+    applyshift         : computes and apply a shift equal to abs(min(hydrodem)) + 1
+
+    OUTPUTS:
+    hydrodem[_unfilled][_shifted][_unwalled]_topagnps.tif in METERS
+
+    '''
+
+    path_to_hydrodem = f'{path_to_raster_dir}/hydrodem.tif'
+    path_to_elev_cm = f'{path_to_raster_dir}/elev_cm.tif'
+    path_to_filldepth = f'{path_to_raster_dir}/filldepth.tif'
+
+    if path_to_write_dir is None:
+        path_to_write_dir = path_to_raster_dir
+
+    output_raster = f'{path_to_write_dir}/hydrodem'
+
+    if unfill:
+        output_raster = f'{output_raster}_unfilled'
+
+    if applyshift:
+        output_raster = f'{output_raster}_shifted'
+
+    if unwall:
+        output_raster = f'{output_raster}_unwalled_{int(wall_threshold_m)}_m'
+
+    output_raster = f'{output_raster}_topagnps.tif'
+
+    with rioxarray.open_rasterio(path_to_hydrodem, masked=True) as hydrodem:
+
+        encoded_nodata = hydrodem.rio.encoded_nodata
+
+        if unfill:
+            print('removing depression filling')
+            with rioxarray.open_rasterio(path_to_filldepth, masked=True) as filldepth:
+
+                hydrodem = hydrodem - filldepth
+
+        if unwall:
+            print('knocking down walls!')
+            with rioxarray.open_rasterio(path_to_elev_cm, masked=True) as elevcm:
+
+                mask = hydrodem - elevcm < int(wall_threshold_m*100)
+
+                hydrodem = hydrodem.where(mask, elevcm)
+
+        if applyshift:
+            print('applying shift')
+            try:
+                shift = abs(hydrodem.STATISTICS_MINIMUM) + 100
+                shift = int(shift.values)
+            except:
+                shift = int(abs(hydrodem.min()) + 100)
+
+            hydrodem = hydrodem + shift
+            
+            output_raster = output_raster.replace('_shifted',f'_shifted_{shift}_cm')
+
+        else:
+            shift = int(0)
+
+        # hydrodem = hydrodem/100.0
+        # if hydrodem.rio.nodata is None:
+        #     print('Replacing lost nodata')
+        hydrodem = hydrodem.rio.write_nodata(encoded_nodata)
+
+        print('writing to raster')
+        hydrodem.rio.to_raster(output_raster, num_threads='all_cpus', dtype='int32', driver='GTiff', windowed=True)
+
+    return hydrodem, shift
+
+
 
 def find_outlet_uparea_shape_intersection(path_to_uparea_asc, boundary):
     # if boundary is string: read from file
@@ -59,3 +283,5 @@ def find_outlet_uparea_shape_intersection(path_to_uparea_asc, boundary):
             return (xout, yout, rowout, colout, src.crs)
 
 
+def quality_control_areas_vs_boundary():
+    pass
