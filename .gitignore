@@ -1,1 +1,9 @@
 inputs/thucs/tophuc_S_40000.gpkg
+inputs/TNM_DEM/HRNHDPlusRasters0708/*
+inputs/TNM_DEM/NHDPLUS_H_0708_HU4_GDB/*
+inputs/TNM_DEM/*.zip
+inputs/TNM_DEM/*.7z
+inputs/TNM_DEM/*.tif
+outputs/topagnps/*
+cache/aiohttp_cache.sqlite
+src/notebooks/cache/aiohttp_cache.sqlite
