@@ -4,7 +4,7 @@ from shapely.geometry import shape
 from shapely.geometry.polygon import Polygon, LinearRing
 import geopandas as gpd
 
-def polygonize_cell_reach_IDs_asc(path_to_cell_IDs_asc, path_to_cell_IDs_shp, outepsg=4326, return_gdf=False):
+def polygonize_cell_reach_IDs_asc(path_to_cell_IDs_asc, path_to_cell_IDs_shp='cells.gpkg', outtype='GPKG', outepsg=4326, return_gdf=False, writefile=True):
 
     with rasterio.open(path_to_cell_IDs_asc) as src:
         band = src.read(1).astype('int32')
@@ -21,7 +21,11 @@ def polygonize_cell_reach_IDs_asc(path_to_cell_IDs_asc, path_to_cell_IDs_shp, ou
 
     gdf = gpd.GeoDataFrame(data, crs=src.crs).to_crs(epsg=outepsg)
 
-    gdf.to_file(path_to_cell_IDs_shp, driver='ESRI Shapefile')
+    if writefile:
+        try:
+            gdf.to_file(path_to_cell_IDs_shp, driver=outtype)
+        except:
+            gdf.to_file(path_to_cell_IDs_shp, driver='GPKG')
 
     if return_gdf:
         return gdf
