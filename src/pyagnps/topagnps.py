@@ -8,6 +8,7 @@ import rioxarray
 import py3dep
 from osgeo import gdal
 import os, subprocess
+import pyagnps.utils as utils
 
 import logging
 
@@ -282,6 +283,71 @@ def find_outlet_uparea_shape_intersection(path_to_uparea_asc, boundary):
 
             return (xout, yout, rowout, colout, src.crs)
 
+def check_topagnps_wrn_log(path_to_topagnps_wrn_log):
+    '''
+    Returns a list of DEM directions where the cells touch the edge of the map
+    '''
 
-def quality_control_areas_vs_boundary():
-    pass
+    if 'TopAGNPS_wrn.CSV' not in path_to_topagnps_wrn_log:
+        raise Exception(f'Wrong log file: {path_to_topagnps_wrn_log}')
+
+    with open(path_to_topagnps_wrn_log, 'r') as topwarn:
+        line_touch_edges = [line for line in topwarn if 'The watershed boundary touches' in line]
+
+    touch_edges = []
+    directions = ['North', 'West', 'South', 'East']
+
+    for line in line_touch_edges:
+        for dir in directions:
+            if dir in line:
+                touch_edges.append(dir)
+
+    return touch_edges
+
+def quality_control_areas_vs_boundary(cells, boundary_shape):
+
+    if isinstance(cells, str):
+        if 'AnnAGNPS_Cell_IDs.asc' in cells:
+            cells = utils.polygonize_cell_reach_IDs_asc(cells, outepsg=4326, return_gdf=True, writefile=False)
+        else:
+            # try to read as a GeoDataFrame object
+            cells = gpd.read_file(cells)
+    else:
+        raise Exception('The TopAGNPS cells should be provided as a GeoDataFrame object or a path to a shape object or AnnAGNPS_Cell_IDs.asc raster file')
+
+    if isinstance(boundary_shape, str):
+        boundary_shape = gpd.read_file(boundary_shape)
+    elif not(isinstance(boundary_shape, gpd.GeoDataFrame)):
+        raise Exception('The boundary shape should be either the path to a shape file or a GeoDataFrame object directly')
+
+
+    utm = cells.estimate_utm_crs()
+
+    cells_bounds = cells.to_crs(utm).buffer(0.01).unary_union # Buffer by 1cm to prevent floating point errors
+
+    boundary_shape = boundary_shape.to_crs(utm) # Make sure the boundary and the cells are on the same utm
+
+    boundary_shape_bounds = boundary_shape.geometry.iloc[0]
+
+    boundary_minus_cells = boundary_shape_bounds.difference(cells_bounds) # Area inside boundary not covered by the cells
+    cells_minus_boundary = cells_bounds.difference(boundary_shape_bounds) # Cells area that are not in the original boundary
+    intersection = boundary_shape_bounds.intersection(cells_bounds) # Area where they overlap
+
+    fraction_of_boundary_covered = intersection.area/boundary_shape_bounds.area
+    fraction_of_boundary_missed = 1 - fraction_of_boundary_covered
+
+    results = {}
+
+    results['total_cells_area_sqm'] = cells_bounds.area
+    results['total_boundary_area_sqm'] = boundary_shape_bounds.area
+
+    results['cells_missed_area_sqm'] = boundary_minus_cells.area
+    results['beyond_boundary_cells_area_sqm'] = cells_minus_boundary.area
+
+    results['intersection_area_sqm'] = intersection.area
+    results['fraction_boundary_covered'] = fraction_of_boundary_covered
+    results['fraction_boundary_missed'] = fraction_of_boundary_missed
+
+    return results
+
+
