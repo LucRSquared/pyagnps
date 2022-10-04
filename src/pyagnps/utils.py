@@ -3,6 +3,8 @@ from rasterio import features
 from shapely.geometry import shape
 from shapely.geometry.polygon import Polygon, LinearRing
 import geopandas as gpd
+import shutil, os, glob, sys
+from datetime import datetime
 
 def polygonize_cell_reach_IDs_asc(path_to_cell_IDs_asc, path_to_cell_IDs_shp='cells.gpkg', outtype='GPKG', outepsg=4326, return_gdf=False, writefile=True):
 
@@ -44,3 +46,46 @@ def get_geometry_boundary(geom):
             raise Exception('Geoseries has more than one object')
     else:
         raise Exception('Invalid geometry object')
+
+def remove_all_files_from_dir_except_from_list(path_to_dir, keep_list=None):
+    '''
+    path_to_dir : directory containing files to be deleted
+    keep_list : list containing file names to keep. 
+                If keep_list is None it deletes everything
+                If keep_list is 'all' then do nothing
+    '''
+
+    delete_error_files = []
+
+    if keep_list is None:
+        shutil.rmtree(path_to_dir)
+    elif keep_list == 'all':
+        return []
+    else:
+        all_files = glob.glob(f'{path_to_dir}/*')
+        delete_list = all_files.copy()
+
+        for elem in all_files:
+            for keepelem in keep_list:
+                if keepelem in elem:
+                    delete_list.remove(elem)
+
+        for elem in delete_list:
+            try:
+                os.remove(elem)
+            except:
+                delete_error_files.append(elem)
+    
+    return delete_error_files
+
+def log_to_file(filepath, message):
+    original_stdout = sys.stdout
+    with open(filepath, 'a') as log:
+        sys.stdout = log
+        print(message)
+        sys.stdout = original_stdout
+
+def get_current_time(format="%Y-%m-%d-%H-%M-%S"):
+    now = datetime.now()
+    now_str = now.strftime(format)
+    return now_str
