@@ -15,9 +15,9 @@ import json
 keep_files =['AgFlow_LS_Factor.asc',
              'AgFlow_LS_Factor.prj',
              'AnnAGNPS_Cell_IDs.asc',
-             'AnnAGNPS_Cell_IDs.prj',
+             'AnnAGNPS_Cell_IDs.PRJ',
              'AnnAGNPS_Reach_IDs.asc',
-             'AnnAGNPS_Reach_IDs.prj',
+             'AnnAGNPS_Reach_IDs.PRJ',
              'FLOVEC.ASC',
              'FLOVEC.PRJ',
              'NETFUL.ASC',
@@ -35,11 +35,11 @@ keep_files =['AgFlow_LS_Factor.asc',
 
 bigbang = time.process_time()
 
-path_to_TOPAGNPS_bin = 'C:/Users/Luc/projects/pyagnps/src/bins/TopAGNPS_v6.00.b.017_release_64-bit_Windows.exe' # absolute or with respect to a sub directory in path_to_dir
-path_to_thucs = 'inputs/thucs/tophuc_S_40000.gpkg'
-root_dir = 'D:/AIMS/WBD/TopAGNPS_Watershed_Delineation/thuc_tests_increasing_hucs/'
+path_to_TOPAGNPS_bin = '/aims/luc/bins/TopAGNPS_v6.00.b.017_release_64-bit_Linux' # absolute or with respect to a sub directory in path_to_dir
+path_to_thucs = '/aims/luc/data/tophuc_S_M_40000_closed_holes_with_container_thuc_merged_bbox_area_first_kept.gpkg'
+root_dir = '/aims/luc/thuc_runs_40k_SM/'
 
-path_to_log_dir = f'{root_dir}/LOGS/' 
+path_to_log_dir = f'{root_dir}/LOGS/'
 if not(os.path.exists(path_to_log_dir) and os.path.isdir(path_to_log_dir)):
     os.makedirs(path_to_log_dir)
 
@@ -54,12 +54,14 @@ path_to_thuc_runlist = f'{path_to_log_dir}/lmrb.csv'
 path_to_thuc_faillist = f'{path_to_log_dir}/fail_list.csv'
 
 thucs = gpd.read_file(path_to_thucs) # GeoDataFrame containing the thucs and their geometry
+thucs = thucs.sort_values(by=['bbox_area_sqkm'], ascending=True)
+
 runlist = pd.read_csv(path_to_thuc_runlist, dtype=object)
 
 
 
 runlist = runlist.iloc[:,0].to_list() # Get the list of thucs that need to be 
-log_to_file(path_to_time_log, 'thuc,time_s') # Initialize completion time log for thucs
+# log_to_file(path_to_time_log, 'thuc,time_s') # Initialize completion time log for thucs
 
 for _, tuc in thucs.iterrows():
 
@@ -73,9 +75,15 @@ for _, tuc in thucs.iterrows():
     thucid_dir_name = f'thuc_{thuc_id}_40000_SM_res_10_buff_500'
     thuc_select = thucs[thucs['tophucid']==thuc_id]
 
+    if os.path.exists(f'{root_dir}/{thucid_dir_name}') and os.path.isdir(f'{root_dir}/{thucid_dir_name}'):
+        now = get_current_time()
+        log_to_file(path_to_general_log, f'{now}: {thuc_id}: THUC previously computed: SKIPPING')
+        continue
+
     path_to_dir = topagnps.create_topagnps_directory(root_dir, thucid_dir_name)
 
     try:
+        now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {thuc_id}: Downloading DEM')
         dem, path_to_asc = topagnps.download_dem(thuc_select, path_to_dir, name=thucid_dir_name, resolution_m=10, buffer_m=500)
     except:
