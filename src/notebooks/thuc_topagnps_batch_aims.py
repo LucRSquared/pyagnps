@@ -6,7 +6,7 @@ import pandas as pd
 
 from pyagnps import topagnps
 from pyagnps import utils
-from pyagnps.utils import log_to_file, get_current_time
+from pyagnps.utils import log_to_file, get_current_time, remove_all_files_from_dir_except_from_list
 
 import time
 import json
@@ -95,11 +95,11 @@ for _, tuc in thucs.iterrows():
     dem_filename = path_to_asc.rsplit('/',1)[-1] # Part of the string after the last / = "thuc_1173_rest_10_m.asc"
 
     topagnpsXML = {'DEMPROC': 2,
-                'FORMAT': 0,
-                'CSA': 10,
-                'MSCL': 250,
-                'KEEPFILES': 1,
-                'FILENAME': dem_filename}
+                   'FORMAT': 0,
+                   'CSA': 10,
+                   'MSCL': 250,
+                   'KEEPFILES': 1,
+                   'FILENAME': dem_filename}
 
     now = get_current_time()
     log_to_file(path_to_general_log, f'{now}: {thuc_id}: Creating TopAGNPS control file')
@@ -133,14 +133,14 @@ for _, tuc in thucs.iterrows():
 
     try:
         topagnpsXML = {'DEMPROC': 0,
-                'FORMAT': 0,
-                'CSA': 10,
-                'MSCL': 250,
-                'KEEPFILES': 1,
-                'OUTROW': rowout,
-                'OUTCOL': colout,
-                'READOUT': 1,
-                'FILENAME': dem_filename}
+                       'FORMAT': 0,
+                       'CSA': 10,
+                       'MSCL': 250,
+                       'KEEPFILES': 1,
+                       'OUTROW': rowout,
+                       'OUTCOL': colout,
+                       'READOUT': 1,
+                       'FILENAME': dem_filename}
 
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {thuc_id}: Updating control file')
@@ -183,7 +183,7 @@ for _, tuc in thucs.iterrows():
 
     keep_files.append(f'{dem_filename}')
     keep_files.append(f'{dem_filename}'.replace('.asc','.prj'))
-    file_del_errors = utils.remove_all_files_from_dir_except_from_list(path_to_dir, keep_files)
+    file_del_errors = remove_all_files_from_dir_except_from_list(path_to_dir, keep_files)
 
     end = time.process_time()
 
