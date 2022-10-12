@@ -5,7 +5,6 @@ import geopandas as gpd
 import pandas as pd
 
 from pyagnps import topagnps
-from pyagnps import utils
 from pyagnps.utils import log_to_file, get_current_time, remove_all_files_from_dir_except_from_list
 
 import time
@@ -64,6 +63,8 @@ runlist = runlist.iloc[:,0].to_list() # Get the list of thucs that need to be
 # log_to_file(path_to_time_log, 'thuc,time_s') # Initialize completion time log for thucs
 
 for _, tuc in thucs.iterrows():
+
+    everythingwentwell = False # Initialize the variable to know if everything went well
 
     thuc_id = tuc['tophucid']
 
@@ -171,6 +172,8 @@ for _, tuc in thucs.iterrows():
 
         log_to_file(f'{path_to_qc_dir}/{thuc_id}.json', json.dumps(quality, indent=2))
 
+        everythingwentwell = True
+
     except:
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {thuc_id}: Error! Failed to compute quality control')
@@ -178,17 +181,26 @@ for _, tuc in thucs.iterrows():
         log_to_file(path_to_thuc_faillist, f'{thuc_id}')
         continue
 
-    now = get_current_time()
-    log_to_file(path_to_general_log, f'{now}: {thuc_id}: Deleting unnecessary files...')
+    if everythingwentwell:
 
-    keep_files.append(f'{dem_filename}')
-    keep_files.append(f'{dem_filename}'.replace('.asc','.prj'))
-    file_del_errors = remove_all_files_from_dir_except_from_list(path_to_dir, keep_files)
+        now = get_current_time()
+        log_to_file(path_to_general_log, f'{now}: {thuc_id}: Deleting unnecessary files...')
 
-    end = time.process_time()
+        keep_files.append(f'{dem_filename}')
+        keep_files.append(f'{dem_filename}'.replace('.asc','.prj'))
+        file_del_errors = remove_all_files_from_dir_except_from_list(path_to_dir, keep_files)
 
-    now = get_current_time()
-    log_to_file(path_to_general_log, f'{now}: {thuc_id}: Finished normally in {end-start} seconds')
-    log_to_file(path_to_time_log, f'{thuc_id},{end-start}')
+        end = time.process_time()
+
+        now = get_current_time()
+        log_to_file(path_to_general_log, f'{now}: {thuc_id}: Finished normally in {end-start} seconds')
+        log_to_file(path_to_time_log, f'{thuc_id},{end-start}')
+
+    else:
+        end = time.process_time()
+
+        now = get_current_time()
+        log_to_file(path_to_general_log, f'{now}: {thuc_id}: Finished with errors in {end-start} seconds')
+        log_to_file(path_to_time_log, f'{thuc_id},{end-start}')
 
 print(f'Finished batch processing! Overall process took {(end-bigbang)/3600} hours')
