@@ -1,11 +1,12 @@
+print('STARTING BATCH THUC')
+
 import sys, os
-# sys.path.append('C:/Users/Luc/projects/pyagnps/src')
-sys.path.append('src')
+sys.path.append('/home/luc/projects/pyagnps/')
 import geopandas as gpd
 import pandas as pd
 
-from pyagnps import topagnps
-from pyagnps.utils import log_to_file, get_current_time, remove_all_files_from_dir_except_from_list
+from src.pyagnps import topagnps
+from src.pyagnps.utils import log_to_file, get_current_time, remove_all_files_from_dir_except_from_list
 
 import time
 import json
@@ -34,7 +35,7 @@ keep_files =['AgFlow_LS_Factor.asc',
 
 bigbang = time.process_time()
 
-path_to_TOPAGNPS_bin = '/aims/luc/bins/TopAGNPS_v6.00.b.017_release_64-bit_Linux' # absolute or with respect to a sub directory in path_to_dir
+path_to_TOPAGNPS_bin = '/aims/luc/bins/TopAGNPS_v6.00.b.018_release_64-bit_Linux' # absolute or with respect to a sub directory in path_to_dir
 path_to_thucs = '/aims/luc/data/tophuc_S_M_40000_closed_holes_with_container_thuc_merged_bbox_area_first_kept.gpkg'
 root_dir = '/aims/luc/thuc_runs_40k_SM/'
 
@@ -62,6 +63,9 @@ runlist = pd.read_csv(path_to_thuc_runlist, dtype=object)
 runlist = runlist.iloc[:,0].to_list() # Get the list of thucs that need to be 
 # log_to_file(path_to_time_log, 'thuc,time_s') # Initialize completion time log for thucs
 
+print('Runlist:')
+print(runlist)
+
 for _, tuc in thucs.iterrows():
 
     everythingwentwell = False # Initialize the variable to know if everything went well
@@ -78,6 +82,7 @@ for _, tuc in thucs.iterrows():
 
     if os.path.exists(f'{root_dir}/{thucid_dir_name}') and os.path.isdir(f'{root_dir}/{thucid_dir_name}'):
         now = get_current_time()
+        print(f'{now}: {thuc_id}: THUC previously computed: SKIPPING')
         log_to_file(path_to_general_log, f'{now}: {thuc_id}: THUC previously computed: SKIPPING')
         continue
 
