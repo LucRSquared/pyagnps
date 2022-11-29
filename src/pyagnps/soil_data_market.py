@@ -133,42 +133,87 @@ def run_one_query(county_code):
 
     url = "https://SDMDataAccess.sc.egov.usda.gov/Tabular/SDMTabularService/post.rest"
 
-    sQuery = f''' select
-    sa.saverest,
-    l.areasymbol,
-    l.areaname,
-    mu.musym,
-    hydgrp,
-    kwfact,
-    albedodry_r,
-    (SELECT CASE when min(resdept_r) is null then '>200' else cast(min(resdept_r) as varchar) END
+    # Updated query after Ron's Email 2022-11-21
+    sQuery = f'''select 
+            sa.saverest, 
+            l.areasymbol, 
+            l.areaname,
+            mu.musym, 
+            hydgrp,
+            kwfact,
+            albedodry_r,
+            (SELECT CASE when min(resdept_r) is null then '>200' else cast(min(resdept_r) as 
+            varchar) END
+                        from component left outer join corestrictions on component.cokey = 
+            corestrictions.cokey where component.cokey = c.cokey and reskind is not null) as 
+            restrictiondepthr,
+            partdensity,
+            c.compname, 
+            texdesc, 
+            hzdepb_r, 
+            dbovendry_r, 
+            claytotal_r,
+            silttotal_r,
+            sandtotal_r,
+            (select sum(cf.fragvol_r) as fragvol  FROM chfrags cf WHERE cf.chkey = ch.chkey 
+            ) as fragvol,
+            sandvf_r,
+            caco3_r,
+            ksat_r,
+            wthirdbar_r,
+            wfifteenbar_r,
+            om_r, 
+            ph1to1h2o_r,
+            c.comppct_r
 
-    from component left outer join corestrictions on component.cokey = corestrictions.cokey where component.cokey = c.cokey and reskind is not null) as restrictiondepthr,
-    partdensity,
-    c.compname,
-    texdesc,
-    hzdepb_r,
-    dbovendry_r,
-    claytotal_r,
-    silttotal_r,
-    sandtotal_r,
-    (select sum(cf.fragvol_r) as fragvol FROM chfrags cf WHERE cf.chkey = ch.chkey ) as fragvol,
-    sandvf_r,
-    caco3_r,
-        ksat_r,
-        wthirdbar_r,
-        wfifteenbar_r,
-        om_r,
-        ph1to1h2o_r,
-        c.comppct_r
-        FROM
-        legend l INNER JOIN mapunit mu ON mu.lkey = l.lkey
-        LEFT OUTER JOIN sacatalog sa ON sa.areasymbol = l.areasymbol
-        LEFT OUTER JOIN component c ON c.mukey = mu.mukey
-        LEFT OUTER JOIN chorizon ch ON ch.cokey = c.cokey
-        LEFT OUTER JOIN chtexturegrp ct ON ch.chkey=ct.chkey
-        WHERE l.areasymbol = '{county_code}' and ct.rvindicator = 'yes'
-        Order by l.areasymbol, musym, hzdepb_r'''
+            FROM 
+            legend l INNER JOIN mapunit mu ON mu.lkey = l.lkey 
+            LEFT OUTER JOIN sacatalog sa ON sa.areasymbol = l.areasymbol
+            LEFT OUTER JOIN component c ON c.mukey = mu.mukey and c.cokey = (SELECT TOP 1 component.cokey FROM component WHERE 
+            component.mukey=mu.mukey ORDER BY component.comppct_r DESC)
+            LEFT OUTER JOIN chorizon ch ON ch.cokey = c.cokey 
+            LEFT OUTER JOIN chtexturegrp ct ON ch.chkey=ct.chkey 
+
+            WHERE l.areasymbol = {county_code} and ct.rvindicator = 'yes'
+
+            Order by l.areasymbol, musym, compname, hzdepb_r'''
+
+    # sQuery = f''' select
+    # sa.saverest,
+    # l.areasymbol,
+    # l.areaname,
+    # mu.musym,
+    # hydgrp,
+    # kwfact,
+    # albedodry_r,
+    # (SELECT CASE when min(resdept_r) is null then '>200' else cast(min(resdept_r) as varchar) END
+
+    # from component left outer join corestrictions on component.cokey = corestrictions.cokey where component.cokey = c.cokey and reskind is not null) as restrictiondepthr,
+    # partdensity,
+    # c.compname,
+    # texdesc,
+    # hzdepb_r,
+    # dbovendry_r,
+    # claytotal_r,
+    # silttotal_r,
+    # sandtotal_r,
+    # (select sum(cf.fragvol_r) as fragvol FROM chfrags cf WHERE cf.chkey = ch.chkey ) as fragvol,
+    # sandvf_r,
+    # caco3_r,
+    #     ksat_r,
+    #     wthirdbar_r,
+    #     wfifteenbar_r,
+    #     om_r,
+    #     ph1to1h2o_r,
+    #     c.comppct_r
+    #     FROM
+    #     legend l INNER JOIN mapunit mu ON mu.lkey = l.lkey
+    #     LEFT OUTER JOIN sacatalog sa ON sa.areasymbol = l.areasymbol
+    #     LEFT OUTER JOIN component c ON c.mukey = mu.mukey
+    #     LEFT OUTER JOIN chorizon ch ON ch.cokey = c.cokey
+    #     LEFT OUTER JOIN chtexturegrp ct ON ch.chkey=ct.chkey
+    #     WHERE l.areasymbol = '{county_code}' and ct.rvindicator = 'yes'
+    #     Order by l.areasymbol, musym, hzdepb_r'''
 
     dRequest = dict()
     dRequest["FORMAT"] = "JSON+COLUMNNAME"
