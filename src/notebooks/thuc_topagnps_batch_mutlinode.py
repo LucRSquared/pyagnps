@@ -1,20 +1,12 @@
 print('STARTING BATCH THUC')
 
-""" 
-This code runs on multiple AIMS nodes that all share the 'aims-nas' folder where the data and binary files are stored
-Each node takes geometry information from the file pointed by 'path_to_thucs' and automatically runs TopAGNPS based on the DEM
-covered by each THUC. 
-If a node is already working on one, other nodes will ignore it (by checking the existence of the working folder) 
-"""
-
-import sys, os
+import sys, os, shutil
 sys.path.append('/home/luc/projects/pyagnps/')
-sys.path.append('/home/luc/projects/pyagnps/src/')
 import geopandas as gpd
 import pandas as pd
 
 from src.pyagnps import topagnps
-from src.pyagnps.utils import log_to_file, get_current_time, remove_all_files_from_dir_except_from_list
+from src.pyagnps.utils import log_to_file, get_current_time, remove_all_files_from_dir_except_from_list, move_files_from_dir_to_dir, copy_files_from_dir_to_dir
 
 import time
 import json
@@ -49,6 +41,10 @@ path_to_TOPAGNPS_bin = '/aims-nas/luc/bins/TopAGNPS_v6.00.b.018_release_64-bit_L
 path_to_thucs = '/aims-nas/luc/data/tophuc_S_M_40000_closed_holes_with_container_thuc_merged_bbox_area_first_kept.gpkg'
 root_dir = '/aims-nas/luc/thuc_runs_40k_SM/'
 
+run_dir = '/home/luc/tmp/' # Directory where the computation will be carried out
+if not(os.path.exists(run_dir) and os.path.isdir(run_dir)):
+    os.makedirs(run_dir)
+
 path_to_log_dir = f'{root_dir}/LOGS/'
 if not(os.path.exists(path_to_log_dir) and os.path.isdir(path_to_log_dir)):
     os.makedirs(path_to_log_dir)
@@ -71,8 +67,8 @@ runlist = thucs['tophucid'].to_list()
 # runlist = pd.read_csv(path_to_thuc_runlist, dtype=object)
 # runlist = runlist.iloc[:,0].to_list() # Get the list of thucs that need to be 
 
-
-log_to_file(path_to_time_log, 'thuc,time_s') # Initialize completion time log for thucs
+if not(os.path.exists(path_to_time_log) and os.path.isfile(path_to_time_log)):
+    log_to_file(path_to_time_log, 'thuc,time_s') # Initialize completion time log for thucs
 
 
 for _, tuc in thucs.iterrows():
@@ -89,21 +85,22 @@ for _, tuc in thucs.iterrows():
     # Make sure the path exists
     thucid_dir_name = f'thuc_{thuc_id}_40000_SM_res_10_buff_500'
     path_to_dir = f'{root_dir}/{thucid_dir_name}'
+    path_to_run_dir = f'{run_dir}/{thucid_dir_name}'
 
     if os.path.exists(path_to_dir) and os.path.isdir(path_to_dir):
         now = get_current_time()
-        print(f'{now}: {nodename}: {thuc_id}: THUC previously computed: SKIPPING')
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: THUC previously computed: SKIPPING')
         continue
     else:
-        path_to_dir = topagnps.create_topagnps_directory(root_dir, thucid_dir_name)
+        topagnps.create_topagnps_directory(root_dir, thucid_dir_name)
+        topagnps.create_topagnps_directory(run_dir, thucid_dir_name)
 
     thuc_select = thucs[thucs['tophucid']==thuc_id]
 
     try:
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Downloading DEM')
-        dem, path_to_asc = topagnps.download_dem(thuc_select, path_to_dir, name=thucid_dir_name, resolution_m=10, buffer_m=500)
+        dem, path_to_asc = topagnps.download_dem(thuc_select, path_to_run_dir, name=thucid_dir_name, resolution_m=10, buffer_m=500)
     except:
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Failed to download DEM')
@@ -122,12 +119,12 @@ for _, tuc in thucs.iterrows():
     now = get_current_time()
     log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Creating TopAGNPS control file')
 
-    topagnps.create_topagnps_xml_control_file(topagnpsXML, path_to_dir+'/TOPAGNPS.XML')
+    topagnps.create_topagnps_xml_control_file(topagnpsXML, path_to_run_dir+'/TOPAGNPS.XML')
 
     try:
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: TopAGNPS pre-processing step')
-        topagnps.run_topagnps(path_to_dir, path_to_TOPAGNPS_bin)
+        topagnps.run_topagnps(path_to_run_dir, path_to_TOPAGNPS_bin)
     except:
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Error! Failed to run pre-processing')
@@ -138,7 +135,7 @@ for _, tuc in thucs.iterrows():
     try:
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Finding outlet...')
-        xout, yout, rowout, colout, raster_crs = topagnps.find_outlet_uparea_shape_intersection(path_to_dir+'/UPAREA.ASC', thuc_select)
+        xout, yout, rowout, colout, raster_crs = topagnps.find_outlet_uparea_shape_intersection(path_to_run_dir+'/UPAREA.ASC', thuc_select)
 
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Outlet found! x = {xout}, y = {yout} ({raster_crs})')
@@ -163,12 +160,12 @@ for _, tuc in thucs.iterrows():
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Updating control file')
 
-        topagnps.create_topagnps_xml_control_file(topagnpsXML, path_to_dir+'/TOPAGNPS.XML')
+        topagnps.create_topagnps_xml_control_file(topagnpsXML, path_to_run_dir+'/TOPAGNPS.XML')
 
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Finishing TopAGNPS processing with outlet information')
 
-        topagnps.run_topagnps(path_to_dir, path_to_TOPAGNPS_bin)
+        topagnps.run_topagnps(path_to_run_dir, path_to_TOPAGNPS_bin)
     except:
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Error! Failed to finish TopAGNPS processing')
@@ -178,8 +175,8 @@ for _, tuc in thucs.iterrows():
 
     try:
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Computing quality control for THUC')
-        path_to_cell_IDs_asc = f'{path_to_dir}/AnnAGNPS_Cell_IDs.asc'
-        path_to_topagnps_wrn = f'{path_to_dir}/TopAGNPS_wrn.CSV'
+        path_to_cell_IDs_asc = f'{path_to_run_dir}/AnnAGNPS_Cell_IDs.asc'
+        path_to_topagnps_wrn = f'{path_to_run_dir}/TopAGNPS_wrn.CSV'
 
         quality = topagnps.quality_control_areas_vs_boundary(path_to_cell_IDs_asc, thuc_select)
         quality['thuc'] = thuc_id
@@ -205,12 +202,28 @@ for _, tuc in thucs.iterrows():
 
         keep_files.append(f'{dem_filename}')
         keep_files.append(f'{dem_filename}'.replace('.asc','.prj'))
-        file_del_errors = remove_all_files_from_dir_except_from_list(path_to_dir, keep_files)
+        file_del_errors = remove_all_files_from_dir_except_from_list(path_to_run_dir, keep_files)
 
         now = get_current_time()
         end = time.process_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Finished normally in {end-start} seconds')
         log_to_file(path_to_time_log, f'{thuc_id},{end-start}')
+
+        # Move files from run directory to output directory
+        if path_to_dir != path_to_run_dir:
+            now = get_current_time()
+            log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Moving files to output directory...')
+            move_files_erros = move_files_from_dir_to_dir(path_to_run_dir, path_to_dir)
+
+            if len(move_files_erros) == 0:
+                now = get_current_time()
+                log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Files moved successfully!')
+                # Remove run directory
+                log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Removing run directory...')
+                shutil.rmtree(path_to_run_dir)
+            else:
+                now = get_current_time()
+                log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Error! Failed to move files from {path_to_run_dir} to {path_to_dir}')
 
     else:
 
