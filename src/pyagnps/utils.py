@@ -78,6 +78,42 @@ def remove_all_files_from_dir_except_from_list(path_to_dir, keep_list=None):
     
     return delete_error_files
 
+def move_files_from_dir_to_dir(path_to_dir, path_to_new_dir):
+    '''
+    path_to_dir : directory containing files to be moved
+    path_to_new_dir : directory where files will be moved
+    '''
+
+    move_error_files = []
+
+    all_files = glob.glob(f'{path_to_dir}/*')
+
+    for elem in all_files:
+        try:
+            shutil.move(elem, path_to_new_dir)
+        except:
+            move_error_files.append(elem)
+    
+    return move_error_files
+
+def copy_files_from_dir_to_dir(path_to_dir, path_to_new_dir):
+    '''
+    path_to_dir : directory containing files to be copied
+    path_to_new_dir : directory where files will be copied
+    '''
+
+    copy_error_files = []
+
+    all_files = glob.glob(f'{path_to_dir}/*')
+
+    for elem in all_files:
+        try:
+            shutil.copy2(elem, path_to_new_dir)
+        except:
+            copy_error_files.append(elem)
+    
+    return copy_error_files
+
 def log_to_file(filepath, message):
     original_stdout = sys.stdout
     with open(filepath, 'a') as log:

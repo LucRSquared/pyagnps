@@ -8,12 +8,9 @@ import rioxarray
 import py3dep
 from osgeo import gdal
 import os, subprocess
-import pyagnps.utils as utils
+import src.pyagnps.utils as utils
 
 import logging
-
-def run_topagnps(topbinpath, path_to_control_file):
-    pass
 
 def create_topagnps_directory(root_dir, topagnps_dir):
     path_to_dir = root_dir+'/'+topagnps_dir
