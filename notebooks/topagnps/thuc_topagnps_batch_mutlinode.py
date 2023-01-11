@@ -104,7 +104,11 @@ for _, tuc in thucs.iterrows():
     except:
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Failed to download DEM')
-        log_to_file(path_to_thuc_faillist, f'{thuc_id}')
+        # Delete path_to_dir so that it can be reattempted some other time
+        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Deleting run and output directory to reattempt later')
+        shutil.rmtree(path_to_dir)
+        shutil.rmtree(path_to_run_dir)
+        # log_to_file(path_to_thuc_faillist, f'{thuc_id}')
         continue
 
     dem_filename = path_to_asc.rsplit('/',1)[-1] # Part of the string after the last / = "thuc_1173_rest_10_m.asc"
