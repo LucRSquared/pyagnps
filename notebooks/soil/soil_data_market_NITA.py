@@ -1,11 +1,11 @@
 """This script shows how to run a query to write AnnAGNPS compatible soil data for one or several County Codes"""
 
 import sys, os
-sys.path.append('..')
+sys.path.append('../..')
 
-from pyagnps import soil_data_market as sdm
+from src.pyagnps import soil_data_market as sdm
 
-path_to_NITA_exe = '../../src/bins/NITA.exe' # With respect to the nita_files
+path_to_NITA_exe = '../../../src/bins/NITA.exe' # With respect to the nita_files
 # county_codes = ['OH107','OH011']
 
 # combine_list = [1, 1]

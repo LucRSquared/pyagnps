@@ -8,7 +8,7 @@ import rioxarray
 import py3dep
 from osgeo import gdal
 import os, subprocess
-import src.pyagnps.utils as utils
+import pyagnps.utils as utils # previously src.pyagnps.utils
 
 import logging
 

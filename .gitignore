@@ -6,4 +6,5 @@ inputs/TNM_DEM/*.7z
 inputs/TNM_DEM/*.tif
 outputs/topagnps/*
 cache/aiohttp_cache.sqlite
-src/notebooks/cache/aiohttp_cache.sqlite
+notebooks/cache/aiohttp_cache.sqlite
+*/__pycache__/*
