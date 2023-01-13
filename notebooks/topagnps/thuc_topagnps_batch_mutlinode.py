@@ -41,6 +41,7 @@ nodename = socket.gethostname()
 path_to_TOPAGNPS_bin = '/aims-nas/luc/bins/TopAGNPS_v6.00.a.018_release_64-bit_Linux' # absolute or with respect to a sub directory in path_to_dir
 path_to_thucs = '/aims-nas/luc/data/tophuc_S_M_40000_closed_holes_with_container_thuc_merged_bbox_area_first_kept.gpkg'
 root_dir = '/aims-nas/luc/thuc_runs_40k_SM/'
+dir_runs_name = '40000_SM_res_10_buff_500'
 
 run_dir = '/home/luc/tmp/' # Directory where the computation will be carried out
 if not(os.path.exists(run_dir) and os.path.isdir(run_dir)):
@@ -84,8 +85,8 @@ for _, tuc in thucs.iterrows():
     start = time.time()
 
     # Make sure the path exists
-    thucid_dir_name = f'thuc_{thuc_id}_40000_SM_res_10_buff_500'
-    path_to_dir = f'{root_dir}/{thucid_dir_name}'
+    thucid_dir_name = f'thuc_{thuc_id}_{dir_runs_name}'
+    path_to_dir = f'{root_dir}/{dir_runs_name}/{thucid_dir_name}'
     path_to_run_dir = f'{run_dir}/{thucid_dir_name}'
 
     if os.path.exists(path_to_dir) and os.path.isdir(path_to_dir):
@@ -93,7 +94,7 @@ for _, tuc in thucs.iterrows():
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: THUC previously computed: SKIPPING')
         continue
     else:
-        topagnps.create_topagnps_directory(root_dir, thucid_dir_name)
+        topagnps.create_topagnps_directory(f'{root_dir}/{dir_runs_name}', thucid_dir_name)
         topagnps.create_topagnps_directory(run_dir, thucid_dir_name)
 
     thuc_select = thucs[thucs['tophucid']==thuc_id]
