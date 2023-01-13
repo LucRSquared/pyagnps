@@ -8,7 +8,7 @@ import rioxarray
 import py3dep
 from osgeo import gdal
 import os, subprocess
-import pyagnps.utils as utils # previously src.pyagnps.utils
+import src.pyagnps.utils as utils
 
 import logging
 
@@ -346,5 +346,3 @@ def quality_control_areas_vs_boundary(cells, boundary_shape):
     results['fraction_boundary_missed'] = fraction_of_boundary_missed
 
     return results
-
-

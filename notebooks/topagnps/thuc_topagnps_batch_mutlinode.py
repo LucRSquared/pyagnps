@@ -33,7 +33,7 @@ keep_files =['AgFlow_LS_Factor.asc',
              'TopAGNPS_wrn.CSV',
              'TOPAGNPS.XML']
 
-bigbang = time.process_time()
+bigbang = time.time()
 
 nodename = 'aims1'
 
@@ -80,7 +80,7 @@ for _, tuc in thucs.iterrows():
     if thuc_id not in runlist:
         continue
 
-    start = time.process_time()
+    start = time.time()
 
     # Make sure the path exists
     thucid_dir_name = f'thuc_{thuc_id}_40000_SM_res_10_buff_500'
@@ -209,7 +209,7 @@ for _, tuc in thucs.iterrows():
         file_del_errors = remove_all_files_from_dir_except_from_list(path_to_run_dir, keep_files)
 
         now = get_current_time()
-        end = time.process_time()
+        end = time.time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Finished normally in {end-start} seconds')
         log_to_file(path_to_time_log, f'{thuc_id},{end-start}')
 
@@ -232,10 +232,10 @@ for _, tuc in thucs.iterrows():
     else:
 
         now = get_current_time()
-        end = time.process_time()
+        end = time.time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Finished with errors in {end-start} seconds')
         log_to_file(path_to_time_log, f'{thuc_id},{end-start}')
 
-end = time.process_time()
+end = time.time()
 
 print(f'Finished batch processing! Overall process took {(end-bigbang)/3600} hours')

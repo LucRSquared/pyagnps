@@ -13,6 +13,7 @@ for root, dirs, files in os.walk(thuc_dir):
         # shutil.rmtree(root)
         # Renaming the directory to failed_thuc
         id = len(thuc_dir)
-        new_dir_name = root[id::].replace('thuc_', 'failed_')
+        new_dir_name = root[id::].replace('thuc_', 'failed_thuc_')
+        # print(root, ' ', new_dir_name)
         print(f'Renaming {root[id::]} to {new_dir_name}')
-        os.rename(root[id::], new_dir_name)
+        os.rename(f'{thuc_dir}/{root[id::]}', f'{thuc_dir}/{new_dir_name}')
