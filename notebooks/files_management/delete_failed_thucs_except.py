@@ -8,7 +8,7 @@ for root, dirs, files in os.walk(thuc_dir):
     if (not dirs) and ('QualityControl' not in root) and ('LOGS' not in root) and \
         ('AnnAGNPS_Cell_Data_Section.csv' not in files) or \
         ('UPAREA.ASC' not in files):
-    # If there are no subdirectories and a cell data section file is not present then it means that it failed
+        # If there are no subdirectories and a cell data section file is not present then it means that it failed
         # print(f'Deleting {root}')
         # shutil.rmtree(root)
         # Renaming the directory to failed_thuc

@@ -1,6 +1,7 @@
 print('STARTING BATCH THUC')
 
 import sys, os, shutil
+import socket
 sys.path.append('/home/luc/projects/pyagnps/')
 import geopandas as gpd
 import pandas as pd
@@ -35,7 +36,7 @@ keep_files =['AgFlow_LS_Factor.asc',
 
 bigbang = time.time()
 
-nodename = 'aims1'
+nodename = socket.gethostname()
 
 path_to_TOPAGNPS_bin = '/aims-nas/luc/bins/TopAGNPS_v6.00.a.018_release_64-bit_Linux' # absolute or with respect to a sub directory in path_to_dir
 path_to_thucs = '/aims-nas/luc/data/tophuc_S_M_40000_closed_holes_with_container_thuc_merged_bbox_area_first_kept.gpkg'
