@@ -8,3 +8,5 @@ outputs/topagnps/*
 cache/aiohttp_cache.sqlite
 notebooks/cache/aiohttp_cache.sqlite
 */__pycache__/*
+nohup.out
+*.pyc
