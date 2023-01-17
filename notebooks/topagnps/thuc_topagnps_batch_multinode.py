@@ -1,5 +1,3 @@
-print('STARTING BATCH THUC')
-
 import sys, os, shutil
 import socket
 sys.path.append('/home/luc/projects/pyagnps/')
@@ -33,6 +31,14 @@ keep_files =['AgFlow_LS_Factor.asc',
              'TopAGNPS_status.CSV',
              'TopAGNPS_wrn.CSV',
              'TOPAGNPS.XML']
+
+# Keep log files in case of failure
+keep_files_failure = ['command_line_output.txt',
+                      'TopAGNPS_log.CSV',
+                      'TopAGNPS_status.CSV',
+                      'TopAGNPS_wrn.CSV',
+                      'TOPAGNPS.XML']
+
 
 bigbang = time.time()
 
@@ -111,7 +117,7 @@ for _, tuc in thucs.iterrows():
         shutil.rmtree(path_to_dir)
         shutil.rmtree(path_to_run_dir)
         # log_to_file(path_to_thuc_faillist, f'{thuc_id}')
-        continue
+        #continue
 
     dem_filename = path_to_asc.rsplit('/',1)[-1] # Part of the string after the last / = "thuc_1173_rest_10_m.asc"
 
@@ -136,7 +142,7 @@ for _, tuc in thucs.iterrows():
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Error! Failed to run pre-processing')
         log_to_file(path_to_time_log, f'{thuc_id},0')
         log_to_file(path_to_thuc_faillist, f'{thuc_id}')
-        continue
+        #continue
 
     try:
         now = get_current_time()
@@ -150,7 +156,7 @@ for _, tuc in thucs.iterrows():
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Error! Failed to find outlet')
         log_to_file(path_to_time_log, f'{thuc_id},0')
         log_to_file(path_to_thuc_faillist, f'{thuc_id}')
-        continue
+        #continue
 
     try:
         topagnpsXML = {'DEMPROC': 0,
@@ -177,7 +183,7 @@ for _, tuc in thucs.iterrows():
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Error! Failed to finish TopAGNPS processing')
         log_to_file(path_to_time_log, f'{thuc_id},0')
         log_to_file(path_to_thuc_faillist, f'{thuc_id}')
-        continue
+        #continue
 
     try:
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Computing quality control for THUC')
@@ -199,7 +205,7 @@ for _, tuc in thucs.iterrows():
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Error! Failed to compute quality control')
         log_to_file(path_to_time_log, f'{thuc_id},0')
         log_to_file(path_to_thuc_faillist, f'{thuc_id}')
-        continue
+        #continue
 
     if everythingwentwell:
 
@@ -219,9 +225,9 @@ for _, tuc in thucs.iterrows():
         if path_to_dir != path_to_run_dir:
             now = get_current_time()
             log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Moving files to output directory...')
-            move_files_erros = move_files_from_dir_to_dir(path_to_run_dir, path_to_dir)
+            move_files_errors = move_files_from_dir_to_dir(path_to_run_dir, path_to_dir)
 
-            if len(move_files_erros) == 0:
+            if len(move_files_errors) == 0:
                 now = get_current_time()
                 log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Files moved successfully!')
                 # Remove run directory
@@ -233,9 +239,31 @@ for _, tuc in thucs.iterrows():
 
     else:
 
+        # Removing useless files from run directory
+        now = get_current_time()
+        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Deleting unnecessary files...')
+        file_del_errors = remove_all_files_from_dir_except_from_list(path_to_run_dir, keep_files_failure)
+
+        # Move log files from run directory to output directory and remove run directory
+        if path_to_dir != path_to_run_dir:
+            now = get_current_time()
+            log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Moving log files of failed delineation to output directory...')
+            move_files_errors = move_files_from_dir_to_dir(path_to_run_dir, path_to_dir)
+
+            if len(move_files_errors) == 0:
+                now = get_current_time()
+                log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Log files moved successfully!')
+                # Remove run directory
+                log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Removing run directory...')
+                shutil.rmtree(path_to_run_dir)
+            else:
+                now = get_current_time()
+                log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Error! Failed to move log files from {path_to_run_dir} to {path_to_dir}')
+
+            
         now = get_current_time()
         end = time.time()
-        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Finished with errors in {end-start} seconds')
+        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Did not finish (errors) {end-start} seconds')
         log_to_file(path_to_time_log, f'{thuc_id},{end-start}')
 
 end = time.time()
