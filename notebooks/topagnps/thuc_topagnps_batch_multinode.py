@@ -109,6 +109,21 @@ for _, tuc in thucs.iterrows():
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Downloading DEM')
         dem, path_to_asc = topagnps.download_dem(thuc_select, path_to_run_dir, name=thucid_dir_name, resolution_m=10, buffer_m=500)
+
+        dem_filename = path_to_asc.rsplit('/',1)[-1] # Part of the string after the last / = "thuc_1173_rest_10_m.asc"
+
+        topagnpsXML = {'DEMPROC': 2,
+                    'FORMAT': 0,
+                    'CSA': 10,
+                    'MSCL': 250,
+                    'KEEPFILES': 1,
+                    'FILENAME': dem_filename}
+
+        now = get_current_time()
+        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Creating TopAGNPS control file')
+
+        topagnps.create_topagnps_xml_control_file(topagnpsXML, path_to_run_dir+'/TOPAGNPS.XML')
+
     except:
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Failed to download DEM')
@@ -118,20 +133,6 @@ for _, tuc in thucs.iterrows():
         shutil.rmtree(path_to_run_dir)
         # log_to_file(path_to_thuc_faillist, f'{thuc_id}')
         #continue
-
-    dem_filename = path_to_asc.rsplit('/',1)[-1] # Part of the string after the last / = "thuc_1173_rest_10_m.asc"
-
-    topagnpsXML = {'DEMPROC': 2,
-                   'FORMAT': 0,
-                   'CSA': 10,
-                   'MSCL': 250,
-                   'KEEPFILES': 1,
-                   'FILENAME': dem_filename}
-
-    now = get_current_time()
-    log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Creating TopAGNPS control file')
-
-    topagnps.create_topagnps_xml_control_file(topagnpsXML, path_to_run_dir+'/TOPAGNPS.XML')
 
     try:
         now = get_current_time()
@@ -243,6 +244,10 @@ for _, tuc in thucs.iterrows():
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Deleting unnecessary files...')
         file_del_errors = remove_all_files_from_dir_except_from_list(path_to_run_dir, keep_files_failure)
+
+        # test if path_to_dir exists if it does not it was removed before
+        if not os.path.exists(path_to_dir):
+            continue
 
         # Move log files from run directory to output directory and remove run directory
         if path_to_dir != path_to_run_dir:
