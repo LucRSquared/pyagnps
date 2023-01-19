@@ -13,7 +13,7 @@ import geopandas as gpd
 import pandas as pd
 
 from src.pyagnps import topagnps
-from src.pyagnps.utils import log_to_file, get_current_time, remove_all_files_from_dir_except_from_list, move_files_from_dir_to_dir, read_topagnps_xml_control_file
+from src.pyagnps.utils import log_to_file, get_current_time, remove_all_files_from_dir_except_from_list, move_files_from_dir_to_dir
 
 import time
 import json
@@ -92,7 +92,7 @@ for thuc_id, path_to_run_dir in runlist:
     contained_files = [os.path.basename(path) for path in glob(f'{path_to_run_dir}/*')]
 
     # Read topagnps control file
-    topagnpsXML = read_topagnps_xml_control_file(path_to_run_dir+'/TOPAGNPS.XML')
+    topagnpsXML = topagnps.read_topagnps_xml_control_file(path_to_run_dir+'/TOPAGNPS.XML')
 
     # Find dem_filename
     dem_filename = os.path.basename(glob(f'{path_to_run_dir}/thuc*.asc')[0])
