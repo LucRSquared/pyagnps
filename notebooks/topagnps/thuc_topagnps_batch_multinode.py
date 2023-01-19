@@ -214,9 +214,11 @@ for _, tuc in thucs.iterrows():
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Deleting unnecessary files...')
 
-        keep_files.append(f'{dem_filename}')
-        keep_files.append(f'{dem_filename}'.replace('.asc','.prj'))
-        file_del_errors = remove_all_files_from_dir_except_from_list(path_to_run_dir, keep_files)
+        keep_files_tmp = keep_files.copy()
+
+        keep_files_tmp.append(f'{dem_filename}')
+        keep_files_tmp.append(f'{dem_filename}'.replace('.asc','.prj'))
+        file_del_errors = remove_all_files_from_dir_except_from_list(path_to_run_dir, keep_files_tmp)
 
         now = get_current_time()
         end = time.time()

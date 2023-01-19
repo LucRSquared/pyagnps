@@ -102,8 +102,8 @@ for thuc_id, path_to_run_dir in runlist:
         topagnpsXML = topagnps.read_topagnps_xml_control_file(path_to_run_dir+'/TOPAGNPS.XML')
     else:
         # delete path_to_run_dir and its contents and continue
-        print(f'Could not find TOPAGNPS.XML and DEM for {thuc_id}, deleting containing directory and continuing')
-        shutil.rmtree(path_to_run_dir)
+        print(f'Could not find TOPAGNPS.XML and DEM for {thuc_id}, continuing')
+        # shutil.rmtree(path_to_run_dir)
         continue
 
     if 'OUTROW' and 'OUTCOL' not in topagnpsXML.keys():
@@ -145,7 +145,7 @@ for thuc_id, path_to_run_dir in runlist:
     try:
         now = get_current_time()
         print(f'{now}: {nodename}: {thuc_id}: [RETRY] Computing quality control for THUC')
-        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Computing quality control for THUC')
+        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: [RETRY] Computing quality control for THUC')
         path_to_cell_IDs_asc = f'{path_to_run_dir}/AnnAGNPS_Cell_IDs.asc'
         path_to_topagnps_wrn = f'{path_to_run_dir}/TopAGNPS_wrn.CSV'
 
@@ -173,9 +173,11 @@ for thuc_id, path_to_run_dir in runlist:
         print(f'{now}: {nodename}: {thuc_id}: [RETRY] Deleting unnecessary files...')
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: [RETRY] Deleting unnecessary files...')
 
-        keep_files.append(f'{dem_filename}')
-        keep_files.append(f'{dem_filename}'.replace('.asc','.prj'))
-        file_del_errors = remove_all_files_from_dir_except_from_list(path_to_run_dir, keep_files)
+        keep_files_tmp = keep_files.copy()
+
+        keep_files_tmp.append(f'{dem_filename}')
+        keep_files_tmp.append(f'{dem_filename}'.replace('.asc','.prj'))
+        file_del_errors = remove_all_files_from_dir_except_from_list(path_to_run_dir, keep_files_tmp)
 
         now = get_current_time()
         end = time.time()
