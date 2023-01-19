@@ -108,8 +108,8 @@ for thuc_id, path_to_run_dir in runlist:
 
     if 'OUTROW' and 'OUTCOL' not in topagnpsXML.keys():
         # delete path_to_run_dir and its contents and continue
-        print(f'Could not find OUTROW and OUTCOL in TOPAGNPS.XML for {thuc_id}, deleting containing directory and continuing')
-        shutil.rmtree(path_to_run_dir)
+        print(f'Could not find OUTROW and OUTCOL in TOPAGNPS.XML for {thuc_id}, skipping')
+        # shutil.rmtree(path_to_run_dir)
         continue
 
     elif all([file in contained_files for file in ['UPAREA.ASC', 'UPAREA.OUT', 'RELIEF.ASC', 'RELIEF.OUT']]):
