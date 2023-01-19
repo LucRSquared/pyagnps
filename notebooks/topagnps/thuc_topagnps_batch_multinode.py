@@ -36,7 +36,8 @@ keep_files =['AgFlow_LS_Factor.asc',
 keep_files_failure = ['command_line_output.txt',
                       'TopAGNPS_log.CSV',
                       'TopAGNPS_status.CSV',
-                      'TopAGNPS_wrn.CSV',
+                      'TopAGNPS_wrn.CSV'
+                      'TopAGNPS_err.CSV',
                       'TOPAGNPS.XML']
 
 
