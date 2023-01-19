@@ -91,8 +91,13 @@ for thuc_id, path_to_run_dir in runlist:
 
     contained_files = [os.path.basename(path) for path in glob(f'{path_to_run_dir}/*')]
 
-    # Read topagnps control file
-    topagnpsXML = topagnps.read_topagnps_xml_control_file(path_to_run_dir+'/TOPAGNPS.XML')
+    if 'TOPAGNPS.XML' in contained_files:
+        # Read topagnps control file
+        topagnpsXML = topagnps.read_topagnps_xml_control_file(path_to_run_dir+'/TOPAGNPS.XML')
+    else:
+        # delete path_to_run_dir and its contents and continue
+        shutil.rmtree(path_to_run_dir)
+        continue   
 
     # Find dem_filename
     dem_filename = os.path.basename(glob(f'{path_to_run_dir}/thuc*.asc')[0])
