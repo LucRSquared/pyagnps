@@ -1,5 +1,10 @@
+"""
+TopAGNPS related functions
+"""
 # from osgeo import gdal
-from importlib.resources import path
+# from importlib.resources import path
+import os
+import subprocess
 from lxml import etree as ET
 import geopandas as gpd
 import numpy as np
@@ -7,23 +12,27 @@ import rasterio
 import rioxarray
 import py3dep
 from osgeo import gdal
-import os, subprocess
 import src.pyagnps.utils as utils
 
-import logging
+# import logging
 
 def create_topagnps_directory(root_dir, topagnps_dir):
+    """
+    Create the directory for the topagnps simulation
+    """
     path_to_dir = root_dir+'/'+topagnps_dir
 
-    if not(os.path.exists(path_to_dir)):
+    if not os.path.exists(path_to_dir):
         os.mkdir(path_to_dir)
-        
+
     return path_to_dir
 
 def create_topagnps_xml_control_file(dico, savepath):
-
+    """
+    Create the xml control file for TopAGNPS
+    """
     root = ET.Element('TOPAGNPS')
-    
+
     for key, value in dico.items():
         line = ET.SubElement(root, "KEYWORD")
         line.text = str(value)
@@ -32,9 +41,23 @@ def create_topagnps_xml_control_file(dico, savepath):
     tree = ET.ElementTree(root)
     tree.write(savepath, pretty_print=True)
 
-    return
+def read_topagnps_xml_control_file(path_to_xml):
+    """
+    Read the xml control file for TopAGNPS
+    """
+    tree = ET.parse(path_to_xml)
+    root = tree.getroot()
+
+    dico = {}
+    for child in root:
+        dico[child.attrib['ID']] = child.text
+
+    return dico
 
 def run_topagnps(path_to_xml_dir, path_to_bin):
+    """
+    Call TopAGNPS binary and run by passing it the XML control file
+    """
     previousdir = os.getcwd()
     os.chdir(path_to_xml_dir)
     try:
