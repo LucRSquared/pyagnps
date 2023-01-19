@@ -92,28 +92,34 @@ for thuc_id, path_to_run_dir in runlist:
     # Find dem_filename
     try:
         dem_filename = os.path.basename(glob(f'{path_to_run_dir}/thuc*.asc')[0])
+        dem_found = True
     except:
         dem_found = False
 
     if 'TOPAGNPS.XML' in contained_files and dem_found:
         # Read topagnps control file
+        print(f'Found TOPAGNPS.XML and DEM for {thuc_id}')
         topagnpsXML = topagnps.read_topagnps_xml_control_file(path_to_run_dir+'/TOPAGNPS.XML')
     else:
         # delete path_to_run_dir and its contents and continue
+        print(f'Could not find TOPAGNPS.XML and DEM for {thuc_id}, deleting containing directory and continuing')
         shutil.rmtree(path_to_run_dir)
         continue
 
     if 'OUTROW' and 'OUTCOL' not in topagnpsXML.keys():
         # delete path_to_run_dir and its contents and continue
+        print(f'Could not find OUTROW and OUTCOL in TOPAGNPS.XML for {thuc_id}, deleting containing directory and continuing')
         shutil.rmtree(path_to_run_dir)
         continue
 
     elif all([file in contained_files for file in ['UPAREA.ASC', 'UPAREA.OUT', 'RELIEF.ASC', 'RELIEF.OUT']]):
         # topagnps can be run again with READOUT option 1
+        print(f'Found preprocessing files for {thuc_id}, running with READOUT option 1')
         remove_all_files_from_dir_except_from_list(path_to_run_dir, ['UPAREA.OUT', 'RELIEF.OUT', dem_filename, dem_filename.replace('.asc', '.prj')])
         # no need to change topagnpsXML
 
     else: # some files are missing but we know the OUTROW and OUTCOL so we do a full processing from the beginning
+        print(f'Could not find preprocessing files for {thuc_id}, running with READOUT option 0')
         topagnpsXML['READOUT'] = 0
         remove_all_files_from_dir_except_from_list(path_to_run_dir, [dem_filename, dem_filename.replace('.asc', '.prj')])
         
@@ -125,16 +131,20 @@ for thuc_id, path_to_run_dir in runlist:
 
     try:
         now = get_current_time()
+        print(f'{now}: {nodename}: {thuc_id}: [RETRY] TopAGNPS full processing')
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: [RETRY] TopAGNPS full processing')
         topagnps.run_topagnps(path_to_run_dir, path_to_TOPAGNPS_bin)
     except:
         now = get_current_time()
+        print(f'{now}: {nodename}: {thuc_id}: [RETRY] Error! Failed to run TopAGNPS to completion')
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: [RETRY] Error! Failed to run TopAGNPS to completion')
         log_to_file(path_to_time_log, f'{thuc_id},0')
         log_to_file(path_to_thuc_faillist, f'{thuc_id}')
         continue
 
     try:
+        now = get_current_time()
+        print(f'{now}: {nodename}: {thuc_id}: [RETRY] Computing quality control for THUC')
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Computing quality control for THUC')
         path_to_cell_IDs_asc = f'{path_to_run_dir}/AnnAGNPS_Cell_IDs.asc'
         path_to_topagnps_wrn = f'{path_to_run_dir}/TopAGNPS_wrn.CSV'
@@ -151,6 +161,7 @@ for thuc_id, path_to_run_dir in runlist:
 
     except:
         now = get_current_time()
+        print(f'{now}: {nodename}: {thuc_id}: [RETRY] Error! Failed to compute quality control')
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: [RETRY] Error! Failed to compute quality control')
         log_to_file(path_to_time_log, f'{thuc_id},0')
         log_to_file(path_to_thuc_faillist, f'{thuc_id}')
@@ -159,7 +170,8 @@ for thuc_id, path_to_run_dir in runlist:
     if everythingwentwell:
 
         now = get_current_time()
-        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Deleting unnecessary files...')
+        print(f'{now}: {nodename}: {thuc_id}: [RETRY] Deleting unnecessary files...')
+        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: [RETRY] Deleting unnecessary files...')
 
         keep_files.append(f'{dem_filename}')
         keep_files.append(f'{dem_filename}'.replace('.asc','.prj'))
@@ -167,23 +179,28 @@ for thuc_id, path_to_run_dir in runlist:
 
         now = get_current_time()
         end = time.time()
-        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Finished normally in {end-start} seconds')
+        print(f'{now}: {nodename}: {thuc_id}: [RETRY] Finished normally in {end-start} seconds')
+        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: [RETRY] Finished normally in {end-start} seconds')
         log_to_file(path_to_time_log, f'{thuc_id},{end-start}')
 
         # Move files from run directory to output directory
         if path_to_dir != path_to_run_dir:
             now = get_current_time()
+            print(f'{now}: {nodename}: {thuc_id}: [RETRY] Moving files to output directory...')
             log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Moving files to output directory...')
             move_files_erros = move_files_from_dir_to_dir(path_to_run_dir, path_to_dir)
 
             if len(move_files_erros) == 0:
                 now = get_current_time()
-                log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Files moved successfully!')
+                print(f'{now}: {nodename}: {thuc_id}: [RETRY] Files moved successfully!')
+                log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: [RETRY] Files moved successfully!')
                 # Remove run directory
-                log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Removing run directory...')
+                print(f'{now}: {nodename}: {thuc_id}: [RETRY] Removing run directory...')
+                log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: [RETRY] Removing run directory...')
                 shutil.rmtree(path_to_run_dir)
             else:
                 now = get_current_time()
+                print(f'{now}: {nodename}: {thuc_id}: [RETRY] Error! Failed to move files from {path_to_run_dir} to {path_to_dir}')
                 log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Error! Failed to move files from {path_to_run_dir} to {path_to_dir}')
 
     else:

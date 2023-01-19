@@ -187,6 +187,7 @@ for _, tuc in thucs.iterrows():
         #continue
 
     try:
+        now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Computing quality control for THUC')
         path_to_cell_IDs_asc = f'{path_to_run_dir}/AnnAGNPS_Cell_IDs.asc'
         path_to_topagnps_wrn = f'{path_to_run_dir}/TopAGNPS_wrn.CSV'
