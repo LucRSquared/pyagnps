@@ -75,8 +75,6 @@ if not(os.path.exists(path_to_time_log) and os.path.isfile(path_to_time_log)):
 # Get list of candidate thucs to run inside run_dir using glob
 runlist = [(os.path.basename(path).split('_')[1], path) for path in glob(f'{run_dir}/thuc_*')]
 
-files_to_keep_in_thuc_dir = ['TOPAGNPS.XML']
-
 
 for thuc_id, path_to_run_dir in runlist:
 
@@ -91,16 +89,19 @@ for thuc_id, path_to_run_dir in runlist:
 
     contained_files = [os.path.basename(path) for path in glob(f'{path_to_run_dir}/*')]
 
-    if 'TOPAGNPS.XML' in contained_files:
+    # Find dem_filename
+    try:
+        dem_filename = os.path.basename(glob(f'{path_to_run_dir}/thuc*.asc')[0])
+    except:
+        dem_found = False
+
+    if 'TOPAGNPS.XML' in contained_files and dem_found:
         # Read topagnps control file
         topagnpsXML = topagnps.read_topagnps_xml_control_file(path_to_run_dir+'/TOPAGNPS.XML')
     else:
         # delete path_to_run_dir and its contents and continue
         shutil.rmtree(path_to_run_dir)
-        continue   
-
-    # Find dem_filename
-    dem_filename = os.path.basename(glob(f'{path_to_run_dir}/thuc*.asc')[0])
+        continue
 
     if 'OUTROW' and 'OUTCOL' not in topagnpsXML.keys():
         # delete path_to_run_dir and its contents and continue
