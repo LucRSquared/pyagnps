@@ -27,6 +27,8 @@ keep_files =['AgFlow_LS_Factor.asc',
              'AnnAGNPS_Cell_Data_Section.csv',
              'AnnAGNPS_Reach_Data_Section.csv',
              'command_line_output.txt',
+             'valgrind_topagnps_preprocessing.txt',
+             'valgrind_topagnps_full_processing.txt',
              'TopAGNPS_log.CSV',
              'TopAGNPS_status.CSV',
              'TopAGNPS_wrn.CSV',
@@ -34,6 +36,8 @@ keep_files =['AgFlow_LS_Factor.asc',
 
 # Keep log files in case of failure
 keep_files_failure = ['command_line_output.txt',
+                      'valgrind_topagnps_preprocessing.txt',
+                      'valgrind_topagnps_full_processing.txt',
                       'TopAGNPS_log.CSV',
                       'TopAGNPS_status.CSV',
                       'TopAGNPS_wrn.CSV'
@@ -45,10 +49,15 @@ bigbang = time.time()
 
 nodename = socket.gethostname()
 
+CSA = 10 # Critical Source Area in ha
+MSCL = 250 # Minimum Stream Channel Length in m
+RESOLUTION = 30 # Resolution of the DEM in m
+BUFFER = 500 # Buffer around the thuc in m
+
 path_to_TOPAGNPS_bin = '/aims-nas/luc/bins/TopAGNPS_v6.00.a.018_release_64-bit_Linux' # absolute or with respect to a sub directory in path_to_dir
 path_to_thucs = '/aims-nas/luc/data/tophuc_S_M_40000_closed_holes_with_container_thuc_merged_bbox_area_first_kept.gpkg'
 root_dir = '/aims-nas/luc/thuc_runs_40k_SM/'
-dir_runs_name = '40000_SM_res_10_buff_500'
+dir_runs_name = f'40000_SM_res_{RESOLUTION}_csa_{CSA}_mscl_{MSCL}_buff_{BUFFER}' # Name of the directory where the runs will be stored
 
 run_dir = '/home/luc/tmp/' # Directory where the computation will be carried out
 if not(os.path.exists(run_dir) and os.path.isdir(run_dir)):
@@ -71,7 +80,9 @@ path_to_thuc_faillist = f'{path_to_log_dir}/{nodename}_fail_list.csv'
 thucs = gpd.read_file(path_to_thucs) # GeoDataFrame containing the thucs and their geometry
 thucs = thucs.sort_values(by=['bbox_area_sqkm'], ascending=True)
 
-runlist = thucs['tophucid'].to_list()
+# runlist = thucs['tophucid'].to_list()
+
+runlist = ['0989', '0570', '1145', '1146', '1142', '1141']
 
 # runlist = pd.read_csv(path_to_thuc_runlist, dtype=object)
 # runlist = runlist.iloc[:,0].to_list() # Get the list of thucs that need to be 
@@ -112,16 +123,19 @@ for _, tuc in thucs.iterrows():
     try:
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Downloading DEM')
-        dem, path_to_asc = topagnps.download_dem(thuc_select, path_to_run_dir, name=thucid_dir_name, resolution_m=10, buffer_m=500)
+        dem, path_to_asc = topagnps.download_dem(thuc_select, path_to_run_dir, name=thucid_dir_name, resolution_m=RESOLUTION, buffer_m=BUFFER)
 
         dem_filename = path_to_asc.rsplit('/',1)[-1] # Part of the string after the last / = "thuc_1173_rest_10_m.asc"
+        print(dem_filename)
 
         topagnpsXML = {'DEMPROC': 2,
                     'FORMAT': 0,
-                    'CSA': 10,
-                    'MSCL': 250,
+                    'CSA': CSA,
+                    'MSCL': MSCL,
                     'KEEPFILES': 1,
                     'FILENAME': dem_filename}
+
+        print(topagnpsXML)
 
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Creating TopAGNPS control file')
@@ -141,7 +155,9 @@ for _, tuc in thucs.iterrows():
     try:
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: TopAGNPS pre-processing step')
-        topagnps.run_topagnps(path_to_run_dir, path_to_TOPAGNPS_bin)
+
+        # topagnps.run_topagnps(path_to_run_dir, path_to_TOPAGNPS_bin)
+        topagnps.run_topagnps_fancy(path_to_run_dir, path_to_TOPAGNPS_bin, memtrack=True, output_memtrack_filename="valgrind_topagnps_preprocessing.txt")
     except:
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Error! Failed to run pre-processing')
@@ -155,7 +171,7 @@ for _, tuc in thucs.iterrows():
         xout, yout, rowout, colout, raster_crs = topagnps.find_outlet_uparea_shape_intersection(path_to_run_dir+'/UPAREA.ASC', thuc_select)
 
         now = get_current_time()
-        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Outlet found! x = {xout}, y = {yout} ({raster_crs})')
+        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Outlet found! x = {xout}, y = {yout} ({raster_crs}) / row = {rowout}, col = {colout}')
     except:
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Error! Failed to find outlet')
@@ -166,8 +182,8 @@ for _, tuc in thucs.iterrows():
     try:
         topagnpsXML = {'DEMPROC': 0,
                        'FORMAT': 0,
-                       'CSA': 10,
-                       'MSCL': 250,
+                       'CSA': CSA,
+                       'MSCL': MSCL,
                        'KEEPFILES': 1,
                        'OUTROW': rowout,
                        'OUTCOL': colout,
@@ -182,7 +198,8 @@ for _, tuc in thucs.iterrows():
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Finishing TopAGNPS processing with outlet information')
 
-        topagnps.run_topagnps(path_to_run_dir, path_to_TOPAGNPS_bin)
+        # topagnps.run_topagnps(path_to_run_dir, path_to_TOPAGNPS_bin)
+        topagnps.run_topagnps_fancy(path_to_run_dir, path_to_TOPAGNPS_bin, memtrack=True, output_memtrack_filename="valgrind_topagnps_full_processing.txt")
     except:
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Error! Failed to finish TopAGNPS processing')

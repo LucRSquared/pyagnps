@@ -1,6 +1,7 @@
 name: pyagnps
 channels:
   - conda-forge
+  - plotly
   - defaults
 dependencies:
   - requests
@@ -13,3 +14,5 @@ dependencies:
   - plotly_express
   - nbformat
   - altair
+  - py3dep
+  - matplotlib
