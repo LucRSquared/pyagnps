@@ -54,15 +54,38 @@ def read_topagnps_xml_control_file(path_to_xml):
 
     return dico
 
-def run_topagnps(path_to_xml_dir, path_to_bin):
+# def run_topagnps(path_to_xml_dir, path_to_bin):
+#     """
+#     Call TopAGNPS binary and run by passing it the XML control file
+#     """
+#     previousdir = os.getcwd()
+#     os.chdir(path_to_xml_dir)
+
+#     try:
+#         with open('command_line_output.txt', 'w') as clo:
+#             print("Running TopAGNPS")
+#             print(path_to_xml_dir)
+#             print(f"{path_to_bin} /f:TOPAGNPS.XML")
+#             subprocess.call([path_to_bin, " /f:TOPAGNPS.XML"], stdout=clo)
+#     except:
+#         os.chdir(previousdir)
+#     os.chdir(previousdir)
+
+def run_topagnps(path_to_xml_dir, path_to_bin, memtrack=False, output_memtrack_filename='valgrind_output.txt'):
     """
     Call TopAGNPS binary and run by passing it the XML control file
     """
+
     previousdir = os.getcwd()
     os.chdir(path_to_xml_dir)
+
     try:
         with open('command_line_output.txt', 'w') as clo:
-            subprocess.call([path_to_bin, " /f:TOPAGNPS.XML"], stdout=clo)
+            if memtrack:
+                subprocess.call(["valgrind", "--tool=massif", "--stacks=yes", f"--massif-out-file={output_memtrack_filename}",  path_to_bin, " /f:TOPAGNPS.XML"], stdout=clo)
+            else:
+                subprocess.call([path_to_bin, ' /f:TOPAGNPS.XML'], stdout=clo)
+
     except:
         os.chdir(previousdir)
     os.chdir(previousdir)

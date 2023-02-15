@@ -57,7 +57,7 @@ BUFFER = 500 # Buffer around the thuc in m
 path_to_TOPAGNPS_bin = '/aims-nas/luc/bins/TopAGNPS_v6.00.a.018_release_64-bit_Linux' # absolute or with respect to a sub directory in path_to_dir
 path_to_thucs = '/aims-nas/luc/data/tophuc_S_M_40000_closed_holes_with_container_thuc_merged_bbox_area_first_kept.gpkg'
 root_dir = '/aims-nas/luc/thuc_runs_40k_SM/'
-dir_runs_name = f'40000_SM_res_{RESOLUTION}_csa_{CSA}_mscl_{MSCL}_buff_{BUFFER}' # Name of the directory where the runs will be stored
+dir_runs_name = f'{nodename}_40000_SM_res_{RESOLUTION}_csa_{CSA}_mscl_{MSCL}_buff_{BUFFER}' # Name of the directory where the runs will be stored
 
 run_dir = '/home/luc/tmp/' # Directory where the computation will be carried out
 if not(os.path.exists(run_dir) and os.path.isdir(run_dir)):
@@ -82,7 +82,7 @@ thucs = thucs.sort_values(by=['bbox_area_sqkm'], ascending=True)
 
 # runlist = thucs['tophucid'].to_list()
 
-runlist = ['0989', '0570', '1145', '1146', '1142', '1141']
+runlist = ['0989', '0570', '1145', '1146', '1142', '1141', '1148']
 
 # runlist = pd.read_csv(path_to_thuc_runlist, dtype=object)
 # runlist = runlist.iloc[:,0].to_list() # Get the list of thucs that need to be 
@@ -157,7 +157,7 @@ for _, tuc in thucs.iterrows():
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: TopAGNPS pre-processing step')
 
         # topagnps.run_topagnps(path_to_run_dir, path_to_TOPAGNPS_bin)
-        topagnps.run_topagnps_fancy(path_to_run_dir, path_to_TOPAGNPS_bin, memtrack=True, output_memtrack_filename="valgrind_topagnps_preprocessing.txt")
+        topagnps.run_topagnps(path_to_run_dir, path_to_TOPAGNPS_bin, memtrack=True, output_memtrack_filename="valgrind_topagnps_preprocessing.txt")
     except:
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Error! Failed to run pre-processing')
@@ -199,7 +199,7 @@ for _, tuc in thucs.iterrows():
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Finishing TopAGNPS processing with outlet information')
 
         # topagnps.run_topagnps(path_to_run_dir, path_to_TOPAGNPS_bin)
-        topagnps.run_topagnps_fancy(path_to_run_dir, path_to_TOPAGNPS_bin, memtrack=True, output_memtrack_filename="valgrind_topagnps_full_processing.txt")
+        topagnps.run_topagnps(path_to_run_dir, path_to_TOPAGNPS_bin, memtrack=True, output_memtrack_filename="valgrind_topagnps_full_processing.txt")
     except:
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Error! Failed to finish TopAGNPS processing')
