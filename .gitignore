@@ -1,4 +1,4 @@
-inputs/thucs/tophuc_S_40000.gpkg
+inputs/thucs/*.gpkg
 inputs/TNM_DEM/HRNHDPlusRasters0708/*
 inputs/TNM_DEM/NHDPLUS_H_0708_HU4_GDB/*
 inputs/TNM_DEM/*.zip

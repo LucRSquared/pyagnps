@@ -62,17 +62,13 @@ def remove_all_files_from_dir_except_from_list(path_to_dir, keep_list=None):
     elif keep_list == 'all':
         return []
     else:
-        all_files = glob.glob(f'{path_to_dir}/*')
-        delete_list = all_files.copy()
-
-        for elem in all_files:
-            for keepelem in keep_list:
-                if keepelem in elem:
-                    delete_list.remove(elem)
+        
+        all_files = os.listdir(path_to_dir)
+        delete_list = [f for f in all_files if f not in keep_list]
 
         for elem in delete_list:
             try:
-                os.remove(elem)
+                os.remove(os.path.join(path_to_dir,elem))
             except:
                 delete_error_files.append(elem)
     
