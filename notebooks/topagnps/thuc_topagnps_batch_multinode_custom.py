@@ -278,16 +278,20 @@ for _, tuc in thucs.iterrows():
                 now = get_current_time()
                 log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Error! Failed to move files from {path_to_run_dir} to {path_to_dir}')
 
-    else:
-
-        # Removing useless files from run directory
-        now = get_current_time()
-        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Deleting unnecessary files...')
-        file_del_errors = remove_all_files_from_dir_except_from_list(path_to_run_dir, keep_files_failure)
+    else:            
 
         # test if path_to_dir exists if it does not it was removed before
         if not os.path.exists(path_to_dir):
             continue
+
+        if not os.path.exists(path_to_run_dir):
+            continue
+
+        # Removing useless files from run directory
+        now = get_current_time()
+        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Deleting unnecessary files...')
+        
+        file_del_errors = remove_all_files_from_dir_except_from_list(path_to_run_dir, keep_files_failure)
 
         # Move log files from run directory to output directory and remove run directory
         if path_to_dir != path_to_run_dir:
