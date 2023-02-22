@@ -290,8 +290,18 @@ for _, tuc in thucs.iterrows():
         # Removing useless files from run directory
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Deleting unnecessary files...')
+
+        keep_files_failure_tmp = keep_files.copy()
+
+        # Original DEM
+        keep_files_failure_tmp.append(f'{dem_filename}')
+        keep_files_failure_tmp.append(f'{dem_filename}'.replace('.asc','.prj'))
+
+        # RELIEF map
+        keep_files_failure_tmp.append(new_dem_name)
+        keep_files_failure_tmp.append(new_prj_name)
         
-        file_del_errors = remove_all_files_from_dir_except_from_list(path_to_run_dir, keep_files_failure)
+        file_del_errors = remove_all_files_from_dir_except_from_list(path_to_run_dir, keep_files_failure_tmp)
 
         # Move log files from run directory to output directory and remove run directory
         if path_to_dir != path_to_run_dir:
