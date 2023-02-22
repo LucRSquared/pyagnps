@@ -65,7 +65,7 @@ run_dir = '/home/luc/tmp/' # Directory where the computation will be carried out
 if not(os.path.exists(run_dir) and os.path.isdir(run_dir)):
     os.makedirs(run_dir)
 
-path_to_log_dir = f'{root_dir}/LOGS/'
+path_to_log_dir = f'{root_dir}/LOGS/{dir_runs_name}'
 if not(os.path.exists(path_to_log_dir) and os.path.isdir(path_to_log_dir)):
     os.makedirs(path_to_log_dir)
 
