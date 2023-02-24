@@ -76,7 +76,7 @@ if not(os.path.exists(path_to_qc_dir) and os.path.isdir(path_to_qc_dir)):
 path_to_time_log = f'{path_to_log_dir}/{nodename}_batch_time_log.txt'
 path_to_general_log = f'{path_to_log_dir}/{nodename}_batch_general_log.txt'
 
-path_to_thuc_runlist = f'{path_to_log_dir}/lmrb.csv'
+path_to_thuc_runlist = f'{root_dir}/LOGS/lmrb.csv'
 path_to_thuc_faillist = f'{path_to_log_dir}/{nodename}_fail_list.csv'
 
 thucs = gpd.read_file(path_to_thucs) # GeoDataFrame containing the thucs and their geometry
@@ -84,10 +84,10 @@ thucs = thucs.sort_values(by=['bbox_area_sqkm'], ascending=True)
 
 # runlist = thucs['tophucid'].to_list()
 
-runlist = ['1060', '1148']
+# runlist = ['1194']
 
-# runlist = pd.read_csv(path_to_thuc_runlist, dtype=object)
-# runlist = runlist.iloc[:,0].to_list() # Get the list of thucs that need to be 
+runlist = pd.read_csv(path_to_thuc_runlist, dtype=object)
+runlist = runlist.iloc[:,0].to_list() # Get the list of thucs that need to be 
 
 if not(os.path.exists(path_to_time_log) and os.path.isfile(path_to_time_log)):
     log_to_file(path_to_time_log, 'thuc,time_s') # Initialize completion time log for thucs
@@ -182,13 +182,15 @@ for _, tuc in thucs.iterrows():
         #continue
 
     try:
-        
+
         # Renaming RELIEF(.ASC|.PRJ) to be used as input DEM
         new_dem_name = f'RELIEF_{dem_filename}'
         new_prj_name = new_dem_name.replace('.asc','.prj')
       
-        os.rename(f'{path_to_run_dir}/RELIEF.ASC', f'{path_to_run_dir}/{new_dem_name}')
-        os.rename(f'{path_to_run_dir}/RELIEF.PRJ', f'{path_to_run_dir}/{new_prj_name}')
+        # os.rename(f'{path_to_run_dir}/RELIEF.ASC', f'{path_to_run_dir}/{new_dem_name}')
+        # os.rename(f'{path_to_run_dir}/RELIEF.PRJ', f'{path_to_run_dir}/{new_prj_name}')
+        shutil.copy2(f'{path_to_run_dir}/RELIEF.ASC', f'{path_to_run_dir}/{new_dem_name}')
+        shutil.copy2(f'{path_to_run_dir}/RELIEF.PRJ', f'{path_to_run_dir}/{new_prj_name}')
 
         topagnpsXML = {'DEMPROC': 0,
                        'FORMAT': 0,
@@ -198,7 +200,7 @@ for _, tuc in thucs.iterrows():
                        'OUTROW': rowout,
                        'OUTCOL': colout,
                        'READOUT': 1,
-                       'FILENAME': new_dem_name}
+                       'FILENAME': dem_filename}
 
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Updating control file')
