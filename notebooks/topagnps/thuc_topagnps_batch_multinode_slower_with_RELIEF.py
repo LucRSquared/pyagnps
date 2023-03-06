@@ -23,8 +23,6 @@ keep_files =['AgFlow_LS_Factor.asc',
              'NETFUL.PRJ',
              'UPAREA.ASC',
              'UPAREA.PRJ',
-             'RELIEF_INP.ASC',
-             'RELIEF_INP.PRJ',
              'AgFlow_Reach_Data.csv',
              'AnnAGNPS_Cell_Data_Section.csv',
              'AnnAGNPS_Reach_Data_Section.csv',
@@ -58,7 +56,7 @@ MSCL = 250 # Minimum Stream Channel Length in m
 RESOLUTION = 30 # Resolution of the DEM in m
 BUFFER = 500 # Buffer around the thuc in m
 
-path_to_TOPAGNPS_bin = '/aims-nas/luc/bins/TopAGNPS_v6.00.b.026_release_64-bit_Linux' # absolute or with respect to a sub directory in path_to_dir
+path_to_TOPAGNPS_bin = '/aims-nas/luc/bins/TopAGNPS_v6.00.b.025_release_64-bit_Linux' # absolute or with respect to a sub directory in path_to_dir
 path_to_thucs = '/aims-nas/luc/data/tophuc_S_M_40000_closed_holes_with_container_thuc_merged_bbox_area_first_kept.gpkg'
 root_dir = '/aims-nas/luc/thuc_runs_40k_SM/'
 dir_runs_name = f'40000_SM_res_{RESOLUTION}_csa_{CSA}_mscl_{MSCL}_buff_{BUFFER}' # Name of the directory where the runs will be stored
@@ -84,9 +82,9 @@ path_to_thuc_faillist = f'{path_to_log_dir}/{nodename}_fail_list.csv'
 thucs = gpd.read_file(path_to_thucs) # GeoDataFrame containing the thucs and their geometry
 thucs = thucs.sort_values(by=['bbox_area_sqkm'], ascending=True)
 
-runlist = thucs['tophucid'].to_list()
+# runlist = thucs['tophucid'].to_list()
 
-# runlist = ['4648', '0453']
+runlist = ['0963']
 
 # runlist = pd.read_csv(path_to_thuc_runlist, dtype=object)
 # runlist = runlist.iloc[:,0].to_list() # Get the list of thucs that need to be 
@@ -186,13 +184,13 @@ for _, tuc in thucs.iterrows():
     try:
 
         # Renaming RELIEF(.ASC|.PRJ) to be used as input DEM
-        # new_dem_name = f'RELIEF_{dem_filename}'
-        # new_prj_name = new_dem_name.replace('.asc','.prj')
+        new_dem_name = f'RELIEF_{dem_filename}'
+        new_prj_name = new_dem_name.replace('.asc','.prj')
       
         # os.rename(f'{path_to_run_dir}/RELIEF.ASC', f'{path_to_run_dir}/{new_dem_name}')
         # os.rename(f'{path_to_run_dir}/RELIEF.PRJ', f'{path_to_run_dir}/{new_prj_name}')
-        # shutil.copy2(f'{path_to_run_dir}/RELIEF.ASC', f'{path_to_run_dir}/{new_dem_name}')
-        # shutil.copy2(f'{path_to_run_dir}/RELIEF.PRJ', f'{path_to_run_dir}/{new_prj_name}')
+        shutil.copy2(f'{path_to_run_dir}/RELIEF.ASC', f'{path_to_run_dir}/{new_dem_name}')
+        shutil.copy2(f'{path_to_run_dir}/RELIEF.PRJ', f'{path_to_run_dir}/{new_prj_name}')
 
         topagnpsXML = {'DEMPROC': 0,
                        'FORMAT': 0,
@@ -201,8 +199,8 @@ for _, tuc in thucs.iterrows():
                        'KEEPFILES': 1,
                        'OUTROW': rowout,
                        'OUTCOL': colout,
-                       'READOUT': 1,
-                       'FILENAME': dem_filename}
+                       'READOUT': 0,
+                       'FILENAME': new_dem_name}
 
         now = get_current_time()
         log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Updating control file')
