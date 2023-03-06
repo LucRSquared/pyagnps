@@ -42,6 +42,8 @@ keep_files_failure = ['command_line_output.txt',
                       'valgrind_topagnps_full_processing.txt',
                       'RELIEF.ASC',
                       'RELIEF.PRJ',
+                      'RELIEF_INP.ASC',
+                      'RELIEF_INP.PRJ',
                       'TopAGNPS_log.CSV',
                       'TopAGNPS_status.CSV',
                       'TopAGNPS_wrn.CSV'
@@ -79,7 +81,7 @@ path_to_time_log = f'{path_to_log_dir}/{nodename}_batch_time_log.txt'
 path_to_general_log = f'{path_to_log_dir}/{nodename}_batch_general_log.txt'
 
 path_to_thuc_runlist = f'{root_dir}/LOGS/lmrb.csv'
-path_to_thuc_runlist = f'{root_dir}/LOGS/lmrb.csv'
+
 path_to_thuc_faillist = f'{path_to_log_dir}/{nodename}_fail_list.csv'
 
 thucs = gpd.read_file(path_to_thucs) # GeoDataFrame containing the thucs and their geometry
@@ -195,10 +197,6 @@ for _, tuc in thucs.iterrows():
         # os.rename(f'{path_to_run_dir}/RELIEF.PRJ', f'{path_to_run_dir}/{new_prj_name}')
         # shutil.copy2(f'{path_to_run_dir}/RELIEF.ASC', f'{path_to_run_dir}/{new_dem_name}')
         # shutil.copy2(f'{path_to_run_dir}/RELIEF.PRJ', f'{path_to_run_dir}/{new_prj_name}')
-        # os.rename(f'{path_to_run_dir}/RELIEF.ASC', f'{path_to_run_dir}/{new_dem_name}')
-        # os.rename(f'{path_to_run_dir}/RELIEF.PRJ', f'{path_to_run_dir}/{new_prj_name}')
-        shutil.copy2(f'{path_to_run_dir}/RELIEF.ASC', f'{path_to_run_dir}/{new_dem_name}')
-        shutil.copy2(f'{path_to_run_dir}/RELIEF.PRJ', f'{path_to_run_dir}/{new_prj_name}')
 
         topagnpsXML = {'DEMPROC': 0,
                        'FORMAT': 0,
@@ -208,7 +206,6 @@ for _, tuc in thucs.iterrows():
                        'OUTROW': rowout,
                        'OUTCOL': colout,
                        'READOUT': 1,
-                       'FILENAME': dem_filename}
                        'FILENAME': dem_filename}
 
         now = get_current_time()
@@ -262,9 +259,9 @@ for _, tuc in thucs.iterrows():
         keep_files_tmp.append(f'{dem_filename}')
         keep_files_tmp.append(f'{dem_filename}'.replace('.asc','.prj'))
 
-        # RELIEF map
-        keep_files_tmp.append(new_dem_name)
-        keep_files_tmp.append(new_prj_name)
+        # # RELIEF map
+        # keep_files_tmp.append(new_dem_name)
+        # keep_files_tmp.append(new_prj_name)
 
         file_del_errors = remove_all_files_from_dir_except_from_list(path_to_run_dir, keep_files_tmp)
 
@@ -309,8 +306,8 @@ for _, tuc in thucs.iterrows():
         keep_files_failure_tmp.append(f'{dem_filename}'.replace('.asc','.prj'))
 
         # RELIEF map
-        keep_files_failure_tmp.append(new_dem_name)
-        keep_files_failure_tmp.append(new_prj_name)
+        # keep_files_failure_tmp.append(new_dem_name)
+        # keep_files_failure_tmp.append(new_prj_name)
         
         file_del_errors = remove_all_files_from_dir_except_from_list(path_to_run_dir, keep_files_failure_tmp)
 
