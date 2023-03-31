@@ -9,3 +9,4 @@ aiohttp_cache.sqlite
 */__pycache__/*
 nohup.out
 *.pyc
+venv/*
