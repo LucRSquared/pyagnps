@@ -1,9 +1,11 @@
 import requests
+import numpy as np
 import pandas as pd
 import geopandas as gpd
 from shapely import wkt
 import glob, os, subprocess
 from pathlib import Path
+from tqdm import tqdm
 
 def download_soil_geodataframe(bbox=None):
     # bbox = (minlon,minlat, maxlon, maxlat) In EPSG:4326 CRS
@@ -25,6 +27,9 @@ def download_soil_geodataframe(bbox=None):
 
     # Send the query and collect the response
     soil_response = requests.post(url, json=body).json()
+
+    if not soil_response:
+        return None
 
     # Reshaping Data
     data = {"musym":[],
@@ -86,7 +91,113 @@ def download_soil_geodataframe(bbox=None):
 
     return gdf
 
+def download_soil_geodataframe_tiles(bbox=None, tile_size=0.1, explode_geometries=True):
+    # bbox = (minlon,minlat, maxlon, maxlat) In EPSG:4326 CRS
+    # e.g. bbox = (-89.94724,34.22708,-89.76632,34.31553)
+    # tile_size in degrees of latitude or longitude, defaults to 0.1
+    # explode_geometries : Boolean (True default), to explode multi-part geometries into single geometries
+
+    if bbox is None:
+        raise Exception('Please provide a bounding box in EPSG:4326 coordinate format (minlon,minlat, maxlon, maxlat)')
+
+    min_lon, min_lat, max_lon, max_lat = bbox
+    if min_lon > max_lon or min_lat > max_lat:
+        raise Exception('Invalid bounding box')
+
+    # calculate the number of chunks to divide the area into
+    n_lon_chunks = int((max_lon - min_lon) / tile_size) + 1
+    n_lat_chunks = int((max_lat - min_lat) / tile_size) + 1
+
+    # divide the bounding box into smaller sub-boxes
+    sub_boxes = []
+    for i in range(n_lon_chunks):
+        for j in range(n_lat_chunks):
+            sub_box = (
+                min_lon + i * tile_size,
+                min_lat + j * tile_size,
+                min_lon + (i + 1) * tile_size,
+                min_lat + (j + 1) * tile_size
+            )
+            sub_boxes.append(sub_box)
+
+    # download the data for each sub-box and concatenate into a single geodataframe
+    gdf_list = []
+    for sub_box in tqdm(sub_boxes):
+        sub_gdf = download_soil_geodataframe(sub_box)
+        gdf_list.append(sub_gdf)
+
+    gdf_list = [gdf_tmp for gdf_tmp in gdf_list if gdf_tmp is not None]
+
+    gdf = gpd.GeoDataFrame(pd.concat(gdf_list, ignore_index=True), crs='epsg:4326')
+    gdf = gpd.clip(gdf, bbox)
+
+    columns = gdf.columns
+
+    # Get rid of tile junctions by dissolving the geometries for identical mukeys
+    gdf = gdf.dissolve(by=['mukey'], as_index=False)
+    gdf = gdf[columns]
+
+    if explode_geometries:
+        # Explode in order to seperate MULTIPOLYGONs into simple POLYGONs
+        gdf = gdf.explode(ignore_index=True, index_parts=False)
+
+    return gdf
+
+
 def assign_soil_to_annagnps_cells(cell_data_section, cells_geometry, soil_data, outpath_cell_data_section=None, write_csv=False):
+
+    # - cell_data_section: GeoDataFrame or path to csv AnnAGNPS_Cell_Data_Section.csv
+    # - cell_geometry: GeoDataFrame or path to shapefile AnnAGNPS_Cell_IDs.shp
+    # - soil_data: GeoDataFrame of path to SSURGO shapefile
+    # - outpath_cell_data_section: path to modified AnnAGNPS_Cell_Data_Section.csv (if different from cell_data_section) 
+
+    if not isinstance(cell_data_section, pd.DataFrame):
+        cell_data_section = pd.read_csv(cell_data_section)
+        outpath_cell_data_section = cell_data_section
+    elif outpath_cell_data_section is None:
+        outpath_cell_data_section = 'AnnAGNPS_Cell_Data_Section.csv' # Default name and will write the file in the current directory
+    
+    if not isinstance(cells_geometry, gpd.GeoDataFrame):
+        cells_geometry = gpd.read_file(cells_geometry)
+
+    if not isinstance(soil_data, gpd.GeoDataFrame):
+        soil_data = gpd.read_file(soil_data) # SSURGO data
+
+    UTM_CRS = cells_geometry.estimate_utm_crs()
+    cells_geometry = cells_geometry.to_crs(UTM_CRS)
+    soil_data = soil_data.to_crs(UTM_CRS)
+
+    # Compute intersection of cells with soil types
+    gdf_overlay = gpd.overlay(cells_geometry, soil_data, how='intersection', keep_geom_type=False)
+
+    gdf_overlay['area'] = gdf_overlay.geometry.area
+
+    # Add the area of each soil group within the cells
+    grouped_data = gdf_overlay.groupby(['DN','musym'])['area'].sum().reset_index()
+
+    # Compute for each cell what is the soil type that has the maximum area
+    majority_data = grouped_data.loc[grouped_data.groupby('DN')['area'].idxmax(),['DN', 'musym']]
+
+    # Rename columns
+    majority_data = majority_data.rename(columns={'DN': 'Cell_ID', 'musym': 'Soil_ID'})
+
+    # Store original columns order
+    columns = cell_data_section.columns
+
+    # Merge data with majority soil type for each cell
+    cell_data_section = pd.merge(cell_data_section, majority_data, on='Cell_ID', how='left', suffixes=('_del', None))
+    cell_data_section = cell_data_section.drop(columns=['Soil_ID_del'])
+
+    # Reorder columns according to original column order
+    cell_data_section = cell_data_section[columns]
+
+    if write_csv:
+        cell_data_section.to_csv(outpath_cell_data_section, sep=',', index=False)
+
+    return cell_data_section
+
+
+def assign_soil_to_annagnps_cells_OLD(cell_data_section, cells_geometry, soil_data, outpath_cell_data_section=None, write_csv=False):
 
     # - cell_data_section: GeoDataFrame or path to csv AnnAGNPS_Cell_Data_Section.csv
     # - cell_geometry: GeoDataFrame or path to shapefile AnnAGNPS_Cell_IDs.shp

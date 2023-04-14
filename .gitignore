@@ -5,8 +5,11 @@ inputs/TNM_DEM/*.zip
 inputs/TNM_DEM/*.7z
 inputs/TNM_DEM/*.tif
 outputs/topagnps/*
+outputs/soil_data_market/shapefile/*
+outputs/soil_data_market/soil/*
 aiohttp_cache.sqlite
 */__pycache__/*
 nohup.out
 *.pyc
 venv/*
+db_credentials.json

@@ -1,0 +1,104 @@
+NITA,INFO   ,    1,Beginning Program Execution: NITA v6.00.a.007 64-bit execution
+NITA,INFO   ,    1,EXECUTION DATE: 04/11/2023   EXECUTION START TIME: 17:41:32
+NITA,INFO   ,    1,No command line arguments were detected. One of "NITA.CSV" or "NITA.XML" must be available to continue.
+NITA,INFO   ,    1,Checking existence of NITA control file:
+NITA,INFO   ,    1,Opened input file: NITA.CSV
+NITA,INFO   ,    1,Reading records from "NITA.CSV" control file.
+NITA,INFO   ,    1,Input record: FILENAME,UNITS_OUT,COMBINE
+NITA,INFO   ,    1,Input record: MS107_nasis.csv,1,1
+NITA,INFO   ,    1,NASIS Input Filename: MS107_nasis.csv
+NITA,INFO   ,    1,The input filename has a .csv extension. Assuming csv-formatted input.
+NITA,INFO   ,    1,Finished reading control file.
+NITA,INFO   ,    1,Opened input file: MS107_nasis.csv
+NITA,INFO   ,    1,Opened output file: MS107_nasis_soil_data.csv
+NITA,INFO   ,    1,Opened output file: MS107_nasis_soil_layers_data.csv
+NITA,INFO   ,    1,Processing file "MS107_nasis.csv".
+NITA,INFO   ,    1,Reading NITA input file...
+NITA,INFO   ,    1,Finished reading NITA input file.
+NITA,INFO   ,    1,Parsing NITA input strings into soil arrays:
+NITA,WARNING,    2,Soil ID "Gs","hydgrp",(hydrologic soil group) on record "  136" is blank in the input data. This is a required field. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gs","hydgrp",(hydrologic soil group) on record "  137" is blank in the input data. This is a required field. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gs","hydgrp",(hydrologic soil group) on record "  139" is blank in the input data. This is a required field. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gu","hydgrp",(hydrologic soil group) on record "  141" is blank in the input data. This is a required field. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gu","hydgrp",(hydrologic soil group) on record "  142" is blank in the input data. This is a required field. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Gu","hydgrp",(hydrologic soil group) on record "  144" is blank in the input data. This is a required field. This record will be ignored.
+NITA,INFO   ,    1,Sorting        369 soil layer data records.
+NITA,INFO   ,    1,Finished sorting soil layer data
+NITA,INFO   ,    1,Finished parsing NITA input strings into soil arrays.
+NITA,INFO   ,    1,Converting parameters to AnnAGNPS units:
+NITA,INFO   ,    1,Finished converting parameters to AnnAGNPS units:
+NITA,INFO   ,    1,Cleaning soil data:
+NITA,INFO   ,    1,Checking muck soil layers:
+NITA,INFO   ,    1,Checking that the sum of clay + silt + sand = 1. (100 %):
+NITA,INFO   ,    1,Finished checking that the sum of clay + silt + sand = 1. (100 %)
+NITA,INFO   ,    1,Checking that the very fine sand ratio is not greater than the sand ratio:
+NITA,INFO   ,    1,Finished checking that the very fine sand ratio is not greater than the sand ratio:
+NITA,INFO   ,    1,Checking for duplicate or decreasing layer depths:
+NITA,WARNING,    2,Soil ID "LoB2",soil name "Grenada",layer depth "13.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GrC2",soil name "Unnamed hydric soils (134dr)",layer depth "13.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "LoE2",soil name "Unnamed hydric soils (134dr)",layer depth "13.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MlF3",soil name "Loring",layer depth "8.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "LoC2",soil name "Grenada",layer depth "13.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GrD3",soil name "Grenada",layer depth "13.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "CpF2",soil name "Cuthbert",layer depth "152.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "MlF2",soil name "Unnamed hydric soils (134dr)",layer depth "13.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "RpE2",soil name "Unnamed hydric soils (133dr)",layer depth "15.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "LoB2",soil name "Byram",layer depth "13.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GrC2",soil name "Unnamed hydric soils (134dr)",layer depth "152.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MeB2",soil name "Memphis",layer depth "15.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MnF2",soil name "Unnamed hydric soils (134dr)",layer depth "13.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "LoC2",soil name "Loring",layer depth "13.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GrD3",soil name "Grenada",layer depth "152.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "CpF2",soil name "Providence",layer depth "152.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "MlF2",soil name "Loring",layer depth "13.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "RpE2",soil name "Smithdale",layer depth "97.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "LoB2",soil name "Providence",layer depth "15.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "GrC3",soil name "Grenada",layer depth "152.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "MeB2",soil name "Loring",layer depth "15.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "MnF2",soil name "Natchez",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "LoC2",soil name "Providence",layer depth "15.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "RpE2",soil name "Unnamed hydric soils (133dr)",layer depth "152.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "LoB2",soil name "Grenada",layer depth "56.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "GrD2",soil name "Grenada",layer depth "13.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "MeB2",soil name "Loring",layer depth "165.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "Mx",soil name "Bruno",layer depth "20.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "LoC2",soil name "Grenada",layer depth "56.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "RpF2",soil name "Unnamed hydric soils (133dr)",layer depth "15.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "LoB2",soil name "Providence",layer depth "56.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "GrD2",soil name "Grenada",layer depth "152.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "MeB2",soil name "Loring",layer depth "203.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "LoC2",soil name "Providence",layer depth "56.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "RpF2",soil name "Providence",layer depth "97.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "LoB2",soil name "Byram",layer depth "142.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "LoC2",soil name "Smithdale",layer depth "132.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "RpF2",soil name "Providence",layer depth "152.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "LoB2",soil name "Providence",layer depth "178.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "LoC2",soil name "Providence",layer depth "178.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "LoC3",soil name "Byram",layer depth "13.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "LoC3",soil name "Providence",layer depth "15.",This record has a duplicate soil layer depth with that of the previous soil layer. However; this record has more parameters populated so this record will be stored and the previous layer will be marked as the duplcate and will be ignored.
+NITA,WARNING,    2,Soil ID "LoC3",soil name "Memphis",layer depth "56.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "LoC3",soil name "Providence",layer depth "56.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "LoC3",soil name "Smithdale",layer depth "132.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,WARNING,    2,Soil ID "LoC3",soil name "Providence",layer depth "178.", This record has a duplicate soil layer depth with that of the previous soil layer. This record will be ignored.
+NITA,INFO   ,    1,Finished checking for duplicate or decreasing layer depths:
+NITA,INFO   ,    1,Assigning the shallowest impervious depth to the soil id:
+NITA,INFO   ,    1,Finished assigning the shallowest impervious depth to the soil id.
+NITA,INFO   ,    1,Assigning bulk density values to blanks, where possible:
+NITA,INFO   ,    1,Finished assigning bulk density values to blanks.
+NITA,INFO   ,    1,Checking for records where field capacity is less than wilting point:
+NITA,INFO   ,    1,Finished Checking for records where field capacity is less than wilting point.
+NITA,INFO   ,    1,Updating the number of soils and soil layers:
+NITA,INFO   ,    1,Finished updating the number of soils and soil layers:
+NITA,INFO   ,    1,Finished cleaning soil data:
+NITA,INFO   ,    1,Writing AnnAGNPS soil output files:
+NITA,INFO   ,    1,Writing AnnAGNPS soil data section file:
+NITA,INFO   ,    1,Finished writing AnnAGNPS soil data section file:
+NITA,INFO   ,    1,Writing AnnAGNPS soil layers data section file:
+NITA,INFO   ,    1,Finished writing AnnAGNPS soil layers data section file:
+NITA,INFO   ,    1,Finished writing AnnAGNPS soil output files:
+NITA,INFO   ,    1,Number of input records ignored "    52".
+NITA,INFO   ,    1,Finished processing file "MS107_nasis.csv".
+NITA,INFO   ,    1,Successful "NITA" execution!
+NITA,INFO   ,    1,Finished Program Execution:  NITA v6.00.a.007 64-bit execution
+NITA,INFO   ,    1,EXECUTION END TIME: 17:41:32
+NITA,INFO   ,    1,Total time in execution (seconds):       0
