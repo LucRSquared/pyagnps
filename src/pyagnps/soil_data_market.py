@@ -143,12 +143,49 @@ def download_soil_geodataframe_tiles(bbox=None, tile_size=0.1, explode_geometrie
 
     return gdf
 
+def assign_attr_plurality_vector_layer(geo_bins, geo_attributes_layer, attr='mukey', bin_id='DN'):
+    # Assign attributes to a GeoDataFrame based on the plurality of a given attribute in a GeoDataFrame
+    # - geo_bins: GeoDataFrame of the bins
+    # - geo_attributes_layer: GeoDataFrame of the attributes
+    # - attr: attribute of the geo_attributes_layer that should be attributed to
+    # - bin_id: id of the bin column in geo_bins
 
-def assign_soil_to_annagnps_cells(cell_data_section, cells_geometry, soil_data, outpath_cell_data_section=None, write_csv=False):
+    # Returns geo_bins with a new column called attr
+
+    if not isinstance(geo_bins, gpd.GeoDataFrame):
+        cells_geometry = gpd.read_file(geo_bins)
+
+    if not isinstance(geo_attributes_layer, gpd.GeoDataFrame):
+        soil_data = gpd.read_file(geo_attributes_layer)
+
+    UTM_CRS = geo_bins.estimate_utm_crs()
+    geo_bins = geo_bins.to_crs(UTM_CRS)
+    geo_attributes_layer = geo_attributes_layer.to_crs(UTM_CRS)
+
+    # Compute intersection of cells with soil types
+    gdf_overlay = gpd.overlay(geo_bins, geo_attributes_layer, how='intersection', keep_geom_type=False)
+
+    gdf_overlay['area'] = gdf_overlay.geometry.area
+
+    # Add the area of each soil group within the cells
+    grouped_data = gdf_overlay.groupby([bin_id, attr])['area'].sum().reset_index()
+
+    # Compute for each cell what is the soil type that has the maximum area
+    majority_data = grouped_data.loc[grouped_data.groupby(bin_id)['area'].idxmax(),[bin_id, attr]]
+
+    # Merge data with majority soil type for each cell
+    geo_bins = pd.merge(geo_bins, majority_data, on=bin_id, how='left', suffixes=('_del', None))
+    # cell_data_section = cell_data_section.drop(columns=['Soil_ID_del'])
+
+    return geo_bins
+
+
+def assign_soil_to_annagnps_cells(cell_data_section, cells_geometry, soil_data, attr='mukey', outpath_cell_data_section=None, write_csv=False):
 
     # - cell_data_section: GeoDataFrame or path to csv AnnAGNPS_Cell_Data_Section.csv
     # - cell_geometry: GeoDataFrame or path to shapefile AnnAGNPS_Cell_IDs.shp
     # - soil_data: GeoDataFrame of path to SSURGO shapefile
+    # - attr : attribute of the soil_data that should be attributed to
     # - outpath_cell_data_section: path to modified AnnAGNPS_Cell_Data_Section.csv (if different from cell_data_section) 
 
     if not isinstance(cell_data_section, pd.DataFrame):
