@@ -5,10 +5,10 @@ have a TOPAGNPS.XML control file with ROW/COL information
 will delete all temporary files and restart the delineation
 """
 
-import sys, os, shutil
+import os, shutil
 from glob import glob
 import socket
-sys.path.append('/home/luc/projects/pyagnps/')
+
 import geopandas as gpd
 import pandas as pd
 

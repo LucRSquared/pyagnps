@@ -11,6 +11,8 @@ aiohttp_cache.sqlite
 */__pycache__/*
 nohup.out
 *.pyc
-venv/*
+.venv/*
 db_credentials.json
 inputs/soil/soil_data_US_with_mukey.csv
+.pdm-python
+build

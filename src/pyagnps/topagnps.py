@@ -12,7 +12,7 @@ import rasterio
 import rioxarray
 import py3dep
 from osgeo import gdal
-import src.pyagnps.utils as utils
+import pyagnps.utils as utils
 
 # import logging
 

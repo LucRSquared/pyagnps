@@ -1,11 +1,11 @@
 import sys, os, shutil
 import socket
-sys.path.append('/home/luc/projects/pyagnps/')
+
 import geopandas as gpd
 import pandas as pd
 
-from src.pyagnps import topagnps
-from src.pyagnps.utils import log_to_file, get_current_time, remove_all_files_from_dir_except_from_list, move_files_from_dir_to_dir, copy_files_from_dir_to_dir
+from pyagnps import topagnps
+from pyagnps.utils import log_to_file, get_current_time, remove_all_files_from_dir_except_from_list, move_files_from_dir_to_dir, copy_files_from_dir_to_dir
 
 import time
 import json

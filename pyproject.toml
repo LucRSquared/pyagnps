@@ -1,0 +1,42 @@
+[tool.pdm]
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "black>=23.3.0",
+    "nbformat>=5.8.0",
+    "ipykernel>=6.22.0",
+]
+[project]
+name = "pyagnps"
+version = "0.1.0"
+description = "A toolbox to manipulate data from and for USDA tools AnnAGNPS, TopAGNPS, etc."
+authors = [
+    {name = "Luc Rébillout", email = "luc@ncche.olemiss.edu"},
+]
+dependencies = [
+    "tqdm>=4.65.0",
+    "Shapely>=2.0.1",
+    "rioxarray>=0.14.1",
+    "xarray>=2023.4.2",
+    "Requests>=2.29.0",
+    "rasterio>=1.3.6",
+    "py3dep>=0.14.0",
+    "pandas>=2.0.1",
+    "numpy>=1.24.3",
+    "networkx>=3.1",
+    "lxml>=4.9.2",
+    "geopandas>=0.12.2",
+    "gdal @ https://github.com/girder/large_image_wheels/raw/wheelhouse/GDAL-3.4.3-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=6b98d9c0b17b99ceffe351de9d936facdc85991a9209f89e8b3add34dca495fa ; sys_platform=='linux'",
+    "gdal-windows @ https://download.lfd.uci.edu/pythonlibs/archived/GDAL-3.4.3-cp311-cp311-win_amd64.whl ; sys_platform=='win32'",
+    "psycopg2>=2.9.6",
+    "sqlalchemy>=2.0.12",
+    "matplotlib>=3.7.1",
+    "rasterstats>=0.18.0",
+]
+requires-python = ">=3.9"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
