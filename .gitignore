@@ -12,6 +12,7 @@ aiohttp_cache.sqlite
 nohup.out
 *.pyc
 .venv/*
+.vscode
 db_credentials.json
 inputs/soil/soil_data_US_with_mukey.csv
 .pdm-python
