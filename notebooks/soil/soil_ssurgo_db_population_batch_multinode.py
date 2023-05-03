@@ -85,6 +85,7 @@ for _, tuc in thucs.iterrows():
 
     # Collect thuc cells geometry from database
     try:
+        now = get_current_time()
         log_to_file(
             general_log,
             f"{now}: {nodename}: {thuc_id}: Querying cells from database...",
