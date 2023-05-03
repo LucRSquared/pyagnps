@@ -142,7 +142,7 @@ for _, tuc in thucs.iterrows():
                 f"{now}: {nodename}: {thuc_id}: Performing plurality analysis",
             )
             cells = sdm.assign_attr_plurality_vector_layer(
-                cells, geo_soil, attr="mukey", bin_id="dn"
+                cells, geo_soil, attr="MUKEY", bin_id="dn"
             )
             cells = cells.rename(columns={"dn": "cell_id", "mukey": "soil_id"})
 
