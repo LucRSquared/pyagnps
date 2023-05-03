@@ -7,17 +7,20 @@ import glob, os, subprocess
 from pathlib import Path
 from tqdm import tqdm
 
+
 def download_soil_geodataframe(bbox=None):
     # bbox = (minlon,minlat, maxlon, maxlat) In EPSG:4326 CRS
     # e.g. bbox = (-89.94724,34.22708,-89.76632,34.31553)
 
     if bbox is None:
-        raise Exception('Please provide a bounding box in EPSG:4326 coordinate format (minlon,minlat, maxlon, maxlat)')
+        raise Exception(
+            "Please provide a bounding box in EPSG:4326 coordinate format (minlon,minlat, maxlon, maxlat)"
+        )
 
     # Prepare the JSON query
     body = {
-    "format": "JSON",
-    "query": f"select Ma.*, M.mupolygonkey, M.areasymbol, M.nationalmusym, M.mupolygongeo from mupolygon M, muaggatt Ma where M.mupolygonkey in \
+        "format": "JSON",
+        "query": f"select Ma.*, M.mupolygonkey, M.areasymbol, M.nationalmusym, M.mupolygongeo from mupolygon M, muaggatt Ma where M.mupolygonkey in \
     (select * from SDA_Get_Mupolygonkey_from_intersection_with_WktWgs84('polygon(\
         ({bbox[0]} {bbox[1]}, {bbox[2]} {bbox[1]}, {bbox[2]} {bbox[3]}, {bbox[0]} {bbox[3]}, {bbox[0]} {bbox[1]})\
     )')) and M.mukey=Ma.mukey",
@@ -32,64 +35,66 @@ def download_soil_geodataframe(bbox=None):
         return None
 
     # Reshaping Data
-    data = {"musym":[],
-        "muname":[],
-        "mustatus":[],
-        "slopegraddcp":[], 
-        "slopegradwta":[], 
-        "brockdepmin":[],
-        "wtdepannmin":[],
-        "wtdepaprjunmin":[],
-        "flodfreqdcd":[],
-        "flodfreqmax":[],
-        "pondfreqprs":[],
-        "aws025wta":[],
-        "aws050wta":[],
-        "aws0100wta":[],
-        "aws0150wta":[],
-        "drclassdcd":[],
-        "drclasswettest":[],
-        "hydgrpdcd":[],
-        "iccdcd":[],
-        "iccdcdpct":[],
-        "niccdcd":[],
-        "niccdcdpct":[],
-        "engdwobdcd":[],
-        "engdwbdcd":[],
-        "engdwbll":[],
-        "engdwbml":[],
-        "engstafdcd":[],
-        "engstafll":[],
-        "engstafml":[],
-        "engsldcd":[],
-        "engsldcp":[],
-        "englrsdcd":[],
-        "engcmssdcd":[],
-        "engcmssmp":[],
-        "urbrecptdcd":[],
-        "urbrecptwta":[],
-        "forpehrtdcp":[],
-        "hydclprs":[],
-        "awmmfpwwta":[],
-        "mukey":[],
-        "mupolygonkey":[],
-        "areasymbol":[],
-        "nationalmusym":[],
-        "geometry":[]
-}
+    data = {
+        "musym": [],
+        "muname": [],
+        "mustatus": [],
+        "slopegraddcp": [],
+        "slopegradwta": [],
+        "brockdepmin": [],
+        "wtdepannmin": [],
+        "wtdepaprjunmin": [],
+        "flodfreqdcd": [],
+        "flodfreqmax": [],
+        "pondfreqprs": [],
+        "aws025wta": [],
+        "aws050wta": [],
+        "aws0100wta": [],
+        "aws0150wta": [],
+        "drclassdcd": [],
+        "drclasswettest": [],
+        "hydgrpdcd": [],
+        "iccdcd": [],
+        "iccdcdpct": [],
+        "niccdcd": [],
+        "niccdcdpct": [],
+        "engdwobdcd": [],
+        "engdwbdcd": [],
+        "engdwbll": [],
+        "engdwbml": [],
+        "engstafdcd": [],
+        "engstafll": [],
+        "engstafml": [],
+        "engsldcd": [],
+        "engsldcp": [],
+        "englrsdcd": [],
+        "engcmssdcd": [],
+        "engcmssmp": [],
+        "urbrecptdcd": [],
+        "urbrecptwta": [],
+        "forpehrtdcp": [],
+        "hydclprs": [],
+        "awmmfpwwta": [],
+        "mukey": [],
+        "mupolygonkey": [],
+        "areasymbol": [],
+        "nationalmusym": [],
+        "geometry": [],
+    }
 
-    for d in soil_response['Table']:
+    for d in soil_response["Table"]:
         for i, kv in enumerate(data.items()):
             data[kv[0]].append(d[i])
 
     df = pd.DataFrame(data)
 
-    df['geometry'] = df['geometry'].apply(wkt.loads)
-    gdf = gpd.GeoDataFrame(df, crs='epsg:4326')
+    df["geometry"] = df["geometry"].apply(wkt.loads)
+    gdf = gpd.GeoDataFrame(df, crs="epsg:4326")
 
     gdf = gpd.clip(gdf, bbox)
 
     return gdf
+
 
 def download_soil_geodataframe_tiles(bbox=None, tile_size=0.1, explode_geometries=True):
     # bbox = (minlon,minlat, maxlon, maxlat) In EPSG:4326 CRS
@@ -98,11 +103,13 @@ def download_soil_geodataframe_tiles(bbox=None, tile_size=0.1, explode_geometrie
     # explode_geometries : Boolean (True default), to explode multi-part geometries into single geometries
 
     if bbox is None:
-        raise Exception('Please provide a bounding box in EPSG:4326 coordinate format (minlon,minlat, maxlon, maxlat)')
+        raise Exception(
+            "Please provide a bounding box in EPSG:4326 coordinate format (minlon,minlat, maxlon, maxlat)"
+        )
 
     min_lon, min_lat, max_lon, max_lat = bbox
     if min_lon > max_lon or min_lat > max_lat:
-        raise Exception('Invalid bounding box')
+        raise Exception("Invalid bounding box")
 
     # calculate the number of chunks to divide the area into
     n_lon_chunks = int((max_lon - min_lon) / tile_size) + 1
@@ -116,7 +123,7 @@ def download_soil_geodataframe_tiles(bbox=None, tile_size=0.1, explode_geometrie
                 min_lon + i * tile_size,
                 min_lat + j * tile_size,
                 min_lon + (i + 1) * tile_size,
-                min_lat + (j + 1) * tile_size
+                min_lat + (j + 1) * tile_size,
             )
             sub_boxes.append(sub_box)
 
@@ -128,13 +135,13 @@ def download_soil_geodataframe_tiles(bbox=None, tile_size=0.1, explode_geometrie
 
     gdf_list = [gdf_tmp for gdf_tmp in gdf_list if gdf_tmp is not None]
 
-    gdf = gpd.GeoDataFrame(pd.concat(gdf_list, ignore_index=True), crs='epsg:4326')
+    gdf = gpd.GeoDataFrame(pd.concat(gdf_list, ignore_index=True), crs="epsg:4326")
     gdf = gpd.clip(gdf, bbox)
 
     columns = gdf.columns
 
     # Get rid of tile junctions by dissolving the geometries for identical mukeys
-    gdf = gdf.dissolve(by=['mukey'], as_index=False)
+    gdf = gdf.dissolve(by=["mukey"], as_index=False)
     gdf = gdf[columns]
 
     if explode_geometries:
@@ -143,7 +150,10 @@ def download_soil_geodataframe_tiles(bbox=None, tile_size=0.1, explode_geometrie
 
     return gdf
 
-def assign_attr_plurality_vector_layer(geo_bins, geo_attributes_layer, attr='mukey', bin_id='DN'):
+
+def assign_attr_plurality_vector_layer(
+    geo_bins, geo_attributes_layer, attr="mukey", bin_id="DN"
+):
     # Assign attributes to a GeoDataFrame based on the plurality of a given attribute in a GeoDataFrame
     # - geo_bins: GeoDataFrame of the bins
     # - geo_attributes_layer: GeoDataFrame of the attributes
@@ -163,126 +173,160 @@ def assign_attr_plurality_vector_layer(geo_bins, geo_attributes_layer, attr='muk
     geo_attributes_layer = geo_attributes_layer.to_crs(UTM_CRS)
 
     # Compute intersection of cells with soil types
-    gdf_overlay = gpd.overlay(geo_bins, geo_attributes_layer, how='intersection', keep_geom_type=False)
+    gdf_overlay = gpd.overlay(
+        geo_bins, geo_attributes_layer, how="intersection", keep_geom_type=False
+    )
 
-    gdf_overlay['area'] = gdf_overlay.geometry.area
+    gdf_overlay["area"] = gdf_overlay.geometry.area
 
     # Add the area of each soil group within the cells
-    grouped_data = gdf_overlay.groupby([bin_id, attr])['area'].sum().reset_index()
+    grouped_data = gdf_overlay.groupby([bin_id, attr])["area"].sum().reset_index()
 
     # Compute for each cell what is the soil type that has the maximum area
-    majority_data = grouped_data.loc[grouped_data.groupby(bin_id)['area'].idxmax(),[bin_id, attr]]
+    majority_data = grouped_data.loc[
+        grouped_data.groupby(bin_id)["area"].idxmax(), [bin_id, attr]
+    ]
 
     # Merge data with majority soil type for each cell
-    geo_bins = pd.merge(geo_bins, majority_data, on=bin_id, how='left', suffixes=('_del', None))
+    geo_bins = pd.merge(
+        geo_bins, majority_data, on=bin_id, how="left", suffixes=("_del", None)
+    )
     # cell_data_section = cell_data_section.drop(columns=['Soil_ID_del'])
 
     return geo_bins
 
 
-def assign_soil_to_annagnps_cells(cell_data_section, cells_geometry, soil_data, attr='mukey', outpath_cell_data_section=None, write_csv=False):
-
+def assign_soil_to_annagnps_cells(
+    cell_data_section,
+    cells_geometry,
+    soil_data,
+    attr="mukey",
+    outpath_cell_data_section=None,
+    write_csv=False,
+):
     # - cell_data_section: GeoDataFrame or path to csv AnnAGNPS_Cell_Data_Section.csv
     # - cell_geometry: GeoDataFrame or path to shapefile AnnAGNPS_Cell_IDs.shp
     # - soil_data: GeoDataFrame of path to SSURGO shapefile
     # - attr : attribute of the soil_data that should be attributed to
-    # - outpath_cell_data_section: path to modified AnnAGNPS_Cell_Data_Section.csv (if different from cell_data_section) 
+    # - outpath_cell_data_section: path to modified AnnAGNPS_Cell_Data_Section.csv (if different from cell_data_section)
 
     if not isinstance(cell_data_section, pd.DataFrame):
         cell_data_section = pd.read_csv(cell_data_section)
         outpath_cell_data_section = cell_data_section
     elif outpath_cell_data_section is None:
-        outpath_cell_data_section = 'AnnAGNPS_Cell_Data_Section.csv' # Default name and will write the file in the current directory
-    
+        outpath_cell_data_section = "AnnAGNPS_Cell_Data_Section.csv"  # Default name and will write the file in the current directory
+
     if not isinstance(cells_geometry, gpd.GeoDataFrame):
         cells_geometry = gpd.read_file(cells_geometry)
 
     if not isinstance(soil_data, gpd.GeoDataFrame):
-        soil_data = gpd.read_file(soil_data) # SSURGO data
+        soil_data = gpd.read_file(soil_data)  # SSURGO data
 
     UTM_CRS = cells_geometry.estimate_utm_crs()
     cells_geometry = cells_geometry.to_crs(UTM_CRS)
     soil_data = soil_data.to_crs(UTM_CRS)
 
     # Compute intersection of cells with soil types
-    gdf_overlay = gpd.overlay(cells_geometry, soil_data, how='intersection', keep_geom_type=False)
+    gdf_overlay = gpd.overlay(
+        cells_geometry, soil_data, how="intersection", keep_geom_type=False
+    )
 
-    gdf_overlay['area'] = gdf_overlay.geometry.area
+    gdf_overlay["area"] = gdf_overlay.geometry.area
 
     # Add the area of each soil group within the cells
-    grouped_data = gdf_overlay.groupby(['DN','musym'])['area'].sum().reset_index()
+    grouped_data = gdf_overlay.groupby(["DN", "musym"])["area"].sum().reset_index()
 
     # Compute for each cell what is the soil type that has the maximum area
-    majority_data = grouped_data.loc[grouped_data.groupby('DN')['area'].idxmax(),['DN', 'musym']]
+    majority_data = grouped_data.loc[
+        grouped_data.groupby("DN")["area"].idxmax(), ["DN", "musym"]
+    ]
 
     # Rename columns
-    majority_data = majority_data.rename(columns={'DN': 'Cell_ID', 'musym': 'Soil_ID'})
+    majority_data = majority_data.rename(columns={"DN": "Cell_ID", "musym": "Soil_ID"})
 
     # Store original columns order
     columns = cell_data_section.columns
 
     # Merge data with majority soil type for each cell
-    cell_data_section = pd.merge(cell_data_section, majority_data, on='Cell_ID', how='left', suffixes=('_del', None))
-    cell_data_section = cell_data_section.drop(columns=['Soil_ID_del'])
+    cell_data_section = pd.merge(
+        cell_data_section,
+        majority_data,
+        on="Cell_ID",
+        how="left",
+        suffixes=("_del", None),
+    )
+    cell_data_section = cell_data_section.drop(columns=["Soil_ID_del"])
 
     # Reorder columns according to original column order
     cell_data_section = cell_data_section[columns]
 
     if write_csv:
-        cell_data_section.to_csv(outpath_cell_data_section, sep=',', index=False)
+        cell_data_section.to_csv(outpath_cell_data_section, sep=",", index=False)
 
     return cell_data_section
 
 
-def assign_soil_to_annagnps_cells_OLD(cell_data_section, cells_geometry, soil_data, outpath_cell_data_section=None, write_csv=False):
-
+def assign_soil_to_annagnps_cells_OLD(
+    cell_data_section,
+    cells_geometry,
+    soil_data,
+    outpath_cell_data_section=None,
+    write_csv=False,
+):
     # - cell_data_section: GeoDataFrame or path to csv AnnAGNPS_Cell_Data_Section.csv
     # - cell_geometry: GeoDataFrame or path to shapefile AnnAGNPS_Cell_IDs.shp
     # - soil_data: GeoDataFrame of path to SSURGO shapefile
-    # - outpath_cell_data_section: path to modified AnnAGNPS_Cell_Data_Section.csv (if different from cell_data_section) 
+    # - outpath_cell_data_section: path to modified AnnAGNPS_Cell_Data_Section.csv (if different from cell_data_section)
 
     if ~isinstance(cell_data_section, pd.DataFrame):
         cell_data_section = pd.read_csv(cell_data_section)
         outpath_cell_data_section = cell_data_section
     elif outpath_cell_data_section is None:
-        outpath_cell_data_section = 'AnnAGNPS_Cell_Data_Section.csv' # Default name and will write the file in the current directory
-    
+        outpath_cell_data_section = "AnnAGNPS_Cell_Data_Section.csv"  # Default name and will write the file in the current directory
+
     if ~isinstance(cells_geometry, gpd.GeoDataFrame):
         cells_geometry = gpd.read_file(cells_geometry)
 
     if ~isinstance(soil_data, gpd.GeoDataFrame):
-        soil_data = gpd.read_file(soil_data) # SSURGO data
+        soil_data = gpd.read_file(soil_data)  # SSURGO data
 
     utm_crs = cells_geometry.estimate_utm_crs()
 
     soil_data = soil_data.to_crs(utm_crs)
 
     for _, cell in cells_geometry.iterrows():
-        gdf_cell = gpd.GeoDataFrame(pd.DataFrame(data={'DN':[cell[0]], 
-                                                'geometry':[cell[1]]}), 
-                                                crs=cells_geometry.crs)
+        gdf_cell = gpd.GeoDataFrame(
+            pd.DataFrame(data={"DN": [cell[0]], "geometry": [cell[1]]}),
+            crs=cells_geometry.crs,
+        )
         gdf_cell = gdf_cell.to_crs(utm_crs)
 
-        intersection = soil_data.overlay(gdf_cell, how='intersection', keep_geom_type=False)
-        intersection['area'] = intersection.geometry.area
-        intersection = pd.pivot_table(intersection, index=['musym'], values=['area'], aggfunc='sum') # !!! TEST THIS (to make sure if there are multiple intersections with the same soil group it's counted as one)
-        musymmajority = intersection['area'].idxmax()
+        intersection = soil_data.overlay(
+            gdf_cell, how="intersection", keep_geom_type=False
+        )
+        intersection["area"] = intersection.geometry.area
+        intersection = pd.pivot_table(
+            intersection, index=["musym"], values=["area"], aggfunc="sum"
+        )  # !!! TEST THIS (to make sure if there are multiple intersections with the same soil group it's counted as one)
+        musymmajority = intersection["area"].idxmax()
         # del intersection
 
         # musymmajority = intersection.loc[intersection['area'].idxmax(),'musym']
-        cell_data_section.loc[cell_data_section['Cell_ID'] == cell[0],'Soil_ID'] = musymmajority
+        cell_data_section.loc[
+            cell_data_section["Cell_ID"] == cell[0], "Soil_ID"
+        ] = musymmajority
 
     if write_csv:
-        cell_data_section.to_csv(outpath_cell_data_section, sep=',', index=False)
+        cell_data_section.to_csv(outpath_cell_data_section, sep=",", index=False)
 
     return cell_data_section
 
-def run_one_query(county_code):
 
+def run_one_query(county_code):
     url = "https://SDMDataAccess.sc.egov.usda.gov/Tabular/SDMTabularService/post.rest"
 
     # Updated query after Ron's Email 2022-11-21
-    sQuery = f'''select 
+    sQuery = f"""select 
             sa.saverest, 
             l.areasymbol, 
             l.areaname,
@@ -324,7 +368,7 @@ def run_one_query(county_code):
 
             WHERE l.areasymbol = {county_code} and ct.rvindicator = 'yes'
 
-            Order by l.areasymbol, musym, compname, hzdepb_r'''
+            Order by l.areasymbol, musym, compname, hzdepb_r"""
 
     # sQuery = f''' select
     # sa.saverest,
@@ -366,41 +410,41 @@ def run_one_query(county_code):
     dRequest = dict()
     dRequest["FORMAT"] = "JSON+COLUMNNAME"
     dRequest["QUERY"] = sQuery
-    
+
     resp = requests.post(url, data=dRequest).json()
-    
-    df = pd.DataFrame(resp['Table'])
-    df.columns = resp['Table'][0]
+
+    df = pd.DataFrame(resp["Table"])
+    df.columns = resp["Table"][0]
     df = df.drop(labels=[0], axis=0)
 
     return df
 
-def run_batch_write_files(county_codes, outpath=''):
 
+def run_batch_write_files(county_codes, outpath=""):
     for county_code in county_codes:
         df = run_one_query(county_code)
-        outfile = Path(outpath,f'{county_code}_nasis.csv')
-        df.to_csv(outfile,index=False,sep=',')
+        outfile = Path(outpath, f"{county_code}_nasis.csv")
+        df.to_csv(outfile, index=False, sep=",")
+
 
 def run_nita(filefolder, path_to_NITA_exe, combine_list=None, units_out=None):
-
-    list_of_files = glob.glob(str(Path(filefolder,"*_nasis.csv")))
+    list_of_files = glob.glob(str(Path(filefolder, "*_nasis.csv")))
 
     # The files are not combined by default
     if combine_list is None:
         combine_list = [0 for _ in list_of_files]
-    
+
     # SI Units by default
     if units_out is None:
         units_out = [1 for _ in list_of_files]
 
-    with open(Path(filefolder,'NITA_CONTROL.csv'), 'w') as control:
-        control.write('FILENAME,UNITS_OUT,COMBINE\n')
+    with open(Path(filefolder, "NITA_CONTROL.csv"), "w") as control:
+        control.write("FILENAME,UNITS_OUT,COMBINE\n")
         for i, file in enumerate(list_of_files):
             filename = Path(file).name
-            control.write(f'{filename},{units_out[i]},{combine_list[i]}\n')
-    
-    command = path_to_NITA_exe+' /f:'+ 'NITA_CONTROL.csv'
+            control.write(f"{filename},{units_out[i]},{combine_list[i]}\n")
+
+    command = path_to_NITA_exe + " /f:" + "NITA_CONTROL.csv"
 
     os.chdir(filefolder)
     subprocess.call(command)
