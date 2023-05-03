@@ -60,9 +60,6 @@ log_dir.mkdir(parents=True, exist_ok=True)
 # runlist = runlist.iloc[:,0].to_list() # Get the list of thucs that need to be
 
 for _, tuc in thucs.iterrows():
-    everythingwentwell = (
-        False  # Initialize the variable to know if everything went well
-    )
     goodsofar = True
 
     thuc_id = tuc["tophucid"]
