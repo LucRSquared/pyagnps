@@ -13,205 +13,295 @@ import geopandas as gpd
 import pandas as pd
 
 from src.pyagnps import topagnps
-from src.pyagnps.utils import log_to_file, get_current_time, remove_all_files_from_dir_except_from_list, move_files_from_dir_to_dir
+from src.pyagnps.utils import (
+    log_to_file,
+    get_current_time,
+    remove_all_files_from_dir_except_from_list,
+    move_files_from_dir_to_dir,
+)
 
 import time
 import json
 
 # Files we ultimately want to keep
-keep_files =['AgFlow_LS_Factor.asc',
-             'AgFlow_LS_Factor.prj',
-             'AnnAGNPS_Cell_IDs.asc',
-             'AnnAGNPS_Cell_IDs.PRJ',
-             'AnnAGNPS_Reach_IDs.asc',
-             'AnnAGNPS_Reach_IDs.PRJ',
-             'FLOVEC.ASC',
-             'FLOVEC.PRJ',
-             'NETFUL.ASC',
-             'NETFUL.PRJ',
-             'UPAREA.ASC',
-             'UPAREA.PRJ',
-             'AgFlow_Reach_Data.csv',
-             'AnnAGNPS_Cell_Data_Section.csv',
-             'AnnAGNPS_Reach_Data_Section.csv',
-             'command_line_output.txt',
-             'TopAGNPS_log.CSV',
-             'TopAGNPS_status.CSV',
-             'TopAGNPS_wrn.CSV',
-             'TOPAGNPS.XML']
+keep_files = [
+    "AgFlow_LS_Factor.asc",
+    "AgFlow_LS_Factor.prj",
+    "AnnAGNPS_Cell_IDs.asc",
+    "AnnAGNPS_Cell_IDs.PRJ",
+    "AnnAGNPS_Reach_IDs.asc",
+    "AnnAGNPS_Reach_IDs.PRJ",
+    "FLOVEC.ASC",
+    "FLOVEC.PRJ",
+    "NETFUL.ASC",
+    "NETFUL.PRJ",
+    "UPAREA.ASC",
+    "UPAREA.PRJ",
+    "AgFlow_Reach_Data.csv",
+    "AnnAGNPS_Cell_Data_Section.csv",
+    "AnnAGNPS_Reach_Data_Section.csv",
+    "command_line_output.txt",
+    "TopAGNPS_log.CSV",
+    "TopAGNPS_status.CSV",
+    "TopAGNPS_wrn.CSV",
+    "TOPAGNPS.XML",
+]
 
 bigbang = time.time()
 
 nodename = socket.gethostname()
 
-path_to_TOPAGNPS_bin = '/aims-nas/luc/bins/TopAGNPS_v6.00.a.018_release_64-bit_Linux' # absolute or with respect to a sub directory in path_to_dir
-path_to_thucs = '/aims-nas/luc/data/tophuc_S_M_40000_closed_holes_with_container_thuc_merged_bbox_area_first_kept.gpkg'
-root_dir = '/aims-nas/luc/thuc_runs_40k_SM/'
-dir_runs_name = '40000_SM_res_10_buff_500' # Directory to place simulations if they were succesfully restarted and finished to completion
+path_to_TOPAGNPS_bin = "/aims-nas/luc/bins/TopAGNPS_v6.00.a.018_release_64-bit_Linux"  # absolute or with respect to a sub directory in path_to_dir
+path_to_thucs = "/aims-nas/luc/data/tophuc_S_M_40000_closed_holes_with_container_thuc_merged_bbox_area_first_kept.gpkg"
+root_dir = "/aims-nas/luc/thuc_runs_40k_SM/"
+dir_runs_name = "40000_SM_res_10_buff_500"  # Directory to place simulations if they were succesfully restarted and finished to completion
 
-run_dir = '/home/luc/tmp/' # Directory where thuc runs have potentially failed and need to be restarted
-if not(os.path.exists(run_dir) and os.path.isdir(run_dir)):
+run_dir = "/home/luc/tmp/"  # Directory where thuc runs have potentially failed and need to be restarted
+if not (os.path.exists(run_dir) and os.path.isdir(run_dir)):
     os.makedirs(run_dir)
 
-path_to_log_dir = f'{root_dir}/LOGS/'
-if not(os.path.exists(path_to_log_dir) and os.path.isdir(path_to_log_dir)):
+path_to_log_dir = f"{root_dir}/LOGS/"
+if not (os.path.exists(path_to_log_dir) and os.path.isdir(path_to_log_dir)):
     os.makedirs(path_to_log_dir)
 
-path_to_qc_dir = f'{root_dir}/QualityControl/'
-if not(os.path.exists(path_to_qc_dir) and os.path.isdir(path_to_qc_dir)):
+path_to_qc_dir = f"{root_dir}/QualityControl/"
+if not (os.path.exists(path_to_qc_dir) and os.path.isdir(path_to_qc_dir)):
     os.makedirs(path_to_qc_dir)
 
-path_to_time_log = f'{path_to_log_dir}/{nodename}_batch_time_log.txt'
-path_to_general_log = f'{path_to_log_dir}/{nodename}_batch_general_log.txt'
+path_to_time_log = f"{path_to_log_dir}/{nodename}_batch_time_log.txt"
+path_to_general_log = f"{path_to_log_dir}/{nodename}_batch_general_log.txt"
 
 # path_to_thuc_runlist = f'{path_to_log_dir}/lmrb.csv'
-path_to_thuc_faillist = f'{path_to_log_dir}/{nodename}_fail_list.csv'
+path_to_thuc_faillist = f"{path_to_log_dir}/{nodename}_fail_list.csv"
 
-thucs = gpd.read_file(path_to_thucs) # GeoDataFrame containing the thucs and their geometry
+thucs = gpd.read_file(
+    path_to_thucs
+)  # GeoDataFrame containing the thucs and their geometry
 
-if not(os.path.exists(path_to_time_log) and os.path.isfile(path_to_time_log)):
-    log_to_file(path_to_time_log, 'thuc,time_s') # Initialize completion time log for thucs
+if not (os.path.exists(path_to_time_log) and os.path.isfile(path_to_time_log)):
+    log_to_file(
+        path_to_time_log, "thuc,time_s"
+    )  # Initialize completion time log for thucs
 
 # Get list of candidate thucs to run inside run_dir using glob
-runlist = [(os.path.basename(path).split('_')[1], path) for path in glob(f'{run_dir}/thuc_*')]
+runlist = [
+    (os.path.basename(path).split("_")[1], path) for path in glob(f"{run_dir}/thuc_*")
+]
 
 
 for thuc_id, path_to_run_dir in runlist:
-
-    everythingwentwell = False # Initialize the variable to know if everything went well
+    everythingwentwell = (
+        False  # Initialize the variable to know if everything went well
+    )
 
     start = time.time()
 
     thucid_dir_name = os.path.basename(path_to_run_dir)
-    path_to_dir = f'{root_dir}/{dir_runs_name}/{thucid_dir_name}'
+    path_to_dir = f"{root_dir}/{dir_runs_name}/{thucid_dir_name}"
 
-    thuc_select = thucs[thucs['tophucid']==thuc_id]
+    thuc_select = thucs[thucs["tophucid"] == thuc_id]
 
-    contained_files = [os.path.basename(path) for path in glob(f'{path_to_run_dir}/*')]
+    contained_files = [os.path.basename(path) for path in glob(f"{path_to_run_dir}/*")]
 
     # Find dem_filename
     try:
-        dem_filename = os.path.basename(glob(f'{path_to_run_dir}/thuc*.asc')[0])
+        dem_filename = os.path.basename(glob(f"{path_to_run_dir}/thuc*.asc")[0])
         dem_found = True
     except:
         dem_found = False
 
-    if 'TOPAGNPS.XML' in contained_files and dem_found:
+    if "TOPAGNPS.XML" in contained_files and dem_found:
         # Read topagnps control file
-        print(f'Found TOPAGNPS.XML and DEM for {thuc_id}')
-        topagnpsXML = topagnps.read_topagnps_xml_control_file(path_to_run_dir+'/TOPAGNPS.XML')
+        print(f"Found TOPAGNPS.XML and DEM for {thuc_id}")
+        topagnpsXML = topagnps.read_topagnps_xml_control_file(
+            path_to_run_dir + "/TOPAGNPS.XML"
+        )
     else:
         # delete path_to_run_dir and its contents and continue
-        print(f'Could not find TOPAGNPS.XML and DEM for {thuc_id}, continuing')
+        print(f"Could not find TOPAGNPS.XML and DEM for {thuc_id}, continuing")
         # shutil.rmtree(path_to_run_dir)
         continue
 
-    if 'OUTROW' and 'OUTCOL' not in topagnpsXML.keys():
+    if "OUTROW" and "OUTCOL" not in topagnpsXML.keys():
         # delete path_to_run_dir and its contents and continue
-        print(f'Could not find OUTROW and OUTCOL in TOPAGNPS.XML for {thuc_id}, skipping')
+        print(
+            f"Could not find OUTROW and OUTCOL in TOPAGNPS.XML for {thuc_id}, skipping"
+        )
         # shutil.rmtree(path_to_run_dir)
         continue
 
-    elif all([file in contained_files for file in ['UPAREA.ASC', 'UPAREA.OUT', 'RELIEF.ASC', 'RELIEF.OUT']]):
+    elif all(
+        [
+            file in contained_files
+            for file in ["UPAREA.ASC", "UPAREA.OUT", "RELIEF.ASC", "RELIEF.OUT"]
+        ]
+    ):
         # topagnps can be run again with READOUT option 1
-        print(f'Found preprocessing files for {thuc_id}, running with READOUT option 1')
-        remove_all_files_from_dir_except_from_list(path_to_run_dir, ['UPAREA.OUT', 'RELIEF.OUT', dem_filename, dem_filename.replace('.asc', '.prj')])
+        print(f"Found preprocessing files for {thuc_id}, running with READOUT option 1")
+        remove_all_files_from_dir_except_from_list(
+            path_to_run_dir,
+            [
+                "UPAREA.OUT",
+                "RELIEF.OUT",
+                dem_filename,
+                dem_filename.replace(".asc", ".prj"),
+            ],
+        )
         # no need to change topagnpsXML
 
-    else: # some files are missing but we know the OUTROW and OUTCOL so we do a full processing from the beginning
-        print(f'Could not find preprocessing files for {thuc_id}, running with READOUT option 0')
-        topagnpsXML['READOUT'] = 0
-        remove_all_files_from_dir_except_from_list(path_to_run_dir, [dem_filename, dem_filename.replace('.asc', '.prj')])
-        
+    else:  # some files are missing but we know the OUTROW and OUTCOL so we do a full processing from the beginning
+        print(
+            f"Could not find preprocessing files for {thuc_id}, running with READOUT option 0"
+        )
+        topagnpsXML["READOUT"] = 0
+        remove_all_files_from_dir_except_from_list(
+            path_to_run_dir, [dem_filename, dem_filename.replace(".asc", ".prj")]
+        )
 
     now = get_current_time()
-    log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: [RETRY] Creating TopAGNPS control file')
+    log_to_file(
+        path_to_general_log,
+        f"{now}: {nodename}: {thuc_id}: [RETRY] Creating TopAGNPS control file",
+    )
 
-    topagnps.create_topagnps_xml_control_file(topagnpsXML, path_to_run_dir+'/TOPAGNPS.XML')
+    topagnps.create_topagnps_xml_control_file(
+        topagnpsXML, path_to_run_dir + "/TOPAGNPS.XML"
+    )
 
     try:
         now = get_current_time()
-        print(f'{now}: {nodename}: {thuc_id}: [RETRY] TopAGNPS full processing')
-        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: [RETRY] TopAGNPS full processing')
+        print(f"{now}: {nodename}: {thuc_id}: [RETRY] TopAGNPS full processing")
+        log_to_file(
+            path_to_general_log,
+            f"{now}: {nodename}: {thuc_id}: [RETRY] TopAGNPS full processing",
+        )
         topagnps.run_topagnps(path_to_run_dir, path_to_TOPAGNPS_bin)
     except:
         now = get_current_time()
-        print(f'{now}: {nodename}: {thuc_id}: [RETRY] Error! Failed to run TopAGNPS to completion')
-        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: [RETRY] Error! Failed to run TopAGNPS to completion')
-        log_to_file(path_to_time_log, f'{thuc_id},0')
-        log_to_file(path_to_thuc_faillist, f'{thuc_id}')
+        print(
+            f"{now}: {nodename}: {thuc_id}: [RETRY] Error! Failed to run TopAGNPS to completion"
+        )
+        log_to_file(
+            path_to_general_log,
+            f"{now}: {nodename}: {thuc_id}: [RETRY] Error! Failed to run TopAGNPS to completion",
+        )
+        log_to_file(path_to_time_log, f"{thuc_id},0")
+        log_to_file(path_to_thuc_faillist, f"{thuc_id}")
         continue
 
     try:
         now = get_current_time()
-        print(f'{now}: {nodename}: {thuc_id}: [RETRY] Computing quality control for THUC')
-        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: [RETRY] Computing quality control for THUC')
-        path_to_cell_IDs_asc = f'{path_to_run_dir}/AnnAGNPS_Cell_IDs.asc'
-        path_to_topagnps_wrn = f'{path_to_run_dir}/TopAGNPS_wrn.CSV'
+        print(
+            f"{now}: {nodename}: {thuc_id}: [RETRY] Computing quality control for THUC"
+        )
+        log_to_file(
+            path_to_general_log,
+            f"{now}: {nodename}: {thuc_id}: [RETRY] Computing quality control for THUC",
+        )
+        path_to_cell_IDs_asc = f"{path_to_run_dir}/AnnAGNPS_Cell_IDs.asc"
+        path_to_topagnps_wrn = f"{path_to_run_dir}/TopAGNPS_wrn.CSV"
 
-        quality = topagnps.quality_control_areas_vs_boundary(path_to_cell_IDs_asc, thuc_select)
-        quality['thuc'] = thuc_id
+        quality = topagnps.quality_control_areas_vs_boundary(
+            path_to_cell_IDs_asc, thuc_select
+        )
+        quality["thuc"] = thuc_id
 
         touch_edges = topagnps.check_topagnps_wrn_log(path_to_topagnps_wrn)
-        quality['touching_edges'] = touch_edges
+        quality["touching_edges"] = touch_edges
 
-        log_to_file(f'{path_to_qc_dir}/{thuc_id}.json', json.dumps(quality, indent=2))
+        log_to_file(f"{path_to_qc_dir}/{thuc_id}.json", json.dumps(quality, indent=2))
 
         everythingwentwell = True
 
     except:
         now = get_current_time()
-        print(f'{now}: {nodename}: {thuc_id}: [RETRY] Error! Failed to compute quality control')
-        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: [RETRY] Error! Failed to compute quality control')
-        log_to_file(path_to_time_log, f'{thuc_id},0')
-        log_to_file(path_to_thuc_faillist, f'{thuc_id}')
+        print(
+            f"{now}: {nodename}: {thuc_id}: [RETRY] Error! Failed to compute quality control"
+        )
+        log_to_file(
+            path_to_general_log,
+            f"{now}: {nodename}: {thuc_id}: [RETRY] Error! Failed to compute quality control",
+        )
+        log_to_file(path_to_time_log, f"{thuc_id},0")
+        log_to_file(path_to_thuc_faillist, f"{thuc_id}")
         continue
 
     if everythingwentwell:
-
         now = get_current_time()
-        print(f'{now}: {nodename}: {thuc_id}: [RETRY] Deleting unnecessary files...')
-        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: [RETRY] Deleting unnecessary files...')
+        print(f"{now}: {nodename}: {thuc_id}: [RETRY] Deleting unnecessary files...")
+        log_to_file(
+            path_to_general_log,
+            f"{now}: {nodename}: {thuc_id}: [RETRY] Deleting unnecessary files...",
+        )
 
         keep_files_tmp = keep_files.copy()
 
-        keep_files_tmp.append(f'{dem_filename}')
-        keep_files_tmp.append(f'{dem_filename}'.replace('.asc','.prj'))
-        file_del_errors = remove_all_files_from_dir_except_from_list(path_to_run_dir, keep_files_tmp)
+        keep_files_tmp.append(f"{dem_filename}")
+        keep_files_tmp.append(f"{dem_filename}".replace(".asc", ".prj"))
+        file_del_errors = remove_all_files_from_dir_except_from_list(
+            path_to_run_dir, keep_files_tmp
+        )
 
         now = get_current_time()
         end = time.time()
-        print(f'{now}: {nodename}: {thuc_id}: [RETRY] Finished normally in {end-start} seconds')
-        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: [RETRY] Finished normally in {end-start} seconds')
-        log_to_file(path_to_time_log, f'{thuc_id},{end-start}')
+        print(
+            f"{now}: {nodename}: {thuc_id}: [RETRY] Finished normally in {end-start} seconds"
+        )
+        log_to_file(
+            path_to_general_log,
+            f"{now}: {nodename}: {thuc_id}: [RETRY] Finished normally in {end-start} seconds",
+        )
+        log_to_file(path_to_time_log, f"{thuc_id},{end-start}")
 
         # Move files from run directory to output directory
         if path_to_dir != path_to_run_dir:
             now = get_current_time()
-            print(f'{now}: {nodename}: {thuc_id}: [RETRY] Moving files to output directory...')
-            log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Moving files to output directory...')
+            print(
+                f"{now}: {nodename}: {thuc_id}: [RETRY] Moving files to output directory..."
+            )
+            log_to_file(
+                path_to_general_log,
+                f"{now}: {nodename}: {thuc_id}: Moving files to output directory...",
+            )
             move_files_erros = move_files_from_dir_to_dir(path_to_run_dir, path_to_dir)
 
             if len(move_files_erros) == 0:
                 now = get_current_time()
-                print(f'{now}: {nodename}: {thuc_id}: [RETRY] Files moved successfully!')
-                log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: [RETRY] Files moved successfully!')
+                print(
+                    f"{now}: {nodename}: {thuc_id}: [RETRY] Files moved successfully!"
+                )
+                log_to_file(
+                    path_to_general_log,
+                    f"{now}: {nodename}: {thuc_id}: [RETRY] Files moved successfully!",
+                )
                 # Remove run directory
-                print(f'{now}: {nodename}: {thuc_id}: [RETRY] Removing run directory...')
-                log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: [RETRY] Removing run directory...')
+                print(
+                    f"{now}: {nodename}: {thuc_id}: [RETRY] Removing run directory..."
+                )
+                log_to_file(
+                    path_to_general_log,
+                    f"{now}: {nodename}: {thuc_id}: [RETRY] Removing run directory...",
+                )
                 shutil.rmtree(path_to_run_dir)
             else:
                 now = get_current_time()
-                print(f'{now}: {nodename}: {thuc_id}: [RETRY] Error! Failed to move files from {path_to_run_dir} to {path_to_dir}')
-                log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: Error! Failed to move files from {path_to_run_dir} to {path_to_dir}')
+                print(
+                    f"{now}: {nodename}: {thuc_id}: [RETRY] Error! Failed to move files from {path_to_run_dir} to {path_to_dir}"
+                )
+                log_to_file(
+                    path_to_general_log,
+                    f"{now}: {nodename}: {thuc_id}: Error! Failed to move files from {path_to_run_dir} to {path_to_dir}",
+                )
 
     else:
-
         now = get_current_time()
         end = time.time()
-        log_to_file(path_to_general_log, f'{now}: {nodename}: {thuc_id}: [RETRIES] Finished with errors in {end-start} seconds')
-        log_to_file(path_to_time_log, f'{thuc_id},{end-start}')
+        log_to_file(
+            path_to_general_log,
+            f"{now}: {nodename}: {thuc_id}: [RETRIES] Finished with errors in {end-start} seconds",
+        )
+        log_to_file(path_to_time_log, f"{thuc_id},{end-start}")
 
 end = time.time()
 
-print(f'Finished batch RETRIES! Overall process took {(end-bigbang)/3600} hours')
+print(f"Finished batch RETRIES! Overall process took {(end-bigbang)/3600} hours")

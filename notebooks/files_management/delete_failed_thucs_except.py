@@ -20,12 +20,13 @@
 
 import os, shutil
 
-thuc_dir = '/aims-nas/luc/thuc_runs_40k_SM/40000_SM_res_30_csa_10_mscl_250_buff_500/'
+thuc_dir = "/aims-nas/luc/thuc_runs_40k_SM/40000_SM_res_30_csa_10_mscl_250_buff_500/"
 
 
 for root, dirs, files in os.walk(thuc_dir):
-
-    if (not dirs) and ('AnnAGNPS_Cell_Data_Section.csv' not in files):# and not('/thuc' in root):
+    if (not dirs) and (
+        "AnnAGNPS_Cell_Data_Section.csv" not in files
+    ):  # and not('/thuc' in root):
         # If there are no subdirectories and a cell data section file is not present then it means that it failed
 
         # Renaming the directory to failed_thuc
@@ -33,12 +34,12 @@ for root, dirs, files in os.walk(thuc_dir):
         # print(root[id::])
         dir_name = root[id::]
 
-        if not(dir_name.startswith('thuc_')):
+        if not (dir_name.startswith("thuc_")):
             continue
         else:
-            print(f'Deleting {root}')
+            print(f"Deleting {root}")
             shutil.rmtree(root)
-            
+
         # new_dir_name = root[id::].replace('thuc_', 'failed_thuc_')
         # print(root, ' ', new_dir_name)
         # print(f'Renaming {root[id::]} to {new_dir_name}')
