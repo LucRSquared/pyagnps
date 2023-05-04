@@ -106,9 +106,8 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]) :
 
 
     # Select thuc for soil population
-    thuc_select = thucs[thucs["tophucid"] == thuc_id]
-    thuc_select = thuc_select.to_crs(utm)
-    thuc_select['geometry'] = thuc_select.geometry.buffer(BUFFER)
+    cells_buffer = cells.copy(deep=True)
+    cells_buffer['geom'] = cells_buffer.geometry.buffer(BUFFER)
 
     # Get SSURGO polygon geometry
     if goodsofar:
@@ -119,7 +118,7 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]) :
                 f"{now}: {nodename}: {thuc_id}: Getting gSSURGO data",
             )
 
-            geo_soil = gpd.read_file(path_to_gssurgo_gdb, driver='OpenFileGDB', layer='MUPOLYGON', bbox=thuc_select)
+            geo_soil = gpd.read_file(path_to_gssurgo_gdb, driver='OpenFileGDB', layer='MUPOLYGON', bbox=cells_buffer)
             geo_soil = geo_soil.to_crs(utm)
 
         except Exception as e:
@@ -217,6 +216,7 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]) :
             general_log,
             f"{now}: {nodename}: {thuc_id}: Did not finish (errors) {end-start} seconds",
         )
+        log_to_file(fail_list, f"{thuc_id}")
 
 end = time.time()
 
