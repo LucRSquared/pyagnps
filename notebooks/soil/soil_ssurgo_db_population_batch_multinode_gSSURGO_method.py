@@ -136,16 +136,21 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]) :
     )
 
     # Check that the soil geometry covers all the cells
-    if not (cells.within(geo_soil.unary_union.envelope).all()):
-        now = get_current_time()
-        log_to_file(
-            general_log,
-            f"{now}: {nodename}: {thuc_id}: WARNING /!\ Not all cells are covered by soil geometry!",
-        )
+    try:
+        if not (cells.within(geo_soil.unary_union.envelope).all()):
+            now = get_current_time()
+            log_to_file(
+                general_log,
+                f"{now}: {nodename}: {thuc_id}: WARNING /!\ Not all cells are covered by soil geometry!",
+            )
 
-    else:
-        pass
-        #print(f"{now}: {nodename}: {thuc_id}: All cells are covered with soil data")
+        else:
+            pass
+            #print(f"{now}: {nodename}: {thuc_id}: All cells are covered with soil data")
+    except Exception as e:
+        goodsofar = False
+        now = get_current_time()
+        log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e}")
 
     # Apply plurality analysis
     if goodsofar:
