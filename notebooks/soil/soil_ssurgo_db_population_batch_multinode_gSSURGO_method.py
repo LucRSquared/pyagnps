@@ -3,6 +3,8 @@ import time
 import json
 from pathlib import Path
 
+from tqdm import tqdm
+
 import geopandas as gpd
 import pandas as pd
 
@@ -23,6 +25,8 @@ password = credentials["password"]
 host = credentials["host"]
 port = credentials["port"]
 database = credentials["database"]
+
+BUFFER = 100
 
 # create a SQLAlchemy engine object
 engine = create_engine(f"postgresql://{user}:{password}@{host}:{port}/{database}")
@@ -49,9 +53,9 @@ thucs = gpd.read_file(
 )  # GeoDataFrame containing the thucs and their geometry
 thucs = thucs.sort_values(by=["bbox_area_sqkm"], ascending=False)
 
-# runlist = thucs['tophucid'].to_list()
+runlist = thucs['tophucid'].to_list()
 # runlist = ["1002", "1004"]
-runlist = ["1002"]
+# runlist = ["1002"]
 
 ssurgo_files_dir.mkdir(parents=True, exist_ok=True)
 log_dir.mkdir(parents=True, exist_ok=True)
@@ -59,16 +63,13 @@ log_dir.mkdir(parents=True, exist_ok=True)
 # runlist = pd.read_csv(path_to_thuc_runlist, dtype=object)
 # runlist = runlist.iloc[:,0].to_list() # Get the list of thucs that need to be
 
-for _, tuc in thucs.iterrows():
+for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]) :
     goodsofar = True
 
     thuc_id = tuc["tophucid"]
 
     if thuc_id not in runlist:
         continue
-    else:
-        # Select thuc for soil population
-        thuc_select = thucs[thucs["tophucid"] == thuc_id]
 
     start = time.time()
 
@@ -103,6 +104,12 @@ for _, tuc in thucs.iterrows():
         now = get_current_time()
         log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e}")
 
+
+    # Select thuc for soil population
+    thuc_select = thucs[thucs["tophucid"] == thuc_id]
+    thuc_select = thuc_select.to_crs(utm)
+    thuc_select['geometry'] = thuc_select.geometry.buffer(BUFFER)
+
     # Get SSURGO polygon geometry
     if goodsofar:
         try:
@@ -113,6 +120,7 @@ for _, tuc in thucs.iterrows():
             )
 
             geo_soil = gpd.read_file(path_to_gssurgo_gdb, driver='OpenFileGDB', layer='MUPOLYGON', bbox=thuc_select)
+            geo_soil = geo_soil.to_crs(utm)
 
         except Exception as e:
             goodsofar = False
@@ -121,6 +129,12 @@ for _, tuc in thucs.iterrows():
 
     else:
         continue
+
+    now = get_current_time()
+    log_to_file(
+        general_log,
+        f"{now}: {nodename}: {thuc_id}: Checking if cells are covered by gSSURGO polygon",
+    )
 
     # Check that the soil geometry covers all the cells
     if not (cells.within(geo_soil.unary_union.envelope).all()):
@@ -131,7 +145,8 @@ for _, tuc in thucs.iterrows():
         )
 
     else:
-        print(f"{now}: {nodename}: {thuc_id}: All cells are covered with soil data")
+        pass
+        #print(f"{now}: {nodename}: {thuc_id}: All cells are covered with soil data")
 
     # Apply plurality analysis
     if goodsofar:
@@ -144,7 +159,7 @@ for _, tuc in thucs.iterrows():
             cells = sdm.assign_attr_plurality_vector_layer(
                 cells, geo_soil, attr="MUKEY", bin_id="dn"
             )
-            cells = cells.rename(columns={"dn": "cell_id", "mukey": "soil_id"})
+            cells = cells.rename(columns={"dn": "cell_id", "MUKEY": "soil_id"})
 
         except Exception as e:
             goodsofar = False
@@ -156,6 +171,7 @@ for _, tuc in thucs.iterrows():
 
     # Update database
     if goodsofar:
+        now = get_current_time()
         log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: Populating Soil_ID...")
 
         data_to_update = cells[["cell_id", "soil_id"]].to_dict(orient="records")
