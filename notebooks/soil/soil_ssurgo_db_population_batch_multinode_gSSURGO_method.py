@@ -127,7 +127,7 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]) :
             log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e}")
 
     else:
-        continue
+        pass
 
     now = get_current_time()
     log_to_file(
@@ -171,7 +171,7 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]) :
             log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e}")
 
     else:
-        continue
+        pass
 
     # Update database
     if goodsofar:
@@ -209,7 +209,7 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]) :
             session.close()
 
     else:
-        continue
+        pass
 
     now = get_current_time()
     if goodsofar:
