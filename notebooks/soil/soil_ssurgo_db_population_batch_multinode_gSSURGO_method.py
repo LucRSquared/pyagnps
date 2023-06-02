@@ -26,8 +26,6 @@ host = credentials["host"]
 port = credentials["port"]
 database = credentials["database"]
 
-BUFFER = 100
-
 # create a SQLAlchemy engine object
 engine = create_engine(f"postgresql://{user}:{password}@{host}:{port}/{database}")
 
@@ -104,11 +102,6 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]) :
         now = get_current_time()
         log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e}")
 
-
-    # Select thuc for soil population
-    cells_buffer = cells.copy(deep=True)
-    cells_buffer['geom'] = cells_buffer.geometry.buffer(BUFFER)
-
     # Get SSURGO polygon geometry
     if goodsofar:
         try:
@@ -118,7 +111,7 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]) :
                 f"{now}: {nodename}: {thuc_id}: Getting gSSURGO data",
             )
 
-            geo_soil = gpd.read_file(path_to_gssurgo_gdb, driver='OpenFileGDB', layer='MUPOLYGON', bbox=cells_buffer)
+            geo_soil = gpd.read_file(path_to_gssurgo_gdb, driver='OpenFileGDB', layer='MUPOLYGON', bbox=cells)
             geo_soil = geo_soil.to_crs(utm)
 
         except Exception as e:
@@ -129,28 +122,35 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]) :
     else:
         pass
 
-    now = get_current_time()
-    log_to_file(
-        general_log,
-        f"{now}: {nodename}: {thuc_id}: Checking if cells are covered by gSSURGO polygon",
-    )
+    # Only keep the cells covered by gSSURGO polygon
+    cells = cells.overlay(geo_soil, how='intersection')
+    cells = cells.dissolve(by='dn').reset_index()
+    cells = cells[['dn', 'geometry']]
+    cells = cells.rename(columns={'geometry': 'geom'})
+    cells = cells.set_geometry('geom')
 
-    # Check that the soil geometry covers all the cells
-    try:
-        if not (cells.within(geo_soil.unary_union.envelope).all()):
-            now = get_current_time()
-            log_to_file(
-                general_log,
-                f"{now}: {nodename}: {thuc_id}: WARNING /!\ Not all cells are covered by soil geometry!",
-            )
+    # now = get_current_time()
+    # log_to_file(
+    #     general_log,
+    #     f"{now}: {nodename}: {thuc_id}: Checking if cells are covered by gSSURGO polygon",
+    # )
 
-        else:
-            pass
-            #print(f"{now}: {nodename}: {thuc_id}: All cells are covered with soil data")
-    except Exception as e:
-        goodsofar = False
-        now = get_current_time()
-        log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e}")
+    # # Check that the soil geometry covers all the cells
+    # try:
+    #     if not (cells.within(geo_soil.unary_union.envelope).all()):
+    #         now = get_current_time()
+    #         log_to_file(
+    #             general_log,
+    #             f"{now}: {nodename}: {thuc_id}: WARNING /!\ Not all cells are covered by soil geometry!",
+    #         )
+
+    #     else:
+    #         pass
+    #         #print(f"{now}: {nodename}: {thuc_id}: All cells are covered with soil data")
+    # except Exception as e:
+    #     goodsofar = False
+    #     now = get_current_time()
+    #     log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e}")
 
     # Apply plurality analysis
     if goodsofar:
