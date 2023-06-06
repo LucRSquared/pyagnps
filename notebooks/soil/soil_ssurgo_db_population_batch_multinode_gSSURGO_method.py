@@ -51,7 +51,7 @@ thucs = gpd.read_file(
 )  # GeoDataFrame containing the thucs and their geometry
 thucs = thucs.sort_values(by=["bbox_area_sqkm"], ascending=False)
 
-runlist = thucs['tophucid'].to_list()
+runlist = thucs["tophucid"].to_list()
 # runlist = ["1002", "1004"]
 # runlist = ["1002"]
 
@@ -61,7 +61,7 @@ log_dir.mkdir(parents=True, exist_ok=True)
 # runlist = pd.read_csv(path_to_thuc_runlist, dtype=object)
 # runlist = runlist.iloc[:,0].to_list() # Get the list of thucs that need to be
 
-for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]) :
+for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
     goodsofar = True
 
     thuc_id = tuc["tophucid"]
@@ -111,7 +111,13 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]) :
                 f"{now}: {nodename}: {thuc_id}: Getting gSSURGO data",
             )
 
-            geo_soil = gpd.read_file(path_to_gssurgo_gdb, driver='OpenFileGDB', layer='MUPOLYGON', bbox=cells)
+            geo_soil = gpd.read_file(
+                path_to_gssurgo_gdb, driver="OpenFileGDB", layer="MUPOLYGON", bbox=cells
+            )
+
+            if geo_soil.empty:
+                raise Exception("No gSSURGO data in this area")
+
             geo_soil = geo_soil.to_crs(utm)
 
         except Exception as e:
@@ -123,11 +129,26 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]) :
         pass
 
     # Only keep the cells covered by gSSURGO polygon
-    cells = cells.overlay(geo_soil, how='intersection')
-    cells = cells.dissolve(by='dn').reset_index()
-    cells = cells[['dn', 'geometry']]
-    cells = cells.rename(columns={'geometry': 'geom'})
-    cells = cells.set_geometry('geom')
+    if goodsofar:
+        try:
+            now = get_current_time()
+            log_to_file(
+                general_log,
+                f"{now}: {nodename}: {thuc_id}: Restricting cells to CONUS",
+            )
+
+            cells = cells.overlay(geo_soil, how="intersection")
+            cells = cells.dissolve(by="dn").reset_index()
+            cells = cells[["dn", "geometry"]]
+            cells = cells.rename(columns={"geometry": "geom"})
+            cells = cells.set_geometry("geom")
+
+        except Exception as e:
+            goodsofar = False
+            now = get_current_time()
+            log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e}")
+    else:
+        pass
 
     # now = get_current_time()
     # log_to_file(

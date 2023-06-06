@@ -4,6 +4,7 @@ inputs/TNM_DEM/NHDPLUS_H_0708_HU4_GDB/*
 inputs/TNM_DEM/*.zip
 inputs/TNM_DEM/*.7z
 inputs/TNM_DEM/*.tif
+inputs/soil/gSSURGO/*
 outputs/topagnps/*
 outputs/soil_data_market/shapefile/*
 outputs/soil_data_market/soil/*

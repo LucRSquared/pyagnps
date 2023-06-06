@@ -75,7 +75,7 @@ for _, tuc in thucs.iterrows():
     thuc_dir = ssurgo_files_dir / thucid_dir_name
     thuc_ssurgo_file = thuc_dir / f"{thuc_id}_ssurgo.gpkg"
 
-    if thuc_dir.exists() and not(thuc_ssurgo_file.exists()):
+    if thuc_dir.exists() and not (thuc_ssurgo_file.exists()):
         now = get_current_time()
         log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: SKIPPING")
         continue
@@ -104,7 +104,6 @@ for _, tuc in thucs.iterrows():
         goodsofar = False
         now = get_current_time()
         log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e}")
-
 
     # Download SSURGO geometry
     if goodsofar:
