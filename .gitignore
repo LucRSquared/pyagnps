@@ -19,3 +19,4 @@ inputs/soil/soil_data_US_with_mukey.csv
 .pdm-python
 build
 tmp/
+outputs/soil_data_market/db_population/thuc_cells_no_soil.json
