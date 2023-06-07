@@ -41,6 +41,7 @@ thucs = gpd.read_file(
 thucs = thucs.sort_values(by=["bbox_area_sqkm"], ascending=True)
 
 runlist = thucs['tophucid'].to_list()
+# runlist = ['1957', '1958']
 
 cells_without_soil = []
 
@@ -54,18 +55,25 @@ for thuc_id in tqdm(runlist):
         with engine.connect() as conn:
             cell_data_section = pd.read_sql(sql=sql_text(query_cds), con=conn)
 
-        no_soil_cells = cell_data_section['cell_id'].to_list()
+            unpopulated_cells = cell_data_section['cell_id'].to_list()
 
-        if no_soil_cells:
-            query_geom = "SELECT * FROM thuc_{}_annagnps_cell_ids WHERE dn in ({})".format(thuc_id, ','.join(str(x) for x in cells_without_soil[thuc_id]['cells_without_soil']))
+            if unpopulated_cells:
 
-            cells = gpd.read_postgis(sql=sql_text(query_geom), con=conn, geom_col="geom")
-            cells = cells.to_crs('epsg:4326')            
-            cells_without_soil.append(cells)
+                query_geom = "SELECT * FROM thuc_{}_annagnps_cell_ids WHERE dn in ({})".format(thuc_id, ','.join(str(x) for x in unpopulated_cells))
 
-    except:
+
+                cells = gpd.read_postgis(sql=sql_text(query_geom), con=conn, geom_col="geom")
+                cells = cells.to_crs('epsg:4326')
+                cells['thuc'] = thuc_id
+
+                del cells['fid']
+
+                cells_without_soil.append(cells)
+
+    except Exception as e:
+        print(e)
         continue
 
-empty_cells = gpd.GeoDataFrame(pd.concat(cells_without_soil, ignore_index=True), crs='epsg:4326')
+empty_cells = gpd.GeoDataFrame(pd.concat(cells_without_soil, ignore_index=True), crs='epsg:4326', geometry="geom")
 
 empty_cells.to_file(outpath_cells, driver='GPKG')
