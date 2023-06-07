@@ -139,6 +139,10 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
 
             cells = cells.overlay(geo_soil, how="intersection")
             cells = cells.dissolve(by="dn").reset_index()
+
+            if cells.empty:
+                raise Exception("No overlap of cells and gSSURGO data")
+
             cells = cells[["dn", "geometry"]]
             cells = cells.rename(columns={"geometry": "geom"})
             cells = cells.set_geometry("geom")
