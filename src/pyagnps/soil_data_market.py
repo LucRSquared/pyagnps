@@ -2,6 +2,10 @@ import requests
 import numpy as np
 import pandas as pd
 import geopandas as gpd
+import rasterio
+import xarray as xr
+import rioxarray
+from rasterstats import zonal_stats
 from shapely import wkt
 import glob, os, subprocess
 from pathlib import Path
@@ -150,6 +154,45 @@ def download_soil_geodataframe_tiles(bbox=None, tile_size=0.1, explode_geometrie
 
     return gdf
 
+def calculate_zonal_stats(geometry, raster_dataset, agg_method='plurality'):
+    stats = zonal_stats(geometry, raster_dataset, stats='mean', all_touched=True)
+    return stats[0][agg_method] if len(stats) > 0 else None
+
+def assign_attr_zonal_stats_raster_layer(
+    geo_bins, raster_layer, agg_method='plurality', attr="mukey", bin_id="DN"
+):
+    # Assign attributes to a GeoDataFrame based on the plurality of a given attribute in a GeoDataFrame
+    # - geo_bins: GeoDataFrame of the bins
+    # - geo_attributes_layer: GeoDataFrame of the attributes
+    # - attr: attribute of the geo_attributes_layer that should be attributed to geo_bins
+    # - bin_id: id of the bin column in geo_bins
+
+    # Returns geo_bins with a new column called attr
+
+    if not isinstance(geo_bins, gpd.GeoDataFrame):
+        geo_bins = gpd.read_file(geo_bins)
+
+    if not isinstance(raster_layer, xr.DataArray):
+        raster_layer = rioxarray.open_rasterio(raster_layer)
+
+    UTM_CRS = geo_bins.estimate_utm_crs()
+    geo_bins = geo_bins.to_crs(UTM_CRS)
+    
+    raster_layer = raster_layer.rio.write_crs(UTM_CRS)
+
+    # Crop raster to geo_bins bounding box
+    bbox = geo_bins.total_bounds
+    raster_layer = raster_layer.rio.clip(bbox, UTM_CRS)
+
+    # Perform zonal statistics
+    raster_dataset = raster_layer.rio.to_rasterio()
+
+    zonal_func = lambda x: calculate_zonal_stats(x, raster_dataset, agg_method=agg_method)
+
+    geo_bins[attr] = geo_bins['geometry'].apply(zonal_func)
+
+    return geo_bins
+
 
 def assign_attr_plurality_vector_layer(
     geo_bins, geo_attributes_layer, attr="mukey", bin_id="DN"
@@ -157,16 +200,16 @@ def assign_attr_plurality_vector_layer(
     # Assign attributes to a GeoDataFrame based on the plurality of a given attribute in a GeoDataFrame
     # - geo_bins: GeoDataFrame of the bins
     # - geo_attributes_layer: GeoDataFrame of the attributes
-    # - attr: attribute of the geo_attributes_layer that should be attributed to
+    # - attr: attribute of the geo_attributes_layer that should be attributed to geo_bins
     # - bin_id: id of the bin column in geo_bins
 
     # Returns geo_bins with a new column called attr
 
     if not isinstance(geo_bins, gpd.GeoDataFrame):
-        cells_geometry = gpd.read_file(geo_bins)
+        geo_bins = gpd.read_file(geo_bins)
 
     if not isinstance(geo_attributes_layer, gpd.GeoDataFrame):
-        soil_data = gpd.read_file(geo_attributes_layer)
+        geo_attributes_layer = gpd.read_file(geo_attributes_layer)
 
     UTM_CRS = geo_bins.estimate_utm_crs()
     geo_bins = geo_bins.to_crs(UTM_CRS)
