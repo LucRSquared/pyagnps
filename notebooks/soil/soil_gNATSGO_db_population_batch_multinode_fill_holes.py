@@ -45,7 +45,7 @@ gNATSGO_files_dir = Path("/aims-nas/luc/thuc_gNATSGO/")
 
 log_dir = gNATSGO_files_dir / "LOGS"
 
-general_log = log_dir / f"{nodename}_batch_ssurgo_population_general_log.txt"
+general_log = log_dir / f"{nodename}_batch_gNATSGO_population_general_log.txt"
 fail_list = log_dir / f"{nodename}_fail_list.txt"
 
 thucs = gpd.read_file(
@@ -153,7 +153,7 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
             cells_to_update = cells_to_update.set_geometry('geom')
 
             if cells_to_update.empty:
-                raise Exception("No overlap of cells and gSSURGO data")
+                raise Exception("No overlap of cells and non gSSURGO data")
 
         except Exception as e:
             goodsofar = False
@@ -172,7 +172,7 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
                 general_log,
                 f"{now}: {nodename}: {thuc_id}: Performing plurality analysis",
             )
-            cells = sdm.assign_attr_zonal_stats_raster_layer(cells_to_update, path_to_gnatsgo_raster, agg_method='majority')
+            cells = sdm.assign_attr_zonal_stats_raster_layer(cells_to_update, path_to_gnatsgo_raster, agg_method='majority', attr="MUKEY")
             # this function uses rasterstats.zonal_stats and the "majority" function actually does the plurality operation by selecting the most common value
 
             cells = cells.rename(columns={"dn": "cell_id", "MUKEY": "soil_id"})
@@ -190,16 +190,17 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
         now = get_current_time()
         log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: Populating missing Soil_ID with gNATSGO data...")
 
-        data_to_update = cells[["cell_id", "soil_id"]].to_dict(orient="records")
-
-        # create a session factory
-        Session = sessionmaker(bind=engine)
-        # create a new session
-        session = Session()
-        # create a transaction
-        transaction = session.begin()
-
         try:
+            
+            data_to_update = cells[["cell_id", "soil_id"]].to_dict(orient="records")
+
+            # create a session factory
+            Session = sessionmaker(bind=engine)
+            # create a new session
+            session = Session()
+            # create a transaction
+            transaction = session.begin()
+
             # execute your update query here
             query = f"UPDATE thuc_{thuc_id}_annagnps_cell_data_section SET soil_id = :soil_id WHERE cell_id = :cell_id"
             session.execute(sql_text(query), data_to_update)
