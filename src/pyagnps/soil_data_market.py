@@ -3,10 +3,14 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import rasterio
+from rasterio.mask import mask
+from rasterio.features import geometry_window
 import xarray as xr
 import rioxarray
+from pyproj import CRS
 from rasterstats import zonal_stats
 from shapely import wkt
+from shapely.geometry import box
 import glob, os, subprocess
 from pathlib import Path
 from tqdm import tqdm
@@ -154,44 +158,100 @@ def download_soil_geodataframe_tiles(bbox=None, tile_size=0.1, explode_geometrie
 
     return gdf
 
-def calculate_zonal_stats(geometry, raster_dataset, agg_method='plurality'):
-    stats = zonal_stats(geometry, raster_dataset, stats='mean', all_touched=True)
+def calculate_zonal_stats(geometry, raster_dataset, agg_method='majority'):
+    # Extract the first band of the raster data
+    raster_values = raster_dataset.values[0]
+    stats = zonal_stats(geometry, raster_values, affine=raster_dataset.rio.transform(), stats=agg_method, all_touched=True)
     return stats[0][agg_method] if len(stats) > 0 else None
 
 def assign_attr_zonal_stats_raster_layer(
-    geo_bins, raster_layer, agg_method='plurality', attr="mukey", bin_id="DN"
-):
-    # Assign attributes to a GeoDataFrame based on the plurality of a given attribute in a GeoDataFrame
-    # - geo_bins: GeoDataFrame of the bins
-    # - geo_attributes_layer: GeoDataFrame of the attributes
-    # - attr: attribute of the geo_attributes_layer that should be attributed to geo_bins
-    # - bin_id: id of the bin column in geo_bins
-
-    # Returns geo_bins with a new column called attr
+    geo_bins, raster_layer, agg_method='majority', attr="mukey"):
 
     if not isinstance(geo_bins, gpd.GeoDataFrame):
         geo_bins = gpd.read_file(geo_bins)
 
-    if not isinstance(raster_layer, xr.DataArray):
-        raster_layer = rioxarray.open_rasterio(raster_layer)
-
     UTM_CRS = geo_bins.estimate_utm_crs()
+
     geo_bins = geo_bins.to_crs(UTM_CRS)
-    
-    raster_layer = raster_layer.rio.write_crs(UTM_CRS)
 
-    # Crop raster to geo_bins bounding box
     bbox = geo_bins.total_bounds
-    raster_layer = raster_layer.rio.clip(bbox, UTM_CRS)
+    bbox_geometry = box(*bbox)
 
-    # Perform zonal statistics
-    raster_dataset = raster_layer.rio.to_rasterio()
+    raster_data = rioxarray.open_rasterio(raster_layer, masked=True)
 
-    zonal_func = lambda x: calculate_zonal_stats(x, raster_dataset, agg_method=agg_method)
+    # Reproject the bounding box to the raster CRS
+    bbox_gdf = gpd.GeoDataFrame({'geometry': [bbox_geometry]}, crs=UTM_CRS)
+    bbox_gdf = bbox_gdf.to_crs(raster_data.rio.crs)
+    bbox_transformed = bbox_gdf.total_bounds
 
-    geo_bins[attr] = geo_bins['geometry'].apply(zonal_func)
+    cropped_data = raster_data.rio.clip_box(*bbox_transformed)
+    cropped_data = cropped_data.rio.reproject(UTM_CRS.to_string())
+
+    zonal_func = lambda x: calculate_zonal_stats(x, cropped_data, agg_method=agg_method)
+
+    geo_bins[attr] = geo_bins.geometry.apply(zonal_func)
 
     return geo_bins
+
+
+# def assign_attr_zonal_stats_raster_layer(
+#     geo_bins, raster_layer, agg_method='majority', attr="mukey"):
+    
+#     # Assign attributes to a GeoDataFrame based on the plurality of a given attribute in a GeoDataFrame
+#     # - geo_bins: GeoDataFrame of the cells to perform zonal statistics on
+#     # - raster_layer: path to raster file
+#     # - attr: attribute of the geo_attributes_layer that should be attributed to geo_bins
+
+#     # Returns geo_bins with a new column called attr
+
+#     if not isinstance(geo_bins, gpd.GeoDataFrame):
+#         geo_bins = gpd.read_file(geo_bins)
+
+#     UTM_CRS = geo_bins.estimate_utm_crs()
+
+#     geo_bins = geo_bins.to_crs(UTM_CRS)
+
+#     bbox = geo_bins.total_bounds
+#     bbox_geometry = box(*bbox)
+
+#     with rasterio.open(raster_layer) as src:
+#         raster_crs = CRS.from_string(src.crs.to_string())
+#         bbox_geometry_reprojected = gpd.GeoSeries(bbox_geometry, crs=UTM_CRS).to_crs(raster_crs).iloc[0]
+
+#         window = rasterio.windows.from_bounds(*bbox_geometry_reprojected.bounds, transform=src.transform)
+#         cropped_data = src.read(window=window)
+#         cropped_transform = src.window_transform(window)
+
+#         # write_cropped_raster_to_file(cropped_data, cropped_transform, src, 'cropped_raster.tif')
+
+#         reprojected_data = np.empty(cropped_data.shape, dtype=cropped_data.dtype)
+
+#         dst_transform = rasterio.transform.from_bounds(*geo_bins.total_bounds, 
+#                                                        reprojected_data.shape[1], 
+#                                                        reprojected_data.shape[2])
+        
+#         nodata_value = src.nodata
+
+#         rasterio.warp.reproject(
+#             source=cropped_data,
+#             src_transform=cropped_transform,
+#             src_crs=src.crs,
+#             destination=reprojected_data,
+#             dst_transform=dst_transform,
+#             dst_crs=UTM_CRS,
+#             resampling=rasterio.warp.Resampling.bilinear,
+#             src_nodata=nodata_value,
+#             dst_nodata=nodata_value
+#         )
+
+#         # zonal_func = lambda x: calculate_zonal_stats(x, reprojected_data[0], affine=dst_transform, 
+#         #                                             agg_method=agg_method)
+#         zonal_func = lambda x: calculate_zonal_stats(x, src, affine=cropped_transform, 
+#                                                     agg_method=agg_method)
+
+#         geo_bins[attr] = geo_bins.geometry.apply(zonal_func)
+
+#     return geo_bins
 
 
 def assign_attr_plurality_vector_layer(
