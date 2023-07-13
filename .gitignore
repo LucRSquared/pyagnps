@@ -17,6 +17,7 @@ nohup.out
 .venv/*
 .vscode
 db_credentials.json
+db_credentials_old.json
 inputs/soil/soil_data_US_with_mukey.csv
 .pdm-python
 build
