@@ -46,7 +46,6 @@ runlist = thucs['tophucid'].to_list()
 cells_without_soil = []
 
 for thuc_id in tqdm(runlist):
-
     
     # Query for cells where soil is not populated
     query_cds = f"SELECT cell_id FROM thuc_{thuc_id}_annagnps_cell_data_section WHERE soil_id is NULL"

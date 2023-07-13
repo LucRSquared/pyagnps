@@ -1,0 +1,133 @@
+CDL_Value,CDL_Category,Modified_CDL_Category,Field_ID,Landuse_Type_ID,Mgmt_Schd_ID
+1,Corn,Corn,Corn,CROPLAND,Corn
+2,Cotton,Cotton,Cotton,CROPLAND,Cotton
+3,Rice,Rice,Rice,CROPLAND,Rice
+4,Sorghum,Sorghum,Sorghum,CROPLAND,Sorghum
+5,Soybeans,Soybeans,Soybeans,CROPLAND,Soybeans
+6,Sunflower,Sunflower,Sunflower,CROPLAND,Sunflower
+10,Peanuts,Peanuts,Peanuts,CROPLAND,Peanuts
+11,Tobacco,Tobacco,Tobacco,CROPLAND,Tobacco
+12,Sweet Corn,Sweet_Corn,Sweet_Corn,CROPLAND,Sweet_Corn
+13,Pop or Orn Corn,Pop_or_Orn_Corn,Pop_or_Orn_Corn,CROPLAND,Pop_or_Orn_Corn
+14,Mint,Mint,Mint,CROPLAND,Mint
+21,Barley,Barley,Barley,CROPLAND,Barley
+22,Durum Wheat,Durum_Wheat,Durum_Wheat,CROPLAND,Durum_Wheat
+23,Spring Wheat,Spring_Wheat,Spring_Wheat,CROPLAND,Spring_Wheat
+24,Winter Wheat,Winter_Wheat,Winter_Wheat,CROPLAND,Winter_Wheat
+25,Other Small Grains,Other_Small_Grains,Other_Small_Grains,CROPLAND,Other_Small_Grains
+26,Dbl Crop WinWht/Soybeans,Dbl_Crop_WinWht_Soybeans,Dbl_Crop_WinWht_Soybeans,CROPLAND,Dbl_Crop_WinWht_Soybeans
+27,Rye,Rye,Rye,CROPLAND,Rye
+28,Oats,Oats,Oats,CROPLAND,Oats
+29,Millet,Millet,Millet,CROPLAND,Millet
+30,Speltz,Speltz,Speltz,CROPLAND,Speltz
+31,Canola,Canola,Canola,CROPLAND,Canola
+32,Flaxseed,Flaxseed,Flaxseed,CROPLAND,Flaxseed
+33,Safflower,Safflower,Safflower,CROPLAND,Safflower
+34,Rape Seed,Rape_Seed,Rape_Seed,CROPLAND,Rape_Seed
+35,Mustard,Mustard,Mustard,CROPLAND,Mustard
+36,Alfalfa,Alfalfa,Alfalfa,CROPLAND,Alfalfa
+37,Other Hay/Non Alfalfa,Other_Hay_Non_Alfalfa,Other_Hay_Non_Alfalfa,CROPLAND,Other_Hay_Non_Alfalfa
+38,Camelina,Camelina,Camelina,CROPLAND,Camelina
+39,Buckwheat,Buckwheat,Buckwheat,CROPLAND,Buckwheat
+41,Sugarbeets,Sugarbeets,Sugarbeets,CROPLAND,Sugarbeets
+42,Dry Beans,Dry_Beans,Dry_Beans,CROPLAND,Dry_Beans
+43,Potatoes,Potatoes,Potatoes,CROPLAND,Potatoes
+44,Other Crops,Other_Crops,Other_Crops,CROPLAND,Other_Crops
+45,Sugarcane,Sugarcane,Sugarcane,CROPLAND,Sugarcane
+46,Sweet Potatoes,Sweet_Potatoes,Sweet_Potatoes,CROPLAND,Sweet_Potatoes
+47,Misc Vegs & Fruits,Misc_Vegs_Fruits,Misc_Vegs_Fruits,CROPLAND,Misc_Vegs_Fruits
+48,Watermelons,Watermelons,Watermelons,CROPLAND,Watermelons
+49,Onions,Onions,Onions,CROPLAND,Onions
+50,Cucumbers,Cucumbers,Cucumbers,CROPLAND,Cucumbers
+51,Chick Peas,Chick_Peas,Chick_Peas,CROPLAND,Chick_Peas
+52,Lentils,Lentils,Lentils,CROPLAND,Lentils
+53,Peas,Peas,Peas,CROPLAND,Peas
+54,Tomatoes,Tomatoes,Tomatoes,CROPLAND,Tomatoes
+55,Caneberries,Caneberries,Caneberries,CROPLAND,Caneberries
+56,Hops,Hops,Hops,CROPLAND,Hops
+57,Herbs,Herbs,Herbs,CROPLAND,Herbs
+58,Clover/Wildflowers,Clover_Wildflowers,Clover_Wildflowers,CROPLAND,Clover_Wildflowers
+59,Sod/Grass Seed,Sod_Grass_Seed,Sod_Grass_Seed,PASTURE,Sod_Grass_Seed
+60,Switchgrass,Switchgrass,Switchgrass,CROPLAND,Switchgrass
+61,Fallow/Idle Cropland,Fallow_Idle_Cropland,Fallow_Idle_Cropland,CROPLAND,Fallow_Idle_Cropland
+62,Pasture/Grass,Pasture_Grass,Pasture_Grass,CROPLAND,Pasture_Grass
+63,Forest,Forest,Forest,FOREST,Forest
+64,Shrubland,Shrubland,Shrubland,RANGELAND,Shrubland
+65,Barren,Barren,Barren,RANGELAND,Barren
+66,Cherries,Cherries,Cherries,CROPLAND,Cherries
+67,Peaches,Peaches,Peaches,CROPLAND,Peaches
+68,Apples,Apples,Apples,CROPLAND,Apples
+69,Grapes,Grapes,Grapes,CROPLAND,Grapes
+70,Christmas Trees,Christmas_Trees,Christmas_Trees,FOREST,Christmas_Trees
+71,Other Tree Crops,Other_Tree_Crops,Other_Tree_Crops,CROPLAND,Other_Tree_Crops
+72,Citrus,Citrus,Citrus,CROPLAND,Citrus
+74,Pecans,Pecans,Pecans,CROPLAND,Pecans
+75,Almonds,Almonds,Almonds,CROPLAND,Almonds
+76,Walnuts,Walnuts,Walnuts,CROPLAND,Walnuts
+77,Pears,Pears,Pears,CROPLAND,Pears
+81,Clouds/No Data,Clouds_No_Data,Clouds/No ,PASTURE,mt_CCCCC
+82,Developed,Developed,Developed,URBAN,Developed
+83,Developed,Developed,Water,URBAN,Developed
+87,Developed,Developed,Wetlands,URBAN,Developed
+88,Nonag/Undefined,Nonag_Undefined,Nonag_Undefined,FOREST,Nonag_Undefined
+92,Developed,Developed,Aquaculture,URBAN,Developed
+111,Developed,Developed,Open_Water,URBAN,Developed
+112,Developed,Developed,Perennial_Ice_Snow,URBAN,Developed
+121,Developed/Open Space,Developed_Open_Space,Developed_Open_Space,URBAN,Developed_Open_Space
+122,Developed/Low Intensity,Developed_Low_Intensity,Developed_Low_Intensity,URBAN,Developed_Low_Intensity
+123,Developed/Med Intensity,Developed_Med_Intensity,Developed_Med_Intensity,URBAN,Developed_Med_Intensity
+124,Developed/High Intensity,Developed_High_Intensity,Developed_High_Intensity,URBAN,Developed_High_Intensity
+131,Barren,Barren,Barren,RANGELAND,Barren
+141,Deciduous Forest,Deciduous_Forest,Deciduous_Forest,FOREST,Deciduous_Forest
+142,Evergreen Forest,Evergreen_Forest,Evergreen_Forest,FOREST,Evergreen_Forest
+143,Mixed Forest,Mixed_Forest,Mixed_Forest,FOREST,Mixed_Forest
+152,Shrubland,Shrubland,Shrubland,RANGELAND,Shrubland
+176,Grassland/Pasture,Grassland_Pasture,Grassland_Pasture,CROPLAND,Grassland_Pasture
+190,Developed,Developed,Woody_Wetlands,URBAN,Developed
+195,Developed,Developed,Herbaceous_Wetlands,URBAN,Developed
+204,Pistachios,Pistachios,Pistachios,CROPLAND,Pistachios
+205,Triticale,Triticale,Triticale,CROPLAND,Triticale
+206,Carrots,Carrots,Carrots,CROPLAND,Carrots
+207,Asparagus,Asparagus,Asparagus,CROPLAND,Asparagus
+208,Garlic,Garlic,Garlic,CROPLAND,Garlic
+209,Cantaloupes,Cantaloupes,Cantaloupes,CROPLAND,Cantaloupes
+210,Prunes,Prunes,Prunes,CROPLAND,Prunes
+211,Olives,Olives,Olives,CROPLAND,Olives
+212,Oranges,Oranges,Oranges,CROPLAND,Oranges
+213,Honeydew Melons,Honeydew_Melons,Honeydew_Melons,CROPLAND,Honeydew_Melons
+214,Broccoli,Broccoli,Broccoli,CROPLAND,Broccoli
+216,Peppers,Peppers,Peppers,CROPLAND,Peppers
+217,Pomegranates,Pomegranates,Pomegranates,CROPLAND,Pomegranates
+218,Nectarines,Nectarines,Nectarines,CROPLAND,Nectarines
+219,Greens,Greens,Greens,CROPLAND,Greens
+220,Plums,Plums,Plums,CROPLAND,Plums
+221,Strawberries,Strawberries,Strawberries,CROPLAND,Strawberries
+222,Squash,Squash,Squash,CROPLAND,Squash
+223,Apricots,Apricots,Apricots,CROPLAND,Apricots
+224,Vetch,Vetch,Vetch,CROPLAND,Vetch
+225,Dbl Crop WinWht/Corn,Dbl_Crop_WinWht_Corn,Dbl_Crop_WinWht_Corn,CROPLAND,Dbl_Crop_WinWht_Corn
+226,Dbl Crop Oats/Corn,Dbl_Crop_Oats_Corn,Dbl_Crop_Oats_Corn,CROPLAND,Dbl_Crop_Oats_Corn
+227,Lettuce,Lettuce,Lettuce,CROPLAND,Lettuce
+229,Pumpkins,Pumpkins,Pumpkins,CROPLAND,Pumpkins
+230,Dbl Crop Lettuce/Durum Wht,Dbl_Crop_Lettuce_Durum_Wht,Dbl_Crop_Lettuce_Durum_Wht,CROPLAND,Dbl_Crop_Lettuce_Durum_Wht
+231,Dbl Crop Lettuce/Cantaloupe,Dbl_Crop_Lettuce_Cantaloupe,Dbl_Crop_Lettuce_Cantaloupe,CROPLAND,Dbl_Crop_Lettuce_Cantaloupe
+232,Dbl Crop Lettuce/Cotton,Dbl_Crop_Lettuce_Cotton,Dbl_Crop_Lettuce_Cotton,CROPLAND,Dbl_Crop_Lettuce_Cotton
+233,Dbl Crop Lettuce/Barley,Dbl_Crop_Lettuce_Barley,Dbl_Crop_Lettuce_Barley,CROPLAND,Dbl_Crop_Lettuce_Barley
+234,Dbl Crop Durum Wht/Sorghum,Dbl_Crop_Durum_Wht_Sorghum,Dbl_Crop_Durum_Wht_Sorghum,CROPLAND,Dbl_Crop_Durum_Wht_Sorghum
+235,Dbl Crop Barley/Sorghum,Dbl_Crop_Barley_Sorghum,Dbl_Crop_Barley_Sorghum,CROPLAND,Dbl_Crop_Barley_Sorghum
+236,Dbl Crop WinWht/Sorghum,Dbl_Crop_WinWht_Sorghum,Dbl_Crop_WinWht_Sorghum,CROPLAND,Dbl_Crop_WinWht_Sorghum
+237,Dbl Crop Barley/Corn,Dbl_Crop_Barley_Corn,Dbl_Crop_Barley_Corn,CROPLAND,Dbl_Crop_Barley_Corn
+238,Dbl Crop WinWht/Cotton,Dbl_Crop_WinWht_Cotton,Dbl_Crop_WinWht_Cotton,CROPLAND,Dbl_Crop_WinWht_Cotton
+239,Dbl Crop Soybeans/Cotton,Dbl_Crop_Soybeans_Cotton,Dbl_Crop_Soybeans_Cotton,CROPLAND,Dbl_Crop_Soybeans_Cotton
+240,Dbl Crop Soybeans/Oats,Dbl_Crop_Soybeans_Oats,Dbl_Crop_Soybeans_Oats,CROPLAND,Dbl_Crop_Soybeans_Oats
+241,Dbl Crop Corn/Soybeans,Dbl_Crop_Corn_Soybeans,Dbl_Crop_Corn_Soybeans,CROPLAND,Dbl_Crop_Corn_Soybeans
+242,Blueberries,Blueberries,Blueberries,CROPLAND,Blueberries
+243,Cabbage,Cabbage,Cabbage,CROPLAND,Cabbage
+244,Cauliflower,Cauliflower,Cauliflower,CROPLAND,Cauliflower
+245,Celery,Celery,Celery,CROPLAND,Celery
+246,Radishes,Radishes,Radishes,CROPLAND,Radishes
+247,Turnips,Turnips,Turnips,CROPLAND,Turnips
+248,Eggplants,Eggplants,Eggplants,CROPLAND,Eggplants
+249,Gourds,Gourds,Gourds,CROPLAND,Gourds
+250,Cranberries,Cranberries,Cranberries,CROPLAND,Cranberries
+254,Dbl Crop Barley/Soybeans,Dbl_Crop_Barley_Soybeans,Dbl_Crop_Barley_Soybeans,CROPLAND,Dbl_Crop_Barley_Soybeans
