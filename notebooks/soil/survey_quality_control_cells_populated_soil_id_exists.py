@@ -35,14 +35,15 @@ path_to_thucs = Path(
 outpath_cells = Path('/aims-nas/luc/thuc_soil_survey/cells_NITA_unvalid_soils_reason_gNATSGO.gpkg')
 
 
+print('Reading Original THUC file')
+
 thucs = gpd.read_file(
     path_to_thucs
 )  
 # GeoDataFrame containing the thucs and their geometry
-thucs = thucs.sort_values(by=["bbox_area_sqkm"], ascending=True)
+thucs = thucs.sort_values(by=["bbox_area_sqkm"], ascending=False)
 
 runlist = thucs['tophucid'].to_list()
-# runlist = ['1957', '1958']
 
 # soil_root_path =  Path('D:/AIMS/Datasets/Soil/DATABASE_POPULATION_TASKS/SDM_QUERY_AND_NITA_PROCESSING/ALL_US_v2_SSURGO_STATSGO2_RSS/')
 soil_root_path = Path('/aims-nas/data/datasets/SDM_QUERY_AND_NITA_PROCESSING/ALL_US_v2_SSURGO_STATSGO2_RSS/')
@@ -126,7 +127,7 @@ for thuc_id in tqdm(runlist):
 print('Generating MEGA concatainated file of all problematic cells')
 
 invalid_cells = gpd.GeoDataFrame(pd.concat(rows_invalid_soil_id, ignore_index=True), crs='epsg:4326', geometry="geom")
-
+invalid_cells['problems'] = invalid_cells['problems'].astype(str)
 
 print('Writing file to disk')
 invalid_cells.to_file(outpath_cells, driver='GPKG')
