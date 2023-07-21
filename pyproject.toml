@@ -27,7 +27,7 @@ dependencies = [
     "lxml>=4.9.2",
     "geopandas>=0.12.2",
     "gdal @ https://github.com/girder/large_image_wheels/raw/wheelhouse/GDAL-3.4.3-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=6b98d9c0b17b99ceffe351de9d936facdc85991a9209f89e8b3add34dca495fa ; sys_platform=='linux'",
-    "gdal-windows @ https://download.lfd.uci.edu/pythonlibs/archived/GDAL-3.4.3-cp311-cp311-win_amd64.whl ; sys_platform=='win32'",
+    "gdal @ https://download.lfd.uci.edu/pythonlibs/archived/GDAL-3.4.3-cp311-cp311-win_amd64.whl ; sys_platform=='win32'",
     "psycopg2-binary>=2.9.6",
     "sqlalchemy>=2.0.12",
     "matplotlib>=3.7.1",
@@ -38,6 +38,8 @@ dependencies = [
     "fastparquet>=2023.7.0",
     "holoviews>=1.16.2",
     "psycopg2>=2.9.6",
+    "hvplot>=0.8.4",
+    "selenium>=4.10.0",
 ]
 requires-python = ">=3.9"
 readme = "README.md"
