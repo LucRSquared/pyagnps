@@ -62,7 +62,7 @@ thucs = gpd.read_file(
 thucs = thucs.sort_values(by=["bbox_area_sqkm"], ascending=True)
 
 df_cdl = pd.read_csv(path_to_management_class_names)
-dico = df_cdl[['CDL_Value','Mgmt_Schd_ID']].set_index('CDL_Value').to_dict(orient='dict')['Mgmt_Schd_ID']
+dico = df_cdl[['CDL_Value','Modified_CDL_Category']].set_index('CDL_Value').to_dict(orient='dict')['Modified_CDL_Category']
 
 runlist = thucs["tophucid"].to_list()
 # runlist = ["1002", "1004"]
@@ -143,6 +143,7 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
             cells = sdm.assign_attr_zonal_stats_raster_layer(cells, path_to_raster, agg_method='majority', attr='CDL_Value')
             print(cells.dtypes)
             cells['CDL_Value'] = cells['CDL_Value'].astype('Int32')
+            cells.loc[cells['CDL_Value']==0, 'CDL_Value'] = 81 # Set 0 value to 81 = Cloud_No_Data
             cells['Mgmt_Field_ID'] = cells['CDL_Value'].map(dico)
             # this function uses rasterstats.zonal_stats and the "majority" function actually does the plurality operation by selecting the most common value
 
