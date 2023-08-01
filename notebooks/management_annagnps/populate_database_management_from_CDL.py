@@ -59,7 +59,7 @@ fail_list = log_dir / f"{nodename}_fail_list.txt"
 thucs = gpd.read_file(
     path_to_thucs
 )  # GeoDataFrame containing the thucs and their geometry
-thucs = thucs.sort_values(by=["bbox_area_sqkm"], ascending=False)
+thucs = thucs.sort_values(by=["bbox_area_sqkm"], ascending=True)
 
 df_cdl = pd.read_csv(path_to_management_class_names)
 dico = df_cdl[['CDL_Value','Mgmt_Schd_ID']].set_index('CDL_Value').to_dict(orient='dict')['Mgmt_Schd_ID']
@@ -126,8 +126,9 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
                 f"{now}: {nodename}: {thuc_id}: Performing plurality analysis",
             )
             cells = sdm.assign_attr_zonal_stats_raster_layer(cells, path_to_raster, agg_method='majority', attr='CDL_Value')
-            cells['CDL_Value'] = cells_tmp['CDL_Value'].astype('Int32')
-            cells['Mgmt_Field_ID'] = cells_tmp['CDL_Value'].map(dico)
+            print(cells.dtypes)
+            cells['CDL_Value'] = cells['CDL_Value'].astype('Int32')
+            cells['Mgmt_Field_ID'] = cells['CDL_Value'].map(dico)
             # this function uses rasterstats.zonal_stats and the "majority" function actually does the plurality operation by selecting the most common value
 
             cells = cells.rename(columns={"dn": "cell_id"})
@@ -136,7 +137,7 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
             goodsofar = False
             now = get_current_time()
             log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e}")
-
+            print(cells['CDL_Value'])
     else:
         pass
 
@@ -169,7 +170,7 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
             now = get_current_time()
             log_to_file(
                 general_log,
-                f"{now}: {nodename}: {thuc_id}: Failed to update DB, rolling back...",
+                f"{now}: {nodename}: {thuc_id}: Failed to update DB, rolling back... : {e}",
             )
 
         finally:
