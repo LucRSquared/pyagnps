@@ -95,6 +95,21 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
     else:
         thuc_dir.mkdir(parents=True)
 
+    # Update table schema and make sure that mgmt_field_id is of type text
+    with engine.connect() as connection:
+        try:
+            query = f"ALTER TABLE thuc_{thuc_id}_annagnps_cell_data_section ALTER COLUMN mgmt_field_id TYPE TEXT"
+            connection.execute(sql_text(query))
+            # Commit the transaction explicitly
+            connection.commit()
+
+        except Exception as e:
+            goodsofar = False
+            # Rollback the transaction in case of an error
+            connection.rollback()
+            now = get_current_time()
+            log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e} (rolling back)")
+
     # Collect thuc cells geometry from database
     try:
         now = get_current_time()
