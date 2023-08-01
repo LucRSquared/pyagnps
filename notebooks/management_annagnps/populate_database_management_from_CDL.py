@@ -11,7 +11,7 @@ import pandas as pd
 from pyagnps import soil_data_market as sdm
 from pyagnps.utils import log_to_file, get_current_time
 
-from sqlalchemy import create_engine, text as sql_text
+from sqlalchemy import URL, create_engine, text as sql_text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -26,8 +26,17 @@ host = credentials["host"]
 port = credentials["port"]
 database = credentials["database"]
 
+url_object = URL.create(
+    "postgresql",
+    username=user,
+    password=password,
+    host=host,
+    port=port,
+    database=database
+)
+
 # create a SQLAlchemy engine object
-engine = create_engine(f"postgresql://{user}:{password}@{host}:{port}/{database}")
+engine = create_engine(url_object)
 
 # PATHS SETUP
 bigbang = time.time()
@@ -37,15 +46,14 @@ path_to_thucs = Path(
     "/aims-nas/luc/data/tophuc_S_M_40000_closed_holes_with_container_thuc_merged_bbox_area_first_kept.gpkg"
 )
 
-path_to_gnatsgo_raster = Path("/aims-nas/data/datasets/gNATSGO/gNATSGO-mukey.tif")
+path_to_raster = Path("/aims-nas/data/datasets/Management/CDL_Annual/CDL_2022.tif")
 
-path_to_gnatsgo_sapolygon = Path("/aims-nas/data/datasets/gNATSGO/gNATSGO_SAPOLYGON.gpkg")
+track_files_dir = Path("/aims-nas/luc/thuc_field_ID_CDL/")
+path_to_management_class_names = Path('/aims-nas/data/datasets/Management/CDL_Annual/definition_of_CDL_Class_Names_for_use_in_AIMS/CDL_Field_ID_dictionary.csv')
 
-gNATSGO_files_dir = Path("/aims-nas/luc/thuc_gNATSGO/")
+log_dir = track_files_dir / "LOGS"
 
-log_dir = gNATSGO_files_dir / "LOGS"
-
-general_log = log_dir / f"{nodename}_batch_gNATSGO_population_general_log.txt"
+general_log = log_dir / f"{nodename}_batch_field_ID_CDL_population_general_log.txt"
 fail_list = log_dir / f"{nodename}_fail_list.txt"
 
 thucs = gpd.read_file(
@@ -53,11 +61,14 @@ thucs = gpd.read_file(
 )  # GeoDataFrame containing the thucs and their geometry
 thucs = thucs.sort_values(by=["bbox_area_sqkm"], ascending=False)
 
+df_cdl = pd.read_csv(path_to_management_class_names)
+dico = df_cdl[['CDL_Value','Mgmt_Schd_ID']].set_index('CDL_Value').to_dict(orient='dict')['Mgmt_Schd_ID']
+
 runlist = thucs["tophucid"].to_list()
 # runlist = ["1002", "1004"]
 # runlist = ["1002"]
 
-gNATSGO_files_dir.mkdir(parents=True, exist_ok=True)
+track_files_dir.mkdir(parents=True, exist_ok=True)
 log_dir.mkdir(parents=True, exist_ok=True)
 
 # runlist = pd.read_csv(path_to_thuc_runlist, dtype=object)
@@ -74,8 +85,8 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
     start = time.time()
 
     # Make sure the path exists
-    thucid_dir_name = f"thuc_{thuc_id}_gNATSGO"
-    thuc_dir = gNATSGO_files_dir / thucid_dir_name
+    thucid_dir_name = f"thuc_{thuc_id}_CDL"
+    thuc_dir = track_files_dir / thucid_dir_name
 
     if thuc_dir.exists():
         now = get_current_time()
@@ -104,64 +115,6 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
         now = get_current_time()
         log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e}")
 
-    # Get SSURGO polygon geometry
-    if goodsofar:
-        try:
-            now = get_current_time()
-            log_to_file(
-                general_log,
-                f"{now}: {nodename}: {thuc_id}: Getting cells boundary",
-            )
-
-            boundary = cells.copy(deep=True)
-            boundary['geom'] = boundary['geom'].buffer(0)
-            boundary = boundary.unary_union
-            boundary = gpd.GeoDataFrame(geometry=[boundary], crs=utm)
-
-            now = get_current_time()
-            log_to_file(
-                general_log,
-                f"{now}: {nodename}: {thuc_id}: Selecting gNATSGO SAPOLYGON in the boundary")
-
-            sapolygon = gpd.read_file(path_to_gnatsgo_sapolygon, rows=0)
-            crs_sapolygon = sapolygon.crs
-
-            sapolygon = gpd.read_file(path_to_gnatsgo_sapolygon, bbox=boundary.to_crs(crs_sapolygon))
-
-        except Exception as e:
-            goodsofar = False
-            now = get_current_time()
-            log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e}")
-
-    else:
-        pass
-
-    # Only keep the cells covered by SAPOLYGON polygon
-    if goodsofar:
-        try:
-            now = get_current_time()
-            log_to_file(
-                general_log,
-                f"{now}: {nodename}: {thuc_id}: Restricting cells to local boundary not covered by SSURGO",
-            )
-
-            cells_to_update= cells.overlay(sapolygon.to_crs(utm), how='intersection')
-
-            cells_to_update = cells_to_update.loc[cells_to_update['SOURCE'] != 'SSURGO', ['dn','geometry']]
-            cells_to_update = cells_to_update.drop_duplicates()
-            cells_to_update = cells_to_update.rename(columns={"geometry": "geom"})
-            cells_to_update = cells_to_update.set_geometry('geom')
-
-            if cells_to_update.empty:
-                raise Exception("No overlap of cells and non gSSURGO data")
-
-        except Exception as e:
-            goodsofar = False
-            now = get_current_time()
-            log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e}")
-    else:
-        pass
-
 
 
     # Apply plurality analysis
@@ -172,10 +125,12 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
                 general_log,
                 f"{now}: {nodename}: {thuc_id}: Performing plurality analysis",
             )
-            cells = sdm.assign_attr_zonal_stats_raster_layer(cells_to_update, path_to_gnatsgo_raster, agg_method='majority', attr="MUKEY")
+            cells = sdm.assign_attr_zonal_stats_raster_layer(cells, path_to_raster, agg_method='majority', attr='CDL_Value')
+            cells['CDL_Value'] = cells_tmp['CDL_Value'].astype('Int32')
+            cells['Mgmt_Field_ID'] = cells_tmp['CDL_Value'].map(dico)
             # this function uses rasterstats.zonal_stats and the "majority" function actually does the plurality operation by selecting the most common value
 
-            cells = cells.rename(columns={"dn": "cell_id", "MUKEY": "soil_id"})
+            cells = cells.rename(columns={"dn": "cell_id"})
 
         except Exception as e:
             goodsofar = False
@@ -188,11 +143,11 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
     # Update database
     if goodsofar:
         now = get_current_time()
-        log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: Populating missing Soil_ID with gNATSGO data...")
+        log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: Populating Field_ID with CDL data...")
 
         try:
             
-            data_to_update = cells[["cell_id", "soil_id"]].to_dict(orient="records")
+            data_to_update = cells[["cell_id", "Mgmt_Field_ID"]].to_dict(orient="records")
 
             # create a session factory
             Session = sessionmaker(bind=engine)
@@ -202,7 +157,7 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
             transaction = session.begin()
 
             # execute your update query here
-            query = f"UPDATE thuc_{thuc_id}_annagnps_cell_data_section SET soil_id = :soil_id WHERE cell_id = :cell_id"
+            query = f"UPDATE thuc_{thuc_id}_annagnps_cell_data_section SET Mgmt_Field_ID = :Mgmt_Field_ID WHERE cell_id = :cell_id"
             session.execute(sql_text(query), data_to_update)
             # commit the transaction
             transaction.commit()
@@ -232,8 +187,9 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
         end = time.time()
         log_to_file(
             general_log,
-            f"{now}: {nodename}: {thuc_id}: Did not finish (errors) {end-start} seconds",
+            f"{now}: {nodename}: {thuc_id}: Did not finish (errors) {end-start} seconds (deleting dir)",
         )
+        thuc_dir.rmdir()
         log_to_file(fail_list, f"{thuc_id}")
 
 end = time.time()
