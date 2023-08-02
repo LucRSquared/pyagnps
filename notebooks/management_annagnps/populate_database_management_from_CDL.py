@@ -56,6 +56,7 @@ log_dir = track_files_dir / "LOGS"
 general_log = log_dir / f"{nodename}_batch_field_ID_CDL_population_general_log.txt"
 fail_list = log_dir / f"{nodename}_fail_list.txt"
 
+print('Reading and initializing files...')
 thucs = gpd.read_file(
     path_to_thucs
 )  # GeoDataFrame containing the thucs and their geometry
@@ -95,20 +96,6 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
     else:
         thuc_dir.mkdir(parents=True)
 
-    # Update table schema and make sure that mgmt_field_id is of type text
-    with engine.connect() as connection:
-        try:
-            query = f"ALTER TABLE thuc_{thuc_id}_annagnps_cell_data_section ALTER COLUMN mgmt_field_id TYPE TEXT"
-            connection.execute(sql_text(query))
-            # Commit the transaction explicitly
-            connection.commit()
-
-        except Exception as e:
-            goodsofar = False
-            # Rollback the transaction in case of an error
-            connection.rollback()
-            now = get_current_time()
-            log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e} (rolling back)")
 
     # Collect thuc cells geometry from database
     try:
@@ -141,7 +128,8 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
                 f"{now}: {nodename}: {thuc_id}: Performing plurality analysis",
             )
             cells = sdm.assign_attr_zonal_stats_raster_layer(cells, path_to_raster, agg_method='majority', attr='CDL_Value')
-            print(cells.dtypes)
+
+            # Reformat the CDL Value column and map with the correct value
             cells['CDL_Value'] = cells['CDL_Value'].astype('Int32')
             cells.loc[cells['CDL_Value']==0, 'CDL_Value'] = 81 # Set 0 value to 81 = Cloud_No_Data
             cells['Mgmt_Field_ID'] = cells['CDL_Value'].map(dico)
@@ -149,11 +137,32 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
 
             cells = cells.rename(columns={"dn": "cell_id"})
 
+            data_to_update = cells[["cell_id", "Mgmt_Field_ID"]].to_dict(orient="records")
+
         except Exception as e:
             goodsofar = False
             now = get_current_time()
             log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e}")
-            print(cells['CDL_Value'])
+    else:
+        pass
+
+    # Update table schema and make sure that mgmt_field_id is of type text
+    if goodsofar:
+        with engine.connect() as connection:
+            try:
+                query = f"ALTER TABLE thuc_{thuc_id}_annagnps_cell_data_section ALTER COLUMN mgmt_field_id TYPE TEXT"
+                connection.execute(sql_text(query))
+                # Commit the transaction explicitly
+                connection.commit()
+
+            except Exception as e:
+                goodsofar = False
+                
+                now = get_current_time()
+                log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e} (rolling back)")
+
+                # Rollback the transaction in case of an error
+                connection.rollback()
     else:
         pass
 
@@ -163,9 +172,6 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
         log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: Populating Field_ID with CDL data...")
 
         try:
-            
-            data_to_update = cells[["cell_id", "Mgmt_Field_ID"]].to_dict(orient="records")
-
             # create a session factory
             Session = sessionmaker(bind=engine)
             # create a new session
@@ -179,7 +185,7 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
             # commit the transaction
             transaction.commit()
 
-        except SQLAlchemyError as e:
+        except Exception as e:
             goodsofar = False
             # rollback the transaction on error
             transaction.rollback()
@@ -196,8 +202,9 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
     else:
         pass
 
-    now = get_current_time()
+
     if goodsofar:
+        now = get_current_time()
         log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: Done!")
 
     else:
