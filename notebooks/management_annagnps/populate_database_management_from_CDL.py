@@ -13,7 +13,6 @@ from pyagnps.utils import log_to_file, get_current_time
 
 from sqlalchemy import URL, create_engine, text as sql_text
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import SQLAlchemyError
 
 # DATABASE SETUP
 credentials = Path("../../inputs/db_credentials.json")
@@ -148,6 +147,8 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
 
     # Update table schema and make sure that mgmt_field_id is of type text
     if goodsofar:
+        now = get_current_time()
+        log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: Changing mgmt_field_id column type to TEXT")
         with engine.connect() as connection:
             try:
                 query = f"ALTER TABLE thuc_{thuc_id}_annagnps_cell_data_section ALTER COLUMN mgmt_field_id TYPE TEXT"
@@ -201,7 +202,6 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
 
     else:
         pass
-
 
     if goodsofar:
         now = get_current_time()
