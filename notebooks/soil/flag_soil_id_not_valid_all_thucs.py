@@ -5,7 +5,7 @@ import geopandas as gpd
 from tqdm import tqdm
 from sqlalchemy import URL, create_engine, text as sql_text
 
-credentials = Path('../../inputs/db_credentials_old.json')
+credentials = Path('../../inputs/db_credentials.json')
 with open(credentials, 'r') as f:
     credentials = json.load(f)
 
@@ -38,32 +38,35 @@ thucs = gpd.read_file(
 thucs = thucs.sort_values(by=["bbox_area_sqkm"], ascending=False)
 
 runlist = thucs["tophucid"].to_list()
-runlist = ['1004']
+# runlist = ['1311']
 
+
+# Get list of valid Soil_ID once 
+valid_soil_ids = []
+with engine.connect() as connection:
+    result = connection.execute(sql_text("""SELECT "Soil_ID" FROM usa_valid_soil_data"""))
+    valid_soil_ids = [row[0] for row in result]
 
 for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
-
     thuc_id = tuc["tophucid"]
 
     if thuc_id not in runlist:
         continue
-
+   
     with engine.connect() as connection:
         try:
-            query = f""" 
+            # Check if soil_id is in prefetched list 
+            query = f"""
             ALTER TABLE thuc_{thuc_id}_annagnps_cell_data_section
             ADD COLUMN soil_id_annagnps_valid INT;
 
-            UPDATE thuc_{thuc_id}_annagnps_cell_data_section
-            SET soil_id_annagnps_valid = CASE WHEN soil_id IN (SELECT Soil_ID FROM usa_valid_soil_data) THEN 1 ELSE 0 END;
-
+            UPDATE thuc_{thuc_id}_annagnps_cell_data_section 
+            SET soil_id_annagnps_valid = CASE WHEN soil_id IN {tuple(valid_soil_ids)} THEN 1 ELSE 0 END
             """
+            
             connection.execute(sql_text(query))
-            # Commit the transaction explicitly
             connection.commit()
-
         except Exception as e:
-            print(e)
-            # Rollback the transaction in case of an error
+            print(f'Error for THUC {thuc_id}') 
+            # print(e)
             connection.rollback()
-
