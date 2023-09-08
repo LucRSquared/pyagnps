@@ -41,6 +41,9 @@ dependencies = [
     "hvplot>=0.8.4",
     "selenium>=4.10.0",
     "psycopg2>=2.9.6 ; sys_platform == 'win32'",
+    "pynldas2>=0.15.1",
+    "pydaymet>=0.15.1",
+    "timezonefinder>=6.2.0",
 ]
 requires-python = ">=3.9"
 readme = "README.md"

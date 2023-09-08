@@ -2,9 +2,12 @@ import rasterio
 from rasterio import features
 from shapely.geometry import shape
 from shapely.geometry.polygon import Polygon, LinearRing
+import numpy as np
 import geopandas as gpd
 import shutil, os, glob, sys
-from datetime import datetime
+
+import dateutil
+from datetime import datetime, timezone
 
 
 def polygonize_cell_reach_IDs_asc(
@@ -135,3 +138,23 @@ def get_current_time(format="%Y-%m-%d-%H-%M-%S"):
     now = datetime.now()
     now_str = now.strftime(format)
     return now_str
+
+def get_date_from_string(date_string, outputtype=np.datetime64):
+    """Converts a string to a datetime object
+       Converts to UTC time zone (naive datetime object)
+       
+       date_string: string in ISO 8601 (friendly-ish) format"""
+
+    date = dateutil.parser.parse(date_string)
+
+    if not(date.tzinfo is None or date.tzinfo == dateutil.tz.tzutc()):
+        date = date.astimezone(timezone.utc)
+        
+    date = date.replace(tzinfo=None)
+
+    if outputtype == datetime:
+        return date
+    elif outputtype == np.datetime64:
+        return np.datetime64(date)
+    else:
+        raise TypeError("outputtype must be datetime or np.datetime64")
