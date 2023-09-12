@@ -9,6 +9,11 @@ from timezonefinder import TimezoneFinder
 import numpy as np
 import pandas as pd
 
+# Do not create 
+import os
+os.environ["HYRIVER_CACHE_NAME"] = "/tmp/climate_cache.sqlite" # On Windows systems it will be under C:/tmp
+# os.environ["HYRIVER_CACHE_DISABLE"] = "true"
+
 
 class clm_annagnps_coords():
     def __init__(self, 
@@ -48,11 +53,13 @@ class clm_annagnps_coords():
         if date_mode == "utc":
             self.start = start
             self.end = end
+            self.timezone = "UTC"
         elif date_mode == "local":
             # Identify timezone:
             lon, lat = coords
             tf = TimezoneFinder()
             tmz_name = tf.timezone_at(lng=lon, lat=lat)
+            self.timezone = tmz_name
 
             # Other method
             start_stamp_local, end_stamp_local = pd.Timestamp(start, tz=tmz_name), pd.Timestamp(end, tz=tmz_name)
@@ -62,6 +69,8 @@ class clm_annagnps_coords():
             self.end = end_stamp_utc
         else:
             raise Exception(f"Invalid ``date_mode`` {date_mode}")
+        
+        self.date_mode = date_mode
         
         self.coords = coords
         self.variables = variables
@@ -77,6 +86,13 @@ class clm_annagnps_coords():
         variables = self.variables,
         source='netcdf',
         n_conn=4)
+
+        # Express dates in local mode
+        if self.date_mode == "local":
+            clm.index = clm.index.tz_convert(self.timezone).tz_localize(None)
+        else:
+            clm.index = clm.index.tz_localize(None)
+
         
         self.clm = clm
 
