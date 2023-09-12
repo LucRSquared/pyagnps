@@ -61,7 +61,6 @@ class clm_annagnps_coords():
             tmz_name = tf.timezone_at(lng=lon, lat=lat)
             self.timezone = tmz_name
 
-            # Other method
             start_stamp_local, end_stamp_local = pd.Timestamp(start, tz=tmz_name), pd.Timestamp(end, tz=tmz_name)
             start_stamp_utc = start_stamp_local.tz_convert("UTC").tz_localize(None)
             end_stamp_utc = end_stamp_local.tz_convert("UTC").tz_localize(None)
@@ -112,6 +111,21 @@ class clm_annagnps_coords():
         clm = self.clm
         clm["tdew"] = compute_dew_point(clm["RH"], clm["temp"])
 
+    def keep_annagnps_columns_only(self):
+        """
+        Once extra variables have been computed (Tdew, Wind Speed, Wind Direction) some variables are no longer needed
+        for AnnAGNPS climate file generation and can be dropped 
+        """
+        columns_to_remove = ["RH", "psurf", "vp (Pa)", "esat", "humidity", "wind_u", "wind_v"]
+
+        if self.clm is not None:
+            self.clm.drop(columns=columns_to_remove, errors="ignore", inplace=True)
+
+        if self.clm_resampled is not None:
+            self.clm_resampled.drop(columns=columns_to_remove, errors="ignore", inplace=True)
+
+    
+
     def resample(self, rule="1D"):
         clm = self.clm
         full_how_dict = {
@@ -152,7 +166,7 @@ class clm_annagnps_coords():
         self.compute_wind_direction()
         self.compute_wind_speed()
 
-    def generate_climate_file_daily(self, use_resampled=True, output_filepath=None, saveformat='csv'):
+    def generate_climate_file_daily(self, use_resampled=True, output_filepath=None, saveformat='csv', float_format='%.3f'):
         """ Generate a climate file for a given period. Returns a DataFrame and writes to csv if output_filepath is provided.
         
         Parameters
@@ -163,6 +177,7 @@ class clm_annagnps_coords():
             Path to write the output file, by default None
         saveformat : str, optional
             Format to save the output file, by default 'csv', also accepts 'parquet'
+        float_format : str, optional default = '%.3f'
 
         Returns
         -------
@@ -246,13 +261,32 @@ class clm_annagnps_coords():
 
         if output_filepath is not None:
             if saveformat == 'csv':
-                df.to_csv(output_filepath, index=False)
+                df.to_csv(output_filepath, index=False, float_format=float_format)
             elif saveformat == 'parquet':
                 df.to_parquet(output_filepath, index=True)
             else:
                 raise ValueError('Invalid saveformat')
 
         return df
+    
+    def query_nldas2_generate_annagnps_climate_daily(self, **kwargs):
+        """
+        Generate climate_daily.csv AnnAGNPS file/DataFrame
+
+        ### Key-Value Arguments:
+        - output_filepath : str, optional
+               Path to write the output file, by default None
+        - saveformat : str, optional
+            Format to save the output file, by default 'csv', also accepts 'parquet'
+        - float_format : str, optional, default= '%.3f' for printing csv file
+        """
+        self.query_nldas2_climate()
+        self.compute_additional_climate_variables()
+        self.keep_annagnps_columns_only()
+        self.resample(rule="1D")
+        
+        df_daily = self.generate_climate_file_daily(use_resampled=True, **kwargs)
+        return df_daily
 
 
 def compute_RH(Psurf, Tair, Qair, Tunit='K'):
