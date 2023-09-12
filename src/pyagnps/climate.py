@@ -1,5 +1,6 @@
+from pathlib import Path
 import pynldas2
-import pydaymet
+# import pydaymet
 
 import datetime
 # import pytz
@@ -66,6 +67,7 @@ class clm_annagnps_coords():
         self.variables = variables
 
         self.clm = None # DataFrame
+        self.clm_resampled = None
 
     def query_nldas2_climate(self):
         clm = pynldas2.get_bycoords(
@@ -96,7 +98,7 @@ class clm_annagnps_coords():
 
     def resample(self, rule="1D"):
         clm = self.clm
-        how_dict = {
+        full_how_dict = {
                 'prcp': 'sum',
                 'pet': 'sum', 
                 'rsds': 'mean',
@@ -104,8 +106,138 @@ class clm_annagnps_coords():
                 'wind_direction': 'mean',
                 'tdew': 'mean', 
                 'temp_min': 'min',
-                'temp_max': 'max'}
-        pass
+                'temp_max': 'max',
+                'RH': 'mean',
+                'temp': 'mean',
+                'psurf': 'mean',
+                'vp (Pa)': 'mean',
+                'esat': 'mean',
+                'humidity': 'mean',
+                'wind_u': 'mean',
+                'wind_v': 'mean'}
+        
+        # Prepare min/max temp columns
+        clm["temp_min"] = clm["temp"]
+        clm["temp_max"] = clm["temp"]
+        
+        # Create aggregation dict 
+        vars_how = {var:full_how_dict[var] for var in clm.columns}
+
+        clm = clm.resample(rule=rule).agg(vars_how)
+        clm.index = clm.index.tz_localize(None)
+
+        self.clm_resampled = clm
+
+        return clm
+    
+    def compute_additional_climate_variables(self):
+        self.compute_RH()
+        self.compute_dew_point()
+        self.compute_wind_direction()
+        self.compute_wind_speed()
+
+    def generate_climate_file_daily(self, use_resampled=True, output_filepath=None, saveformat='csv'):
+        """ Generate a climate file for a given period. Returns a DataFrame and writes to csv if output_filepath is provided.
+        
+        Parameters
+        ----------
+        df : pandas.DataFrame with all necessary variables
+        use_resampled: if True it will used the resampled dataframe if it exists, if not it will use the current one
+        output_filepath : str, optional
+            Path to write the output file, by default None
+        saveformat : str, optional
+            Format to save the output file, by default 'csv', also accepts 'parquet'
+
+        Returns
+        -------
+        pandas.DataFrame
+            DataFrame containing the climate data properly formatted
+        """
+
+        if use_resampled:
+            df = self.clm_resampled.copy(deep=True)
+        else:
+            df = self.clm.copy(deep=True)
+
+        # Columns to keep:
+        columns_to_keep = set(['Month', 'Day', 'Year', 'Max_Air_Temperature', 'Min_Air_Temperature', 'Precip', 'Dew_Point',
+                'Sky_Cover', 'Wind_Speed', 'Wind_Direction', 'Solar_Radiation', 'Storm_Type_ID',
+                'Potential_ET', 'Actual_ET', 'Actual_EI', 'Input_Units_Code'])
+
+        # Get the time series for the nearest grid cell
+        df['Day'] = df.index.day
+        df['Month'] = df.index.month
+        df['Year'] = df.index.year
+
+        # Convert temperatures to Celsius
+        df['temp_max'] = df['temp_max'] - 273.15
+        df['temp_min'] = df['temp_min'] - 273.15
+        # df['Tair'] = df['Tair'] - 273.15
+        df['tdew'] = df['tdew'] - 273.15
+
+        # Total Solar Radiation (W/m2)
+        df['Solar_Radiation'] = df['rsds']
+
+        # Add blank columns for the other variables
+        df['Sky_Cover'] = None
+        df['Storm_Type_ID'] = None
+        df['Actual_ET'] = None
+        df['Actual_EI'] = None
+
+        # We use SI units because we respect ourserlves
+        df['Input_Units_Code'] = 1
+
+        # No need to convert precipitation (PotEvap) to mm/day, if we assume rhow = 1000 kg/m3 = 1 kg/L -> 1 mm = 1 L/m2 = 1 kg/m2
+        df["pet"] = df["pet"].apply(lambda x: max(x,0))
+
+        # Rename columns
+        df = df.rename(columns={'wind_speed': 'Wind_Speed',
+                                'wind_direction': 'Wind_Direction',
+                                'prcp': 'Precip',
+                                'pet': 'Potential_ET',
+                                'temp_min': 'Min_Air_Temperature',
+                                'temp_max': 'Max_Air_Temperature',
+                                'tdew': 'Dew_Point'})
+        
+        # Drop useless columns
+        columns = set(df.columns)
+        useless_columns = columns - columns.intersection(columns_to_keep)
+        df = df.drop(columns=useless_columns)
+
+
+        # Reorder columns
+        df = df[['Month', 'Day', 'Year', 'Max_Air_Temperature', 'Min_Air_Temperature', 'Precip', 'Dew_Point',
+                'Sky_Cover', 'Wind_Speed', 'Wind_Direction', 'Solar_Radiation', 'Storm_Type_ID',
+                'Potential_ET', 'Actual_ET', 'Actual_EI', 'Input_Units_Code']]
+
+        # Optimize memory usage
+        df = df.astype({'Month': 'int8',
+                        'Day': 'int8',
+                        'Year': 'int16',
+                        'Max_Air_Temperature': 'float32',
+                        'Min_Air_Temperature': 'float32',
+                        'Precip': 'float32',
+                        'Dew_Point': 'float32',
+                        # 'Sky_Cover': 'float32',
+                        'Wind_Speed': 'float32',
+                        'Wind_Direction': 'float32',
+                        'Solar_Radiation': 'float32',
+                        # 'Storm_Type_ID': 'int8',
+                        'Potential_ET': 'float32',
+                        # 'Actual_ET': 'float32',
+                        # 'Actual_EI': 'float32',
+                        'Input_Units_Code': 'int8'})
+
+        if output_filepath is not None:
+            if saveformat == 'csv':
+                df.to_csv(output_filepath, index=False)
+            elif saveformat == 'parquet':
+                df.to_parquet(output_filepath, index=True)
+            else:
+                raise ValueError('Invalid saveformat')
+
+        return df
+
 
 def compute_RH(Psurf, Tair, Qair, Tunit='K'):
     """Compute relative humidity from air temperature and specific humidity.
