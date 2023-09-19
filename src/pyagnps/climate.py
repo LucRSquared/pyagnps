@@ -51,8 +51,8 @@ class clm_annagnps_coords():
         '''
 
         if date_mode == "utc":
-            self.start = start
-            self.end = end
+            self.start = pd.Timestamp(start)
+            self.end = pd.Timestamp(end)
             self.timezone = "UTC"
         elif date_mode == "local":
             # Identify timezone:
@@ -78,6 +78,7 @@ class clm_annagnps_coords():
         self.clm_resampled = None
 
     def query_nldas2_climate(self):
+
         clm = pynldas2.get_bycoords(
         coords=self.coords,
         start_date=self.start,
@@ -124,8 +125,6 @@ class clm_annagnps_coords():
         if self.clm_resampled is not None:
             self.clm_resampled.drop(columns=columns_to_remove, errors="ignore", inplace=True)
 
-    
-
     def resample(self, rule="1D"):
         clm = self.clm
         full_how_dict = {
@@ -165,6 +164,25 @@ class clm_annagnps_coords():
         self.compute_dew_point()
         self.compute_wind_direction()
         self.compute_wind_speed()
+
+    def query_nldas2_generate_annagnps_climate_daily(self, **kwargs):
+        """
+        Generate climate_daily.csv AnnAGNPS file/DataFrame
+
+        ### Key-Value Arguments:
+        - output_filepath : str, optional
+               Path to write the output file, by default None
+        - saveformat : str, optional
+            Format to save the output file, by default 'csv', also accepts 'parquet'
+        - float_format : str, optional, default= '%.3f' for printing csv file
+        """
+        self.query_nldas2_climate()
+        self.compute_additional_climate_variables()
+        self.keep_annagnps_columns_only()
+        self.resample(rule="1D")
+        
+        df_daily = self.generate_climate_file_daily(use_resampled=True, **kwargs)
+        return df_daily
 
     def generate_climate_file_daily(self, use_resampled=True, output_filepath=None, saveformat='csv', float_format='%.3f'):
         """ Generate a climate file for a given period. Returns a DataFrame and writes to csv if output_filepath is provided.
@@ -269,24 +287,66 @@ class clm_annagnps_coords():
 
         return df
     
-    def query_nldas2_generate_annagnps_climate_daily(self, **kwargs):
+    def generate_climate_station_file(self, output_dir=Path().cwd(), **kwargs):
         """
-        Generate climate_daily.csv AnnAGNPS file/DataFrame
+        Generate the AnnAGNPS climate station file for this current query (unless overriden)
+        """
+        # columns = [
+        #     "Version",
+        #     "Input_Units_Code",
+        #     "Climate_Station_Name",
+        #     "Beginning_Climate_Date",
+        #     "Ending_Climate_Date",
+        #     "Latitude",
+        #     "Longitude",
+        #     "Elevation",
+        #     "Temperature_Lapse_Rate",
+        #     "Precipitation_N",
+        #     "Global_Storm_Type_ID",
+        #     "1st_Elevation_Difference",
+        #     "1st_Elevation_Rain_Factor",
+        #     "2nd_Elevation_Difference",
+        #     "2nd_Elevation_Rain_Factor",
+        #     "2_Yr_24_hr_Precipitation",
+        #     "Calibration_or_Areal_Correction_Coefficient",
+        #     "Calibration_or_Areal_Correction_Exponent",
+        #     "Minimum_Interception_Evaporation",
+        #     "Maximum_Interception_Evaporation",
+        #     "Winter_Storm_Type_ID",
+        #     "Spring_Storm_Type_ID",
+        #     "Summer_Storm_Type_ID",
+        #     "Autumn_Storm_Type_ID"
+        # ]
 
-        ### Key-Value Arguments:
-        - output_filepath : str, optional
-               Path to write the output file, by default None
-        - saveformat : str, optional
-            Format to save the output file, by default 'csv', also accepts 'parquet'
-        - float_format : str, optional, default= '%.3f' for printing csv file
-        """
-        self.query_nldas2_climate()
-        self.compute_additional_climate_variables()
-        self.keep_annagnps_columns_only()
-        self.resample(rule="1D")
-        
-        df_daily = self.generate_climate_file_daily(use_resampled=True, **kwargs)
-        return df_daily
+        columns_defaults = {
+            "Version": 6.00,
+            "Input Units Code": 1,
+            "Climate Station Name": "Station",
+            "Beginning Climate Date 'mm/dd/yyyy'": self.start.strftime("%m/%d/%Y"),
+            "Ending Climate Date 'mm/dd/yyyy'": self.end.strftime("%m/%d/%Y"),
+            "Latitude": self.coords[1],
+            "Longitude": self.coords[0],
+            "Elevation": 0,
+            "Temperature Lapse Rate": "",
+            "Precipitation N": "",
+            "Global Storm Type ID": "",
+            "1st Elevation Difference": "",
+            "1st Elevation Rain Factor": "",
+            "2nd Elevation Difference": "",
+            "2nd Elevation Rain Factor": "",
+            "2 Yr 24 hr Precipitation": "",
+            "Calibration or Areal Correction Coefficient": "",
+            "Calibration or Areal Correction Exponent": "",
+            "Minimum Interception Evaporation": "",
+            "Maximum Interception Evaporation": "",
+            "Winter Storm Type ID": "",
+            "Spring Storm Type ID": "",
+            "Summer Storm Type ID": "",
+            "Autumn Storm Type ID": ""
+        }
+
+
+    
 
 
 def compute_RH(Psurf, Tair, Qair, Tunit='K'):
