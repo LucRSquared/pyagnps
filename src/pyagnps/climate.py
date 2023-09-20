@@ -287,10 +287,14 @@ class clm_annagnps_coords():
 
         return df
     
-    def generate_climate_station_file(self, output_dir=Path().cwd(), **kwargs):
+    def generate_climate_station_file(self, output_dir=Path().cwd(), append='', **kwargs):
         """
         Generate the AnnAGNPS climate station file for this current query (unless overriden)
         Will generate a "climate_station.csv" file in the specified output_dir.
+
+        ### Arguments:
+        - output_dir : where to save the file, defaults to current working directory
+        - append : default '' : will save the file as "climate_station_[append].csv"
         """
         # columns = [
         #     "Version",
@@ -345,6 +349,8 @@ class clm_annagnps_coords():
             "Summer Storm Type ID": "",
             "Autumn Storm Type ID": ""
         }
+
+        output_file_path = output_dir / f"climate_station_{append}.csv"
 
 
     
