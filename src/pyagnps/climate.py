@@ -290,6 +290,7 @@ class clm_annagnps_coords():
     def generate_climate_station_file(self, output_dir=Path().cwd(), **kwargs):
         """
         Generate the AnnAGNPS climate station file for this current query (unless overriden)
+        Will generate a "climate_station.csv" file in the specified output_dir.
         """
         # columns = [
         #     "Version",
