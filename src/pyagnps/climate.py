@@ -296,32 +296,6 @@ class clm_annagnps_coords():
         - output_dir : where to save the file, defaults to current working directory
         - append : default '' : will save the file as "climate_station_[append].csv"
         """
-        # columns = [
-        #     "Version",
-        #     "Input_Units_Code",
-        #     "Climate_Station_Name",
-        #     "Beginning_Climate_Date",
-        #     "Ending_Climate_Date",
-        #     "Latitude",
-        #     "Longitude",
-        #     "Elevation",
-        #     "Temperature_Lapse_Rate",
-        #     "Precipitation_N",
-        #     "Global_Storm_Type_ID",
-        #     "1st_Elevation_Difference",
-        #     "1st_Elevation_Rain_Factor",
-        #     "2nd_Elevation_Difference",
-        #     "2nd_Elevation_Rain_Factor",
-        #     "2_Yr_24_hr_Precipitation",
-        #     "Calibration_or_Areal_Correction_Coefficient",
-        #     "Calibration_or_Areal_Correction_Exponent",
-        #     "Minimum_Interception_Evaporation",
-        #     "Maximum_Interception_Evaporation",
-        #     "Winter_Storm_Type_ID",
-        #     "Spring_Storm_Type_ID",
-        #     "Summer_Storm_Type_ID",
-        #     "Autumn_Storm_Type_ID"
-        # ]
 
         columns_defaults = {
             "Version": 6.00,
