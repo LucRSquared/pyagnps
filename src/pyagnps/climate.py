@@ -1,9 +1,9 @@
 from pathlib import Path
 import pynldas2
 import py3dep
-# import pydaymet
+import pydaymet
 
-import datetime
+# import datetime
 # import pytz
 from timezonefinder import TimezoneFinder
 
@@ -78,14 +78,14 @@ class clm_annagnps_coords():
         self.clm = None # DataFrame
         self.clm_resampled = None
 
-    def query_nldas2_climate(self):
+    def query_nldas2_climate(self, source='netcdf'):
 
         clm = pynldas2.get_bycoords(
         coords=self.coords,
         start_date=self.start,
         end_date=self.end,
         variables = self.variables,
-        source='netcdf',
+        source=source,
         n_conn=4)
 
         # Express dates in local mode
@@ -160,11 +160,37 @@ class clm_annagnps_coords():
 
         return clm
     
-    def compute_additional_climate_variables(self):
+    def compute_additional_climate_variables_method_nldas2(self):
         self.compute_RH()
         self.compute_dew_point()
         self.compute_wind_direction()
         self.compute_wind_speed()
+
+    def compute_additional_climate_variables_method_nldas2_and_daymet(self):
+        # query vapor pressure from daymet
+        daymet_vp_daily = pydaymet.get_bycoords(self.coords,
+                                            dates=(self.start, self.end),
+                                            variables='vp')
+        daymet_vp_daily = daymet_vp_daily.rename_axis('date')
+
+        # self.clm['temp_min'] = self.clm['temp']
+        # self.clm['temp_max'] = self.clm['temp']
+        self.compute_wind_speed()
+        self.compute_wind_direction()
+        clm = self.clm
+        clm['esat'] = compute_esat(clm['temp'], Tunit='K')
+        # Merge with daymet data
+        clm.merge(daymet_vp_daily, how='outer', right_on='date', left_index=True)
+        
+        # Compute RH
+        clm['RH'] = 100 * clm['vp (Pa)'] / clm['esat']
+        clm['RH'] = clm['RH'].where((clm['RH'] <= 100) | np.isnan(clm['RH']), 100)
+
+        # Compute Dew Point
+        clm['tdew'] = compute_dew_point(clm['RH'], clm['temp'])
+
+        self.clm = clm
+
 
     def query_nldas2_generate_annagnps_climate_daily(self, **kwargs):
         """
@@ -177,8 +203,17 @@ class clm_annagnps_coords():
             Format to save the output file, by default 'csv', also accepts 'parquet'
         - float_format : str, optional, default= '%.3f' for printing csv file
         """
-        self.query_nldas2_climate()
-        self.compute_additional_climate_variables()
+        self.query_nldas2_climate(source='netcdf')
+        # Test if there are any NaN values
+        if self.clm.isna().any().any():
+            # Use alternative method using Day Met
+            self.variables = ['prcp','temp', 'rsds', 'pet','wind_u','wind_v']
+            self.query_nldas2_climate(source='grib')
+            self.compute_additional_climate_variables_method_nldas2_and_daymet()
+        else:
+            # do normal way        
+            self.compute_additional_climate_variables()
+
         self.keep_annagnps_columns_only()
         self.resample(rule="1D")
         
@@ -393,8 +428,32 @@ class clm_annagnps_coords():
         return df
 
 
-    
+def compute_esat(Tair, Tunit='K'):
+    """
+    Compute saturation vapor pressure
 
+    Parameters:
+    -----------
+    Tair: Air temperature
+
+    Returns:
+    -------
+    esat : Saturation vapor pressure
+    """
+    # Constants
+    A1 = 17.625
+    B1 = 243.04 # degC
+    C1 = 610.94 # Pa
+
+    if Tunit == 'K':
+        d = 273.15
+    elif Tunit == 'degC':
+        d = 0
+
+    # Compute saturation vapor pressure
+    esat = C1 * np.exp(A1 * (Tair - d) / (B1 + (Tair - d))) # Magnus formula but not really it's actually Alduchov and Eskrige (1996)
+
+    return esat
 
 def compute_RH(Psurf, Tair, Qair, Tunit='K'):
     """
@@ -415,20 +474,10 @@ def compute_RH(Psurf, Tair, Qair, Tunit='K'):
     RH : xarray.DataArray
         Relative humidity [%]
     """
-    # Constants
-    A1 = 17.625
-    B1 = 243.04 # degC
-    C1 = 610.94 # Pa
 
-    if Tunit == 'K':
-        d = 273.15
-    elif Tunit == 'degC':
-        d = 0
+    es = compute_esat(Tair, Tunit)
 
     epsilon = 0.622
-
-    # Compute saturation vapor pressure
-    es = C1 * np.exp(A1 * (Tair - d) / (B1 + (Tair - d))) # Magnus formula but not really it's actually Alduchov and Eskrige (1996)
 
     # Compute vapor pressure
     e = Qair * Psurf / epsilon # The real formula should be e = Qair * (Pair - es) / (epsilon * es)
