@@ -1,5 +1,6 @@
 from pathlib import Path
 import pynldas2
+import py3dep
 # import pydaymet
 
 import datetime
@@ -287,51 +288,117 @@ class clm_annagnps_coords():
 
         return df
     
-    def generate_climate_station_file(self, output_dir=Path().cwd(), append='', **kwargs):
+    def generate_climate_station_file(self, 
+            output_filepath=Path('climate_station.csv'), 
+            climate_station_name="Station",
+            beginning_climate_date=None,
+            ending_climate_date=None,
+            latitude=None,
+            longitude=None,
+            elevation='3dep',
+            temperature_lapse_rate="",
+            precipitation_n="",
+            global_storm_type_id="",
+            first_elevation_difference="",
+            first_elevation_rain_factor="",
+            second_elevation_difference="",
+            second_elevation_rain_factor="",
+            two_year_24_hour_precipitation="",
+            calibration_or_areal_correction_coefficient="",
+            calibration_or_areal_correction_exponent="",
+            minimum_interception_evaporation="",
+            maximum_interception_evaporation="",
+            winter_storm_type_id="",
+            spring_storm_type_id="",
+            summer_storm_type_id="",
+            autumn_storm_type_id="",
+            version=6.00,
+            input_units_code=1):
         """
         Generate the AnnAGNPS climate station file for this current query (unless overriden)
         Will generate a "climate_station.csv" file in the specified output_dir.
 
         ### Arguments:
-        - output_dir : where to save the file, defaults to current working directory
-        - append : default '' : will save the file as "climate_station_[append].csv"
+        - output_dir (Path): The directory where to save the file. Defaults to the current working directory.
+        - version (str or float): The version number. Defaults to 6.00.
+        - input_units_code (int): The input units code. Defaults to 1 for SI units.
+        - climate_station_name (str): The climate station name. Defaults to "Station".
+        - beginning_climate_date (str): The beginning climate date in 'mm/dd/yyyy' format. Defaults to the queried start date
+        - ending_climate_date (str): The ending climate date in 'mm/dd/yyyy' format. Defaults to queried end date
+        - latitude (float): The latitude. Defaults to queried latitude.
+        - longitude (float): The longitude. Defaults to queried longitude.
+        - elevation (float/str): 
+            - (float): the elevation.
+            - (str): '3dep' (default) queries the elevation at (longitude, latitude) querying the 3dep service
+        - temperature_lapse_rate (float): The temperature lapse rate. Defaults to an empty string.
+        - precipitation_n (float): Precipitation N. Defaults to an empty string.
+        - global_storm_type_id (str): Global storm type ID. Defaults to an empty string.
+        - first_elevation_difference (float): First elevation difference. Defaults to an empty string.
+        - first_elevation_rain_factor (float): First elevation rain factor. Defaults to an empty string.
+        - second_elevation_difference (float): Second elevation difference. Defaults to an empty string.
+        - second_elevation_rain_factor (float): Second elevation rain factor. Defaults to an empty string.
+        - two_year_24_hour_precipitation (float): 2 Yr 24 hr Precipitation. Defaults to an empty string.
+        - calibration_or_areal_correction_coefficient (float): Calibration or Areal Correction Coefficient. Defaults to an empty string.
+        - calibration_or_areal_correction_exponent (float): Calibration or Areal Correction Exponent. Defaults to an empty string.
+        - minimum_interception_evaporation (float): Minimum Interception Evaporation. Defaults to an empty string.
+        - maximum_interception_evaporation (float): Maximum Interception Evaporation. Defaults to an empty string.
+        - winter_storm_type_id (str): Winter storm type ID. Defaults to an empty string.
+        - spring_storm_type_id (str): Spring storm type ID. Defaults to an empty string.
+        - summer_storm_type_id (str): Summer storm type ID. Defaults to an empty string.
+        - autumn_storm_type_id (str): Autumn storm type ID. Defaults to an empty string.
         """
 
-        columns_defaults = {
-            "Version": 6.00,
-            "Input Units Code": 1,
-            "Climate Station Name": "Station",
-            "Beginning Climate Date 'mm/dd/yyyy'": self.start.strftime("%m/%d/%Y"),
-            "Ending Climate Date 'mm/dd/yyyy'": self.end.strftime("%m/%d/%Y"),
-            "Latitude": self.coords[1],
-            "Longitude": self.coords[0],
-            "Elevation": 0,
-            "Temperature Lapse Rate": "",
-            "Precipitation N": "",
-            "Global Storm Type ID": "",
-            "1st Elevation Difference": "",
-            "1st Elevation Rain Factor": "",
-            "2nd Elevation Difference": "",
-            "2nd Elevation Rain Factor": "",
-            "2 Yr 24 hr Precipitation": "",
-            "Calibration or Areal Correction Coefficient": "",
-            "Calibration or Areal Correction Exponent": "",
-            "Minimum Interception Evaporation": "",
-            "Maximum Interception Evaporation": "",
-            "Winter Storm Type ID": "",
-            "Spring Storm Type ID": "",
-            "Summer Storm Type ID": "",
-            "Autumn Storm Type ID": ""
+        data = {
+            "Version": str(version),
+            "Input Units Code": input_units_code,
+            "Climate Station Name": climate_station_name,
+            "Beginning Climate Date 'mm/dd/yyyy'": beginning_climate_date if beginning_climate_date else self.start.strftime("%m/%d/%Y"),
+            "Ending Climate Date 'mm/dd/yyyy'": ending_climate_date if ending_climate_date else self.end.strftime("%m/%d/%Y"),
+            "Latitude": latitude if latitude is not None else self.coords[1],
+            "Longitude": longitude if longitude is not None else self.coords[0],
+            "Elevation": elevation,
+            "Temperature Lapse Rate": temperature_lapse_rate,
+            "Precipitation N": precipitation_n,
+            "Global Storm Type ID": global_storm_type_id,
+            "1st Elevation Difference": first_elevation_difference,
+            "1st Elevation Rain Factor": first_elevation_rain_factor,
+            "2nd Elevation Difference": second_elevation_difference,
+            "2nd Elevation Rain Factor": second_elevation_rain_factor,
+            "2 Yr 24 hr Precipitation": two_year_24_hour_precipitation,
+            "Calibration or Areal Correction Coefficient": calibration_or_areal_correction_coefficient,
+            "Calibration or Areal Correction Exponent": calibration_or_areal_correction_exponent,
+            "Minimum Interception Evaporation": minimum_interception_evaporation,
+            "Maximum Interception Evaporation": maximum_interception_evaporation,
+            "Winter Storm Type ID": winter_storm_type_id,
+            "Spring Storm Type ID": spring_storm_type_id,
+            "Summer Storm Type ID": summer_storm_type_id,
+            "Autumn Storm Type ID": autumn_storm_type_id
         }
 
-        output_file_path = output_dir / f"climate_station_{append}.csv"
+        if elevation == '3dep':
+            elevation = py3dep.elevation_bycoords((data["Longitude"], data["Latitude"]), source='tep')
+            data["Elevation"] = elevation
+        elif not(isinstance(elevation, float)):
+            raise Exception(f"Invalid elevation: {elevation}, please provide an elevation in meters (float) or '3dep' to query the elevation automatically")
+
+        df = pd.DataFrame(data, index=[0])
+        df.to_csv(output_filepath, float_format='%1.3f', index=False)
+
+        # # Write header line
+        # output_filepath.write_text(f"{','.join(data.keys())}\n")
+        # # Write values:
+        # with output_filepath.open(mode='a') as f:
+        #     f.write(f"{','.join([str(x) for x in data.values()])}")
+
+        return df
 
 
     
 
 
 def compute_RH(Psurf, Tair, Qair, Tunit='K'):
-    """Compute relative humidity from air temperature and specific humidity.
+    """
+    Compute relative humidity from air temperature and specific humidity.
     This formula has < 0.4% error for -40 °C < Tair < 50 °C.
     
     Parameters
