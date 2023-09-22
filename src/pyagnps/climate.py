@@ -153,7 +153,7 @@ class clm_annagnps_coords():
         # Create aggregation dict 
         vars_how = {var:full_how_dict[var] for var in clm.columns}
 
-        clm = clm.resample(rule=rule).agg(vars_how)
+        clm = clm.resample(rule=rule, origin='start').agg(vars_how)
         clm.index = clm.index.tz_localize(None)
 
         self.clm_resampled = clm
