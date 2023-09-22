@@ -81,12 +81,12 @@ class clm_annagnps_coords():
     def query_nldas2_climate(self, source='netcdf'):
 
         clm = pynldas2.get_bycoords(
-        coords=self.coords,
-        start_date=self.start,
-        end_date=self.end,
-        variables = self.variables,
-        source=source,
-        n_conn=4)
+                coords=self.coords,
+                start_date=self.start,
+                end_date=self.end,
+                variables = self.variables,
+                source=source,
+                n_conn=4)
 
         # Express dates in local mode
         if self.date_mode == "local":
@@ -166,7 +166,7 @@ class clm_annagnps_coords():
         self.compute_wind_direction()
         self.compute_wind_speed()
 
-    def compute_additional_climate_variables_method_nldas2_and_daymet(self):
+    def resample_and_compute_additional_climate_variables_method_nldas2_and_daymet(self):
         # query vapor pressure from daymet
         daymet_vp_daily = pydaymet.get_bycoords(self.coords,
                                             dates=(self.start, self.end),
@@ -177,19 +177,24 @@ class clm_annagnps_coords():
         # self.clm['temp_max'] = self.clm['temp']
         self.compute_wind_speed()
         self.compute_wind_direction()
-        clm = self.clm
-        clm['esat'] = compute_esat(clm['temp'], Tunit='K')
+        self.resample(rule='1D')
+        clm_daily = self.clm_resampled
+        clm_daily['esat'] = compute_esat(clm_daily['temp'], Tunit='K')
         # Merge with daymet data
-        clm.merge(daymet_vp_daily, how='outer', right_on='date', left_index=True)
+        clm_daily = pd.merge(clm_daily, daymet_vp_daily, how='outer', right_on='date', left_index=True)
         
         # Compute RH
-        clm['RH'] = 100 * clm['vp (Pa)'] / clm['esat']
-        clm['RH'] = clm['RH'].where((clm['RH'] <= 100) | np.isnan(clm['RH']), 100)
+        clm_daily['RH'] = 100 * clm_daily['vp (Pa)'] / clm_daily['esat']
+        clm_daily['RH'] = clm_daily['RH'].where((clm_daily['RH'] <= 100) | np.isnan(clm_daily['RH']), 100)
+
+        # Linearly interpolate possibly missing values
+        clm_daily.interpolate(inplace=True)
+        clm_daily.set_index('date', inplace=True)
 
         # Compute Dew Point
-        clm['tdew'] = compute_dew_point(clm['RH'], clm['temp'])
+        clm_daily['tdew'] = compute_dew_point(clm_daily['RH'], clm_daily['temp'])
 
-        self.clm = clm
+        self.clm_resampled = clm_daily
 
 
     def query_nldas2_generate_annagnps_climate_daily(self, **kwargs):
@@ -209,13 +214,13 @@ class clm_annagnps_coords():
             # Use alternative method using Day Met
             self.variables = ['prcp','temp', 'rsds', 'pet','wind_u','wind_v']
             self.query_nldas2_climate(source='grib')
-            self.compute_additional_climate_variables_method_nldas2_and_daymet()
+            self.resample_and_compute_additional_climate_variables_method_nldas2_and_daymet()
         else:
             # do normal way        
             self.compute_additional_climate_variables()
+            self.resample(rule="1D")
 
         self.keep_annagnps_columns_only()
-        self.resample(rule="1D")
         
         df_daily = self.generate_climate_file_daily(use_resampled=True, **kwargs)
         return df_daily
@@ -258,8 +263,10 @@ class clm_annagnps_coords():
         df['temp_max'] = df['temp_max'] - 273.15
         df['temp_min'] = df['temp_min'] - 273.15
         # df['Tair'] = df['Tair'] - 273.15
-        df['tdew'] = df['tdew'] - 273.15
-
+        try:
+            df['tdew'] = df['tdew'] - 273.15
+        except KeyError:
+            df['tdew'] = None
         # Total Solar Radiation (W/m2)
         df['Solar_Radiation'] = df['rsds']
 
