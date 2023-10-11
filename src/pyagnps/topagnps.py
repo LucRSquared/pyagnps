@@ -1,7 +1,7 @@
 """
 TopAGNPS related functions
 """
-# from osgeo import gdal
+from osgeo import gdal
 # from importlib.resources import path
 import os
 import subprocess
@@ -11,7 +11,7 @@ import numpy as np
 import rasterio
 import rioxarray
 import py3dep
-from osgeo import gdal
+
 import pyagnps.utils as utils
 
 # import logging
