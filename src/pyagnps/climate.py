@@ -10,21 +10,19 @@ from timezonefinder import TimezoneFinder
 import numpy as np
 import pandas as pd
 
+import xarray as xr
+
 # Do not create 
 import os
 os.environ["HYRIVER_CACHE_NAME"] = "/tmp/climate_cache.sqlite" # On Windows systems it will be under C:/tmp
 # os.environ["HYRIVER_CACHE_DISABLE"] = "true"
-
 
 class clm_annagnps_coords():
     def __init__(self, 
                  coords: tuple, 
                  start: str = "2022-01-01", 
                  end: str ="2022-12-31", 
-                 date_mode: str ="local",
-                 variables:list[str] = ['prcp','temp', 'rsds', 'pet', 
-                                        'humidity', 'wind_u', 'wind_v', 
-                                        'psurf']):
+                 date_mode: str ="local"):
         '''
         ## Positional arguments:
         - coords: (longitude, latitude) in EPSG:4326 projection
@@ -40,15 +38,6 @@ class clm_annagnps_coords():
                              in the coords local time zone
                      "utc" will assume that the start and end dates are provided in 
                            UTC timezone
-        - variables: str or list of str, optional
-                Variables to download. If None, all variables are downloaded.
-                Valid variables are: ``prcp`` (precipitation in kg/m² ~ mm), ``pet`` (potential evaporation in kg/m² ~ mm),
-                                     ``temp`` (temperature in K), 
-                                     ``wind_u``, ``wind_v`` (10-m above ground zonal and meridional winds respectively, in m/s)
-                                     ``rlds`` (surface downward longwave radiation flux in W/m²), 
-                                     ``rsds`` (surface downward shortwave radiation flux in W/m²),
-                                     ``humidity`` (2-m above ground specific humidity kg/kg)
-                                     and ``psurf`` (surface pressure in Pa if provided from netcdf NLDAS-2 data rods source``)
         '''
 
         if date_mode == "utc":
@@ -73,18 +62,25 @@ class clm_annagnps_coords():
         self.date_mode = date_mode
         
         self.coords = coords
-        self.variables = variables
 
         self.clm = None # DataFrame
-        self.clm_resampled = None
+        self.clm_resampled = None # DataFrame resampled
+        self.ds = None # xarray.DataSet for CMIP6 outputs
 
-    def query_nldas2_climate(self, source='netcdf'):
+    def query_nldas2_climate(self, source='netcdf', variables = ['prcp',
+                                                                 'temp', 
+                                                                 'rsds', 
+                                                                 'pet', 
+                                                                 'humidity', 
+                                                                 'wind_u', 
+                                                                 'wind_v', 
+                                                                 'psurf']):
 
         clm = pynldas2.get_bycoords(
                 coords=self.coords,
                 start_date=self.start,
                 end_date=self.end,
-                variables = self.variables,
+                variables = variables,
                 source=source,
                 n_conn=4)
 
@@ -96,35 +92,6 @@ class clm_annagnps_coords():
 
         
         self.clm = clm
-
-    def compute_wind_speed(self):
-        clm = self.clm
-        clm["wind_speed"] = compute_wind_speed(clm["wind_u"], clm["wind_v"])
-
-    def compute_wind_direction(self, method='annagnps'):
-        clm = self.clm
-        clm["wind_direction"] = compute_wind_direction(clm["wind_u"], clm["wind_v"], method=method)
-
-    def compute_RH(self):
-        clm = self.clm
-        clm["RH"] = compute_RH(clm["psurf"], clm["temp"], clm["humidity"])
-
-    def compute_dew_point(self):
-        clm = self.clm
-        clm["tdew"] = compute_dew_point(clm["RH"], clm["temp"])
-
-    def keep_annagnps_columns_only(self):
-        """
-        Once extra variables have been computed (Tdew, Wind Speed, Wind Direction) some variables are no longer needed
-        for AnnAGNPS climate file generation and can be dropped 
-        """
-        columns_to_remove = ["RH", "psurf", "vp (Pa)", "esat", "humidity", "wind_u", "wind_v"]
-
-        if self.clm is not None:
-            self.clm.drop(columns=columns_to_remove, errors="ignore", inplace=True)
-
-        if self.clm_resampled is not None:
-            self.clm_resampled.drop(columns=columns_to_remove, errors="ignore", inplace=True)
 
     def resample(self, rule="1D"):
         clm = self.clm
@@ -178,6 +145,7 @@ class clm_annagnps_coords():
         self.compute_wind_speed()
         self.compute_wind_direction()
         self.resample(rule='1D')
+
         clm_daily = self.clm_resampled
         clm_daily['esat'] = compute_esat(clm_daily['temp'], Tunit='K')
         # Merge with daymet data
@@ -212,8 +180,7 @@ class clm_annagnps_coords():
         # Test if there are any NaN values
         if self.clm.isna().any().any():
             # Use alternative method using Day Met
-            self.variables = ['prcp','temp', 'rsds', 'pet','wind_u','wind_v']
-            self.query_nldas2_climate(source='grib')
+            self.query_nldas2_climate(source='grib', variables=['prcp','temp', 'rsds', 'pet','wind_u','wind_v'])
             self.resample_and_compute_additional_climate_variables_method_nldas2_and_daymet()
         else:
             # do normal way        
@@ -224,6 +191,62 @@ class clm_annagnps_coords():
         
         df_daily = self.generate_climate_file_daily(use_resampled=True, **kwargs)
         return df_daily
+    
+    def read_cmip6_data(self, cmip_files):
+        """
+        Reads CMIP6 data files from the ScenarioMIP Activity and "day" table.
+
+        ### Arguments:
+        - cmip_files: Iterable (list), paths to CMIP6 files. The required variables are:
+                      'pr'    : Precipitation (kg/(m².s))
+                      'hurs'  : Relative Humidity (%)
+                      'rsds'  : Downward Shortwave Radiation (W/m²)
+                      'tas'   : Average temperature (K)
+                      'tasmax': Max Daily temperature (K)
+                      'tasmin': Min Daily temperature (K)
+                      'uas'   : Eastward (Zonal) Wind component near surface (m/s)
+                      'vas'   : Northward (Meridional) Wind component near surface (m/s)
+        """
+        # We read in chunks leveraging dask "lazy reading" as to not overcharge the memory
+        self.ds = xr.open_mfdataset(cmip_files, compat='override', chunks={'time': 365}, parallel=True)
+
+        loaded_variables = list(self.ds.keys())
+
+        required_vars = ['pr', 'hurs', 'rsds', 'tas', 'tasmax', 'tasmin', 'uas', 'vas']
+
+        for var in required_vars:
+            if var not in loaded_variables:
+                raise ValueError(f"Variable {var} missing from input files, make sure all required input files are provided")
+
+    
+    def compute_wind_speed(self):
+        clm = self.clm
+        clm["wind_speed"] = compute_wind_speed(clm["wind_u"], clm["wind_v"])
+
+    def compute_wind_direction(self, method='annagnps'):
+        clm = self.clm
+        clm["wind_direction"] = compute_wind_direction(clm["wind_u"], clm["wind_v"], method=method)
+
+    def compute_RH(self):
+        clm = self.clm
+        clm["RH"] = compute_RH(clm["psurf"], clm["temp"], clm["humidity"])
+
+    def compute_dew_point(self):
+        clm = self.clm
+        clm["tdew"] = compute_dew_point(clm["RH"], clm["temp"])
+
+    def keep_annagnps_columns_only(self):
+        """
+        Once extra variables have been computed (Tdew, Wind Speed, Wind Direction) some variables are no longer needed
+        for AnnAGNPS climate file generation and can be dropped 
+        """
+        columns_to_remove = ["RH", "psurf", "vp (Pa)", "esat", "humidity", "wind_u", "wind_v"]
+
+        if self.clm is not None:
+            self.clm.drop(columns=columns_to_remove, errors="ignore", inplace=True)
+
+        if self.clm_resampled is not None:
+            self.clm_resampled.drop(columns=columns_to_remove, errors="ignore", inplace=True)
 
     def generate_climate_file_daily(self, use_resampled=True, output_filepath=None, saveformat='csv', float_format='%.3f'):
         """ Generate a climate file for a given period. Returns a DataFrame and writes to csv if output_filepath is provided.
