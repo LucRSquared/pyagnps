@@ -17,7 +17,7 @@ import os
 os.environ["HYRIVER_CACHE_NAME"] = "/tmp/climate_cache.sqlite" # On Windows systems it will be under C:/tmp
 # os.environ["HYRIVER_CACHE_DISABLE"] = "true"
 
-class clm_annagnps_coords():
+class ClimateAnnGNPSCoords():
     def __init__(self, 
                  coords: tuple, 
                  start: str = "2022-01-01", 
@@ -40,11 +40,11 @@ class clm_annagnps_coords():
                            UTC timezone
         '''
 
-        if date_mode == "utc":
+        if date_mode.lower() == "utc":
             self.start = pd.Timestamp(start)
             self.end = pd.Timestamp(end)
             self.timezone = "UTC"
-        elif date_mode == "local":
+        elif date_mode.lower() == "local":
             # Identify timezone:
             lon, lat = coords
             tf = TimezoneFinder()
@@ -62,10 +62,12 @@ class clm_annagnps_coords():
         self.date_mode = date_mode
         
         self.coords = coords
+        self.coords_actual = None # Actual coordinates queried using nearest method
 
         self.clm = None # DataFrame
         self.clm_resampled = None # DataFrame resampled
         self.ds = None # xarray.DataSet for CMIP6 outputs
+        self.ds_select = None # xarray.DataSet for ds selection for coord and time bounds
 
     def query_nldas2_climate(self, source='netcdf', variables = ['prcp',
                                                                  'temp', 
@@ -164,10 +166,9 @@ class clm_annagnps_coords():
 
         self.clm_resampled = clm_daily
 
-
     def query_nldas2_generate_annagnps_climate_daily(self, **kwargs):
         """
-        Generate climate_daily.csv AnnAGNPS file/DataFrame
+        Generate climate_daily.csv AnnAGNPS file/DataFrame from NLDAS-2 (and DAYMET)
 
         ### Key-Value Arguments:
         - output_filepath : str, optional
@@ -190,6 +191,35 @@ class clm_annagnps_coords():
         self.keep_annagnps_columns_only()
         
         df_daily = self.generate_climate_file_daily(use_resampled=True, **kwargs)
+        return df_daily
+    
+    def read_cmip6_generate_annagnps_climate_daily(self, cmip_files, **kwargs):
+        """
+        Generate climate_daily.csv AnnAGNPS file/DataFrame from NLDAS-2 (and DAYMET)
+
+        ### Arguments:
+        - cmip_files: Iterable (list), paths to CMIP6 files. The required variables are:
+                      'pr'    : Precipitation (kg/(m².s))
+                      'hurs'  : Relative Humidity (%)
+                      'rsds'  : Downward Shortwave Radiation (W/m²)
+                      'tas'   : Average temperature (K)
+                      'tasmax': Max Daily temperature (K)
+                      'tasmin': Min Daily temperature (K)
+                      'uas'   : Eastward (Zonal) Wind component near surface (m/s)
+                      'vas'   : Northward (Meridional) Wind component near surface (m/s)
+        
+        ### Key-Value Arguments:
+        - output_filepath : str, optional
+               Path to write the output file, by default None
+        - saveformat : str, optional
+            Format to save the output file, by default 'csv', also accepts 'parquet'
+        - float_format : str, optional, default= '%.3f' for printing csv file
+        """
+        self.read_cmip6_data(cmip_files)
+        self.select_cmip6_coords_timeslice_data()
+        self.generate_cmip6_coords_timeslice_dataframe()
+
+        df_daily = self.generate_climate_file_daily(use_resampled=False, **kwargs)
         return df_daily
     
     def read_cmip6_data(self, cmip_files):
@@ -218,7 +248,48 @@ class clm_annagnps_coords():
             if var not in loaded_variables:
                 raise ValueError(f"Variable {var} missing from input files, make sure all required input files are provided")
 
-    
+    def select_cmip6_coords_timeslice_data(self):
+        """
+        Slices the CMIP6 xarray.DataSet for the coords
+        """
+        longitude = (self.coords[0] + 360) % 360 # For CMIP6 the longitude needs to be in the [0, 360[ range
+        latitude = self.coords[1]
+        self.ds_select = self.ds.sel(lat=latitude, lon=longitude, method='nearest')\
+                                .sel(time=slice(self.start, self.end))
+        
+        self.coords_actual = (float(self.ds_select['lon'])-360, float(self.ds_select['lat']))
+
+        self.ds_select = self.ds_select.drop(['height', 'time_bounds', 'lat', 'lon'])
+
+    def generate_cmip6_coords_timeslice_dataframe(self):
+        """
+        Generate a DataFrame from the selected xarray.DataSet
+        """
+
+        df = self.ds_select.to_dataframe()
+
+        df['pr'] = df['pr']*3600*24 # compute total precipitation for one day based on the flux
+
+        # We rename columns using the same variable names as the NLDAS-2 pynldas2 class so that we can
+        # use the same methods
+        df.rename(columns={
+            'pr': 'prcp',
+            'hurs': 'RH',
+            'tas': 'temp',
+            'tasmin': 'temp_min',
+            'tasmax': 'temp_max',
+            'uas': 'wind_u',
+            'vas': 'wind_v'
+        },inplace=True)
+
+        self.clm = df
+        self.clm_resampled = df
+
+        self.compute_dew_point()
+        self.compute_wind_speed()
+        self.compute_wind_direction()
+        self.keep_annagnps_columns_only()
+
     def compute_wind_speed(self):
         clm = self.clm
         clm["wind_speed"] = compute_wind_speed(clm["wind_u"], clm["wind_v"])
@@ -240,7 +311,7 @@ class clm_annagnps_coords():
         Once extra variables have been computed (Tdew, Wind Speed, Wind Direction) some variables are no longer needed
         for AnnAGNPS climate file generation and can be dropped 
         """
-        columns_to_remove = ["RH", "psurf", "vp (Pa)", "esat", "humidity", "wind_u", "wind_v"]
+        columns_to_remove = ["RH", "psurf", "temp", "vp (Pa)", "esat", "humidity", "wind_u", "wind_v"]
 
         if self.clm is not None:
             self.clm.drop(columns=columns_to_remove, errors="ignore", inplace=True)
@@ -303,7 +374,10 @@ class clm_annagnps_coords():
         df['Input_Units_Code'] = 1
 
         # No need to convert precipitation (PotEvap) to mm/day, if we assume rhow = 1000 kg/m3 = 1 kg/L -> 1 mm = 1 L/m2 = 1 kg/m2
-        df["pet"] = df["pet"].apply(lambda x: max(x,0))
+        if 'pet' in df:
+            df["pet"] = df["pet"].apply(lambda x: max(x,0) if x is not None else None)
+        else:
+            df["pet"] = None
 
         # Rename columns
         df = df.rename(columns={'wind_speed': 'Wind_Speed',
