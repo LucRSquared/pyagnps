@@ -31,7 +31,7 @@ url_object = URL.create(
     password=password,
     host=host,
     port=port,
-    database=database
+    database=database,
 )
 
 # create a SQLAlchemy engine object
@@ -48,21 +48,27 @@ path_to_thucs = Path(
 path_to_raster = Path("/aims-nas/data/datasets/Management/CDL_Annual/CDL_2022.tif")
 
 track_files_dir = Path("/aims-nas/luc/thuc_field_ID_CDL/")
-path_to_management_class_names = Path('/aims-nas/data/datasets/Management/CDL_Annual/definition_of_CDL_Class_Names_for_use_in_AIMS/CDL_Field_ID_dictionary.csv')
+path_to_management_class_names = Path(
+    "/aims-nas/data/datasets/Management/CDL_Annual/definition_of_CDL_Class_Names_for_use_in_AIMS/CDL_Field_ID_dictionary.csv"
+)
 
 log_dir = track_files_dir / "LOGS"
 
 general_log = log_dir / f"{nodename}_batch_field_ID_CDL_population_general_log.txt"
 fail_list = log_dir / f"{nodename}_fail_list.txt"
 
-print('Reading and initializing files...')
+print("Reading and initializing files...")
 thucs = gpd.read_file(
     path_to_thucs
 )  # GeoDataFrame containing the thucs and their geometry
 thucs = thucs.sort_values(by=["bbox_area_sqkm"], ascending=True)
 
 df_cdl = pd.read_csv(path_to_management_class_names)
-dico = df_cdl[['CDL_Value','Modified_CDL_Category']].set_index('CDL_Value').to_dict(orient='dict')['Modified_CDL_Category']
+dico = (
+    df_cdl[["CDL_Value", "Modified_CDL_Category"]]
+    .set_index("CDL_Value")
+    .to_dict(orient="dict")["Modified_CDL_Category"]
+)
 
 runlist = thucs["tophucid"].to_list()
 # runlist = ["1002", "1004"]
@@ -95,7 +101,6 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
     else:
         thuc_dir.mkdir(parents=True)
 
-
     # Collect thuc cells geometry from database
     try:
         now = get_current_time()
@@ -116,8 +121,6 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
         now = get_current_time()
         log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e}")
 
-
-
     # Apply plurality analysis
     if goodsofar:
         try:
@@ -126,17 +129,23 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
                 general_log,
                 f"{now}: {nodename}: {thuc_id}: Performing plurality analysis",
             )
-            cells = sdm.assign_attr_zonal_stats_raster_layer(cells, path_to_raster, agg_method='majority', attr='CDL_Value')
+            cells = sdm.assign_attr_zonal_stats_raster_layer(
+                cells, path_to_raster, agg_method="majority", attr="CDL_Value"
+            )
 
             # Reformat the CDL Value column and map with the correct value
-            cells['CDL_Value'] = cells['CDL_Value'].astype('Int32')
-            cells.loc[cells['CDL_Value']==0, 'CDL_Value'] = 81 # Set 0 value to 81 = Cloud_No_Data
-            cells['Mgmt_Field_ID'] = cells['CDL_Value'].map(dico)
+            cells["CDL_Value"] = cells["CDL_Value"].astype("Int32")
+            cells.loc[
+                cells["CDL_Value"] == 0, "CDL_Value"
+            ] = 81  # Set 0 value to 81 = Cloud_No_Data
+            cells["Mgmt_Field_ID"] = cells["CDL_Value"].map(dico)
             # this function uses rasterstats.zonal_stats and the "majority" function actually does the plurality operation by selecting the most common value
 
             cells = cells.rename(columns={"dn": "cell_id"})
 
-            data_to_update = cells[["cell_id", "Mgmt_Field_ID"]].to_dict(orient="records")
+            data_to_update = cells[["cell_id", "Mgmt_Field_ID"]].to_dict(
+                orient="records"
+            )
 
         except Exception as e:
             goodsofar = False
@@ -148,7 +157,10 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
     # Update table schema and make sure that mgmt_field_id is of type text
     if goodsofar:
         now = get_current_time()
-        log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: Changing mgmt_field_id column type to TEXT")
+        log_to_file(
+            general_log,
+            f"{now}: {nodename}: {thuc_id}: Changing mgmt_field_id column type to TEXT",
+        )
         with engine.connect() as connection:
             try:
                 query = f"ALTER TABLE thuc_{thuc_id}_annagnps_cell_data_section ALTER COLUMN mgmt_field_id TYPE TEXT"
@@ -158,9 +170,11 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
 
             except Exception as e:
                 goodsofar = False
-                
+
                 now = get_current_time()
-                log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e} (rolling back)")
+                log_to_file(
+                    general_log, f"{now}: {nodename}: {thuc_id}: {e} (rolling back)"
+                )
 
                 # Rollback the transaction in case of an error
                 connection.rollback()
@@ -170,7 +184,10 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
     # Update database
     if goodsofar:
         now = get_current_time()
-        log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: Populating Field_ID with CDL data...")
+        log_to_file(
+            general_log,
+            f"{now}: {nodename}: {thuc_id}: Populating Field_ID with CDL data...",
+        )
 
         try:
             # create a session factory

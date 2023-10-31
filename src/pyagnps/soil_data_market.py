@@ -158,15 +158,23 @@ def download_soil_geodataframe_tiles(bbox=None, tile_size=0.1, explode_geometrie
 
     return gdf
 
-def calculate_zonal_stats(geometry, raster_dataset, agg_method='majority'):
+
+def calculate_zonal_stats(geometry, raster_dataset, agg_method="majority"):
     # Extract the first band of the raster data
     raster_values = raster_dataset.values[0]
-    stats = zonal_stats(geometry, raster_values, affine=raster_dataset.rio.transform(), stats=agg_method, all_touched=True)
+    stats = zonal_stats(
+        geometry,
+        raster_values,
+        affine=raster_dataset.rio.transform(),
+        stats=agg_method,
+        all_touched=True,
+    )
     return stats[0][agg_method] if len(stats) > 0 else None
 
-def assign_attr_zonal_stats_raster_layer(
-    geo_bins, raster_layer, agg_method='majority', attr="mukey"):
 
+def assign_attr_zonal_stats_raster_layer(
+    geo_bins, raster_layer, agg_method="majority", attr="mukey"
+):
     if not isinstance(geo_bins, gpd.GeoDataFrame):
         geo_bins = gpd.read_file(geo_bins)
 
@@ -180,7 +188,7 @@ def assign_attr_zonal_stats_raster_layer(
     raster_data = rioxarray.open_rasterio(raster_layer, masked=True)
 
     # Reproject the bounding box to the raster CRS
-    bbox_gdf = gpd.GeoDataFrame({'geometry': [bbox_geometry]}, crs=UTM_CRS)
+    bbox_gdf = gpd.GeoDataFrame({"geometry": [bbox_geometry]}, crs=UTM_CRS)
     bbox_gdf = bbox_gdf.to_crs(raster_data.rio.crs)
     bbox_transformed = bbox_gdf.total_bounds
 
@@ -196,7 +204,7 @@ def assign_attr_zonal_stats_raster_layer(
 
 # def assign_attr_zonal_stats_raster_layer(
 #     geo_bins, raster_layer, agg_method='majority', attr="mukey"):
-    
+
 #     # Assign attributes to a GeoDataFrame based on the plurality of a given attribute in a GeoDataFrame
 #     # - geo_bins: GeoDataFrame of the cells to perform zonal statistics on
 #     # - raster_layer: path to raster file
@@ -226,10 +234,10 @@ def assign_attr_zonal_stats_raster_layer(
 
 #         reprojected_data = np.empty(cropped_data.shape, dtype=cropped_data.dtype)
 
-#         dst_transform = rasterio.transform.from_bounds(*geo_bins.total_bounds, 
-#                                                        reprojected_data.shape[1], 
+#         dst_transform = rasterio.transform.from_bounds(*geo_bins.total_bounds,
+#                                                        reprojected_data.shape[1],
 #                                                        reprojected_data.shape[2])
-        
+
 #         nodata_value = src.nodata
 
 #         rasterio.warp.reproject(
@@ -244,9 +252,9 @@ def assign_attr_zonal_stats_raster_layer(
 #             dst_nodata=nodata_value
 #         )
 
-#         # zonal_func = lambda x: calculate_zonal_stats(x, reprojected_data[0], affine=dst_transform, 
+#         # zonal_func = lambda x: calculate_zonal_stats(x, reprojected_data[0], affine=dst_transform,
 #         #                                             agg_method=agg_method)
-#         zonal_func = lambda x: calculate_zonal_stats(x, src, affine=cropped_transform, 
+#         zonal_func = lambda x: calculate_zonal_stats(x, src, affine=cropped_transform,
 #                                                     agg_method=agg_method)
 
 #         geo_bins[attr] = geo_bins.geometry.apply(zonal_func)

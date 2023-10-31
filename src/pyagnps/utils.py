@@ -139,17 +139,18 @@ def get_current_time(format="%Y-%m-%d-%H-%M-%S"):
     now_str = now.strftime(format)
     return now_str
 
+
 def get_date_from_string(date_string, outputtype=np.datetime64):
     """Converts a string to a datetime object
-       Converts to UTC time zone (naive datetime object)
-       
-       date_string: string in ISO 8601 (friendly-ish) format"""
+    Converts to UTC time zone (naive datetime object)
+
+    date_string: string in ISO 8601 (friendly-ish) format"""
 
     date = dateutil.parser.parse(date_string)
 
-    if not(date.tzinfo is None or date.tzinfo == dateutil.tz.tzutc()):
+    if not (date.tzinfo is None or date.tzinfo == dateutil.tz.tzutc()):
         date = date.astimezone(timezone.utc)
-        
+
     date = date.replace(tzinfo=None)
 
     if outputtype == datetime:

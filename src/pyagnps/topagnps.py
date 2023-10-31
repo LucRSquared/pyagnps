@@ -2,6 +2,7 @@
 TopAGNPS related functions
 """
 from osgeo import gdal
+
 # from importlib.resources import path
 import os
 import subprocess

@@ -39,7 +39,9 @@ path_to_thucs = Path(
 
 path_to_gnatsgo_raster = Path("/aims-nas/data/datasets/gNATSGO/gNATSGO-mukey.tif")
 
-path_to_gnatsgo_sapolygon = Path("/aims-nas/data/datasets/gNATSGO/gNATSGO_SAPOLYGON.gpkg")
+path_to_gnatsgo_sapolygon = Path(
+    "/aims-nas/data/datasets/gNATSGO/gNATSGO_SAPOLYGON.gpkg"
+)
 
 gNATSGO_files_dir = Path("/aims-nas/luc/thuc_gNATSGO/")
 
@@ -114,19 +116,22 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
             )
 
             boundary = cells.copy(deep=True)
-            boundary['geom'] = boundary['geom'].buffer(0)
+            boundary["geom"] = boundary["geom"].buffer(0)
             boundary = boundary.unary_union
             boundary = gpd.GeoDataFrame(geometry=[boundary], crs=utm)
 
             now = get_current_time()
             log_to_file(
                 general_log,
-                f"{now}: {nodename}: {thuc_id}: Selecting gNATSGO SAPOLYGON in the boundary")
+                f"{now}: {nodename}: {thuc_id}: Selecting gNATSGO SAPOLYGON in the boundary",
+            )
 
             sapolygon = gpd.read_file(path_to_gnatsgo_sapolygon, rows=0)
             crs_sapolygon = sapolygon.crs
 
-            sapolygon = gpd.read_file(path_to_gnatsgo_sapolygon, bbox=boundary.to_crs(crs_sapolygon))
+            sapolygon = gpd.read_file(
+                path_to_gnatsgo_sapolygon, bbox=boundary.to_crs(crs_sapolygon)
+            )
 
         except Exception as e:
             goodsofar = False
@@ -145,12 +150,14 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
                 f"{now}: {nodename}: {thuc_id}: Restricting cells to local boundary not covered by SSURGO",
             )
 
-            cells_to_update= cells.overlay(sapolygon.to_crs(utm), how='intersection')
+            cells_to_update = cells.overlay(sapolygon.to_crs(utm), how="intersection")
 
-            cells_to_update = cells_to_update.loc[cells_to_update['SOURCE'] != 'SSURGO', ['dn','geometry']]
+            cells_to_update = cells_to_update.loc[
+                cells_to_update["SOURCE"] != "SSURGO", ["dn", "geometry"]
+            ]
             cells_to_update = cells_to_update.drop_duplicates()
             cells_to_update = cells_to_update.rename(columns={"geometry": "geom"})
-            cells_to_update = cells_to_update.set_geometry('geom')
+            cells_to_update = cells_to_update.set_geometry("geom")
 
             if cells_to_update.empty:
                 raise Exception("No overlap of cells and non gSSURGO data")
@@ -162,8 +169,6 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
     else:
         pass
 
-
-
     # Apply plurality analysis
     if goodsofar:
         try:
@@ -172,7 +177,12 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
                 general_log,
                 f"{now}: {nodename}: {thuc_id}: Performing plurality analysis",
             )
-            cells = sdm.assign_attr_zonal_stats_raster_layer(cells_to_update, path_to_gnatsgo_raster, agg_method='majority', attr="MUKEY")
+            cells = sdm.assign_attr_zonal_stats_raster_layer(
+                cells_to_update,
+                path_to_gnatsgo_raster,
+                agg_method="majority",
+                attr="MUKEY",
+            )
             # this function uses rasterstats.zonal_stats and the "majority" function actually does the plurality operation by selecting the most common value
 
             cells = cells.rename(columns={"dn": "cell_id", "MUKEY": "soil_id"})
@@ -188,10 +198,12 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
     # Update database
     if goodsofar:
         now = get_current_time()
-        log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: Populating missing Soil_ID with gNATSGO data...")
+        log_to_file(
+            general_log,
+            f"{now}: {nodename}: {thuc_id}: Populating missing Soil_ID with gNATSGO data...",
+        )
 
         try:
-            
             data_to_update = cells[["cell_id", "soil_id"]].to_dict(orient="records")
 
             # create a session factory
