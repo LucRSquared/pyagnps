@@ -246,6 +246,9 @@ class ClimateAnnAGNPSCoords:
 
         df_daily = self._generate_climate_file_daily(use_resampled=False, **kwargs)
         return df_daily
+    
+    def read_cmip5_maca_generate_annagnps_climate_daily(self, cmip_files, **kwargs):
+        pass
 
     def _read_cmip6_data(self, cmip_files):
         """
@@ -283,16 +286,40 @@ class ClimateAnnAGNPSCoords:
 
         ### Arguments:
         - cmip_files: Iterable (list), paths to CMIP6 files. The required variables are:
-                      'pr' : Precipitation (mm = kg/m²)
-                      'huss'   : Specific humidity (kg/kg)
-                      'rhsmin' : Daily Min Relative Humidity (%)
-                      'rhsmax' : Daily Min Relative Humidity (%)
+                      'pr'     : Precipitation (mm = kg/m²)
                       'rsds'   : Downward Shortwave Radiation (W/m²)
                       'tasmax' : Max Daily temperature (K)
                       'tasmin' : Min Daily temperature (K)
                       'uas'    : Eastward (Zonal) Wind component near surface (m/s)
                       'vas'    : Northward (Meridional) Wind component near surface (m/s)
+                      # THOSE BELOW ARE NOT NECESSARY
+                      'huss'   : Specific humidity (kg/kg)
+                      'rhsmin' : Daily Min Relative Humidity (%)
+                      'rhsmax' : Daily Min Relative Humidity (%)
         """
+        # Function to preprocess each file before merging the dataset
+        def preprocess(ds):
+            if 'air_temperature' in ds:
+                if 'minimum' in ds['air_temperature'].cell_methods:
+                    ds = ds.rename_vars({'air_temperature': 'tasmin'})
+                elif 'maximum' in ds['air_temperature'].cell_methods:
+                    ds = ds.rename_vars({'air_temperature': 'tasmax'})
+            elif 'relative_humidity' in ds:
+                if 'minimum' in ds['relative_humidity'].cell_methods:
+                    ds = ds.rename_vars({'relative_humidity': 'rhsmin'})
+                elif 'maximum' in ds['relative_humidity'].cell_methods:
+                    ds = ds.rename_vars({'relative_humidity': 'rhsmax'})
+            elif 'eastward_wind' in ds:
+                ds = ds.rename_vars({'eastward_wind': 'uas'})
+            elif 'northward_wind' in ds:
+                ds = ds.rename_vars({'northward_wind': 'vas'})
+            elif 'precipitation' in ds:
+                ds = ds.rename_vars({'precipitation': 'pr'})
+            elif 'surface_downwelling_shortwave_flux_in_air' in ds:
+                ds = ds.rename_vars({'surface_downwelling_shortwave_flux_in_air': 'rsds'})
+            return ds
+        
+        self.ds = xr.open_mfdataset(cmip_files, chunks={'time':'auto'}, preprocess=preprocess, parallel=True)
 
     def _select_cmip_coords_timeslice_data(self):
         """
