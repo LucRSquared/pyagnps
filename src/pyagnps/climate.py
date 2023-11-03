@@ -220,7 +220,7 @@ class ClimateAnnAGNPSCoords:
 
     def read_cmip6_generate_annagnps_climate_daily(self, cmip_files, **kwargs):
         """
-        Generate climate_daily.csv AnnAGNPS file/DataFrame from NLDAS-2 (and DAYMET)
+        Generate climate_daily.csv AnnAGNPS file/DataFrame from CMIP6 output files
 
         ### Arguments:
         - cmip_files: Iterable (list), paths to CMIP6 files. The required variables are:
@@ -248,7 +248,36 @@ class ClimateAnnAGNPSCoords:
         return df_daily
     
     def read_cmip5_maca_generate_annagnps_climate_daily(self, cmip_files, **kwargs):
-        pass
+        """
+        Generate climate_daily.csv AnnAGNPS file/DataFrame from CMIP5 MACA_v2_METDATA output files
+
+        ### Arguments:
+        - cmip_files: Iterable (list), paths to CMIP6 files. The required variables are:
+                      'pr'     : Precipitation (mm = kg/m²)
+                      'rsds'   : Downward Shortwave Radiation (W/m²)
+                      'tasmax' : Max Daily temperature (K)
+                      'tasmin' : Min Daily temperature (K)
+                      'uas'    : Eastward (Zonal) Wind component near surface (m/s)
+                      'vas'    : Northward (Meridional) Wind component near surface (m/s)
+                      'vpd'    : Mean vapor pressure deficit (kPa)
+                      --- VARIABLES BELOW ARE NOT NECESSARY ---
+                      'huss'   : Specific humidity (kg/kg)
+                      'rhsmin' : Daily Min Relative Humidity (%)
+                      'rhsmax' : Daily Min Relative Humidity (%)
+
+        ### Key-Value Arguments:
+        - output_filepath : str, optional
+               Path to write the output file, by default None
+        - saveformat : str, optional
+            Format to save the output file, by default 'csv', also accepts 'parquet'
+        - float_format : str, optional, default= '%.3f' for printing csv file
+        """
+        self._read_cmip5_maca_data(cmip_files)
+        self._select_cmip_coords_timeslice_data()
+        self._generate_cmip5_coords_timeslice_dataframe()
+
+        df_daily = self._generate_climate_file_daily(use_resampled=False, **kwargs)
+        return df_daily
 
     def _read_cmip6_data(self, cmip_files):
         """
@@ -282,7 +311,7 @@ class ClimateAnnAGNPSCoords:
 
     def _read_cmip5_maca_data(self, cmip_files):
         """
-        Reads CMIP5 MACA resampled data table.
+        Reads CMIP5 MACA resampled data table (Tested with MACA_v2_METDATA).
 
         ### Arguments:
         - cmip_files: Iterable (list), paths to CMIP6 files. The required variables are:
@@ -292,7 +321,8 @@ class ClimateAnnAGNPSCoords:
                       'tasmin' : Min Daily temperature (K)
                       'uas'    : Eastward (Zonal) Wind component near surface (m/s)
                       'vas'    : Northward (Meridional) Wind component near surface (m/s)
-                      # THOSE BELOW ARE NOT NECESSARY
+                      'vpd'    : Mean vapor pressure deficit (kPa)
+                      --- VARIABLES BELOW ARE NOT NECESSARY
                       'huss'   : Specific humidity (kg/kg)
                       'rhsmin' : Daily Min Relative Humidity (%)
                       'rhsmax' : Daily Min Relative Humidity (%)
@@ -304,7 +334,7 @@ class ClimateAnnAGNPSCoords:
                     ds = ds.rename_vars({'air_temperature': 'tasmin'})
                 elif 'maximum' in ds['air_temperature'].cell_methods:
                     ds = ds.rename_vars({'air_temperature': 'tasmax'})
-            elif 'relative_humidity' in ds:
+            elif 'relative_humidity' in ds: # Those are not necessary
                 if 'minimum' in ds['relative_humidity'].cell_methods:
                     ds = ds.rename_vars({'relative_humidity': 'rhsmin'})
                 elif 'maximum' in ds['relative_humidity'].cell_methods:
@@ -317,9 +347,22 @@ class ClimateAnnAGNPSCoords:
                 ds = ds.rename_vars({'precipitation': 'pr'})
             elif 'surface_downwelling_shortwave_flux_in_air' in ds:
                 ds = ds.rename_vars({'surface_downwelling_shortwave_flux_in_air': 'rsds'})
+            elif 'vpd' in ds:
+                ds['vpd'] = ds['vpd'] * 1000 # Convert kPa --> Pa
+                ds['vpd'].attrs['units'] = 'Pa'
             return ds
         
         self.ds = xr.open_mfdataset(cmip_files, chunks={'time':'auto'}, preprocess=preprocess, parallel=True)
+
+        loaded_variables = list(self.ds.keys())
+
+        required_vars = ["pr", "rsds", "tasmax", "tasmin", "uas", "vas", "vpd"]
+
+        for var in required_vars:
+            if var not in loaded_variables:
+                raise ValueError(
+                    f"Variable {var} missing from input files, make sure all required input files are provided"
+                )
 
     def _select_cmip_coords_timeslice_data(self):
         """
@@ -327,7 +370,7 @@ class ClimateAnnAGNPSCoords:
         """
         longitude = (
             self.coords[0] + 360
-        ) % 360  # For CMIP6 the longitude needs to be in the [0, 360[ range
+        ) % 360  # For CMIP6 and CMIP5 the longitude needs to be in the [0, 360[ range
         latitude = self.coords[1]
         self.ds_select = self.ds.sel(lat=latitude, lon=longitude, method="nearest").sel(
             time=slice(self.start, self.end)
@@ -366,12 +409,42 @@ class ClimateAnnAGNPSCoords:
                 "vas": "wind_v",
             },
             inplace=True,
+            errors='ignore'
         )
 
         self.clm = df
         self.clm_resampled = df
 
         self._compute_dew_point()
+        self._compute_wind_speed()
+        self._compute_wind_direction()
+        self._keep_annagnps_columns_only()
+
+    def _generate_cmip5_coords_timeslice_dataframe(self):
+        """
+        Generate a DataFrame from the selected xarray.DataSet
+        """
+
+        df = self.ds_select.to_dataframe()
+
+        # We rename columns using the same variable names as the NLDAS-2 pynldas2 class so that we can
+        # use the same methods
+        df.rename(
+            columns={
+                "pr": "prcp",
+                "tasmin": "temp_min",
+                "tasmax": "temp_max",
+                "uas": "wind_u",
+                "vas": "wind_v",
+            },
+            inplace=True,
+            errors='ignore'
+        )
+
+        self.clm = df
+        self.clm_resampled = df
+
+        self._compute_dew_point_cmip5_maca()
         self._compute_wind_speed()
         self._compute_wind_direction()
         self._keep_annagnps_columns_only()
@@ -393,6 +466,18 @@ class ClimateAnnAGNPSCoords:
     def _compute_dew_point(self):
         clm = self.clm
         clm["tdew"] = compute_dew_point(clm["RH"], clm["temp"])
+
+    def _compute_dew_point_cmip5_maca(self):
+        clm = self.clm
+        # Compute Tavg
+        clm["tavg"] = (clm["temp_min"] + clm["temp_max"]) * 0.5
+        # Compute esat
+        clm["esat"] = compute_esat(clm["tavg"], Tunit='K')
+        # Compute RH
+        clm["RH"] = 100 * (1- clm["vpd"]/clm["esat"])
+        # Compute Tdew
+        clm["tdew"] = compute_dew_point(clm["RH"], clm["tavg"], Tunit="K")
+
 
     def _keep_annagnps_columns_only(self):
         """
