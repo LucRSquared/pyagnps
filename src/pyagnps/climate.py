@@ -240,13 +240,12 @@ class ClimateAnnAGNPSCoords:
             Format to save the output file, by default 'csv', also accepts 'parquet'
         - float_format : str, optional, default= '%.3f' for printing csv file
         """
-        self._read_cmip6_data(cmip_files)
-        self._select_cmip_coords_timeslice_data()
-        self._generate_cmip6_coords_timeslice_dataframe()
+        self.read_cmip6_data(cmip_files)
 
-        df_daily = self._generate_climate_file_daily(use_resampled=False, **kwargs)
+        df_daily = self.generate_annagnps_daily_climate_data_cmip6(**kwargs)
+
         return df_daily
-    
+
     def read_cmip5_maca_generate_annagnps_climate_daily(self, cmip_files, **kwargs):
         """
         Generate climate_daily.csv AnnAGNPS file/DataFrame from CMIP5 MACA_v2_METDATA output files
@@ -272,14 +271,13 @@ class ClimateAnnAGNPSCoords:
             Format to save the output file, by default 'csv', also accepts 'parquet'
         - float_format : str, optional, default= '%.3f' for printing csv file
         """
-        self._read_cmip5_maca_data(cmip_files)
-        self._select_cmip_coords_timeslice_data()
-        self._generate_cmip5_coords_timeslice_dataframe()
+        self.read_cmip5_maca_data(cmip_files)
+    
+        df_daily = self.generate_annagnps_daily_climate_data_cmip5_maca(**kwargs)
 
-        df_daily = self._generate_climate_file_daily(use_resampled=False, **kwargs)
         return df_daily
 
-    def _read_cmip6_data(self, cmip_files):
+    def read_cmip6_data(self, cmip_files):
         """
         Reads CMIP6 data files from the ScenarioMIP Activity and "day" table.
 
@@ -309,7 +307,7 @@ class ClimateAnnAGNPSCoords:
                     f"Variable {var} missing from input files, make sure all required input files are provided"
                 )
 
-    def _read_cmip5_maca_data(self, cmip_files):
+    def read_cmip5_maca_data(self, cmip_files):
         """
         Reads CMIP5 MACA resampled data table (Tested with MACA_v2_METDATA).
 
@@ -327,32 +325,37 @@ class ClimateAnnAGNPSCoords:
                       'rhsmin' : Daily Min Relative Humidity (%)
                       'rhsmax' : Daily Min Relative Humidity (%)
         """
+
         # Function to preprocess each file before merging the dataset
         def preprocess(ds):
-            if 'air_temperature' in ds:
-                if 'minimum' in ds['air_temperature'].cell_methods:
-                    ds = ds.rename_vars({'air_temperature': 'tasmin'})
-                elif 'maximum' in ds['air_temperature'].cell_methods:
-                    ds = ds.rename_vars({'air_temperature': 'tasmax'})
-            elif 'relative_humidity' in ds: # Those are not necessary
-                if 'minimum' in ds['relative_humidity'].cell_methods:
-                    ds = ds.rename_vars({'relative_humidity': 'rhsmin'})
-                elif 'maximum' in ds['relative_humidity'].cell_methods:
-                    ds = ds.rename_vars({'relative_humidity': 'rhsmax'})
-            elif 'eastward_wind' in ds:
-                ds = ds.rename_vars({'eastward_wind': 'uas'})
-            elif 'northward_wind' in ds:
-                ds = ds.rename_vars({'northward_wind': 'vas'})
-            elif 'precipitation' in ds:
-                ds = ds.rename_vars({'precipitation': 'pr'})
-            elif 'surface_downwelling_shortwave_flux_in_air' in ds:
-                ds = ds.rename_vars({'surface_downwelling_shortwave_flux_in_air': 'rsds'})
-            elif 'vpd' in ds:
-                ds['vpd'] = ds['vpd'] * 1000 # Convert kPa --> Pa
-                ds['vpd'].attrs['units'] = 'Pa'
+            if "air_temperature" in ds:
+                if "minimum" in ds["air_temperature"].cell_methods:
+                    ds = ds.rename_vars({"air_temperature": "tasmin"})
+                elif "maximum" in ds["air_temperature"].cell_methods:
+                    ds = ds.rename_vars({"air_temperature": "tasmax"})
+            elif "relative_humidity" in ds:  # Those are not necessary
+                if "minimum" in ds["relative_humidity"].cell_methods:
+                    ds = ds.rename_vars({"relative_humidity": "rhsmin"})
+                elif "maximum" in ds["relative_humidity"].cell_methods:
+                    ds = ds.rename_vars({"relative_humidity": "rhsmax"})
+            elif "eastward_wind" in ds:
+                ds = ds.rename_vars({"eastward_wind": "uas"})
+            elif "northward_wind" in ds:
+                ds = ds.rename_vars({"northward_wind": "vas"})
+            elif "precipitation" in ds:
+                ds = ds.rename_vars({"precipitation": "pr"})
+            elif "surface_downwelling_shortwave_flux_in_air" in ds:
+                ds = ds.rename_vars(
+                    {"surface_downwelling_shortwave_flux_in_air": "rsds"}
+                )
+            elif "vpd" in ds:
+                ds["vpd"] = ds["vpd"] * 1000  # Convert kPa --> Pa
+                ds["vpd"].attrs["units"] = "Pa"
             return ds
-        
-        self.ds = xr.open_mfdataset(cmip_files, chunks={'time':'auto'}, preprocess=preprocess, parallel=True)
+
+        self.ds = xr.open_mfdataset(
+            cmip_files, chunks={"time": "auto"}, preprocess=preprocess, parallel=True
+        )
 
         loaded_variables = list(self.ds.keys())
 
@@ -363,6 +366,41 @@ class ClimateAnnAGNPSCoords:
                 raise ValueError(
                     f"Variable {var} missing from input files, make sure all required input files are provided"
                 )
+            
+    def generate_annagnps_daily_climate_data_cmip5_maca(self, **kwargs):
+        ### Key-Value Arguments:
+        """
+        - output_filepath : str, optional
+               Path to write the output file, by default None
+        - saveformat : str, optional
+            Format to save the output file, by default 'csv', also accepts 'parquet'
+        - float_format : str, optional, default= '%.3f' for printing csv file
+        """
+
+        self._select_cmip_coords_timeslice_data()
+        self._generate_cmip5_coords_timeslice_dataframe()
+
+        df_daily = self._generate_climate_file_daily(use_resampled=False, **kwargs)
+        return df_daily
+    
+    def generate_annagnps_daily_climate_data_cmip6(self, **kwargs):
+        """
+        Generate climate_daily.csv AnnAGNPS file/DataFrame from CMIP6 output files
+
+        ### Key-Value Arguments:
+        - output_filepath : str, optional
+               Path to write the output file, by default None
+        - saveformat : str, optional
+            Format to save the output file, by default 'csv', also accepts 'parquet'
+        - float_format : str, optional, default= '%.3f' for printing csv file
+        """
+        self._select_cmip_coords_timeslice_data()
+        self._generate_cmip6_coords_timeslice_dataframe()
+
+        df_daily = self._generate_climate_file_daily(use_resampled=False, **kwargs)
+
+        return df_daily
+
 
     def _select_cmip_coords_timeslice_data(self):
         """
@@ -409,7 +447,7 @@ class ClimateAnnAGNPSCoords:
                 "vas": "wind_v",
             },
             inplace=True,
-            errors='ignore'
+            errors="ignore",
         )
 
         self.clm = df
@@ -438,7 +476,7 @@ class ClimateAnnAGNPSCoords:
                 "vas": "wind_v",
             },
             inplace=True,
-            errors='ignore'
+            errors="ignore",
         )
 
         self.clm = df
@@ -472,12 +510,11 @@ class ClimateAnnAGNPSCoords:
         # Compute Tavg
         clm["tavg"] = (clm["temp_min"] + clm["temp_max"]) * 0.5
         # Compute esat
-        clm["esat"] = compute_esat(clm["tavg"], Tunit='K')
+        clm["esat"] = compute_esat(clm["tavg"], Tunit="K")
         # Compute RH
-        clm["RH"] = 100 * (1- clm["vpd"]/clm["esat"])
+        clm["RH"] = 100 * (1 - clm["vpd"] / clm["esat"])
         # Compute Tdew
         clm["tdew"] = compute_dew_point(clm["RH"], clm["tavg"], Tunit="K")
-
 
     def _keep_annagnps_columns_only(self):
         """
@@ -720,57 +757,149 @@ class ClimateAnnAGNPSCoords:
         - autumn_storm_type_id (str): Autumn storm type ID. Defaults to an empty string.
         """
 
-        data = {
-            "Version": str(version),
-            "Input Units Code": input_units_code,
-            "Climate Station Name": climate_station_name,
-            "Beginning Climate Date 'mm/dd/yyyy'": beginning_climate_date
+        df = generate_climate_station_file(
+            output_filepath=output_filepath,
+            climate_station_name=climate_station_name,
+            beginning_climate_date=beginning_climate_date
             if beginning_climate_date
             else self.start.strftime("%m/%d/%Y"),
-            "Ending Climate Date 'mm/dd/yyyy'": ending_climate_date
+            ending_climate_date=ending_climate_date
             if ending_climate_date
             else self.end.strftime("%m/%d/%Y"),
-            "Latitude": latitude if latitude is not None else self.coords[1],
-            "Longitude": longitude if longitude is not None else self.coords[0],
-            "Elevation": elevation,
-            "Temperature Lapse Rate": temperature_lapse_rate,
-            "Precipitation N": precipitation_n,
-            "Global Storm Type ID": global_storm_type_id,
-            "1st Elevation Difference": first_elevation_difference,
-            "1st Elevation Rain Factor": first_elevation_rain_factor,
-            "2nd Elevation Difference": second_elevation_difference,
-            "2nd Elevation Rain Factor": second_elevation_rain_factor,
-            "2 Yr 24 hr Precipitation": two_year_24_hour_precipitation,
-            "Calibration or Areal Correction Coefficient": calibration_or_areal_correction_coefficient,
-            "Calibration or Areal Correction Exponent": calibration_or_areal_correction_exponent,
-            "Minimum Interception Evaporation": minimum_interception_evaporation,
-            "Maximum Interception Evaporation": maximum_interception_evaporation,
-            "Winter Storm Type ID": winter_storm_type_id,
-            "Spring Storm Type ID": spring_storm_type_id,
-            "Summer Storm Type ID": summer_storm_type_id,
-            "Autumn Storm Type ID": autumn_storm_type_id,
-        }
-
-        if elevation == "3dep":
-            elevation = py3dep.elevation_bycoords(
-                (data["Longitude"], data["Latitude"]), source="tep"
-            )
-            data["Elevation"] = elevation
-        elif not (isinstance(elevation, float)):
-            raise Exception(
-                f"Invalid elevation: {elevation}, please provide an elevation in meters (float) or '3dep' to query the elevation automatically"
-            )
-
-        df = pd.DataFrame(data, index=[0])
-        df.to_csv(output_filepath, float_format="%1.3f", index=False)
-
-        # # Write header line
-        # output_filepath.write_text(f"{','.join(data.keys())}\n")
-        # # Write values:
-        # with output_filepath.open(mode='a') as f:
-        #     f.write(f"{','.join([str(x) for x in data.values()])}")
+            latitude=latitude if latitude is not None else self.coords[1],
+            longitude=longitude if longitude is not None else self.coords[0],
+            elevation=elevation,
+            temperature_lapse_rate=temperature_lapse_rate,
+            precipitation_n=precipitation_n,
+            global_storm_type_id=global_storm_type_id,
+            first_elevation_difference=first_elevation_difference,
+            first_elevation_rain_factor=first_elevation_rain_factor,
+            second_elevation_difference=second_elevation_difference,
+            second_elevation_rain_factor=second_elevation_rain_factor,
+            two_year_24_hour_precipitation=two_year_24_hour_precipitation,
+            calibration_or_areal_correction_coefficient=calibration_or_areal_correction_coefficient,
+            calibration_or_areal_correction_exponent=calibration_or_areal_correction_exponent,
+            minimum_interception_evaporation=minimum_interception_evaporation,
+            maximum_interception_evaporation=maximum_interception_evaporation,
+            winter_storm_type_id=winter_storm_type_id,
+            spring_storm_type_id=spring_storm_type_id,
+            summer_storm_type_id=summer_storm_type_id,
+            autumn_storm_type_id=autumn_storm_type_id,
+            version=version,
+            input_units_code=input_units_code,
+        )
 
         return df
+
+
+def generate_climate_station_file(
+    output_filepath=Path("climate_station.csv"),
+    climate_station_name="Station",
+    beginning_climate_date=None,
+    ending_climate_date=None,
+    latitude=None,
+    longitude=None,
+    elevation="3dep",
+    temperature_lapse_rate="",
+    precipitation_n="",
+    global_storm_type_id="",
+    first_elevation_difference="",
+    first_elevation_rain_factor="",
+    second_elevation_difference="",
+    second_elevation_rain_factor="",
+    two_year_24_hour_precipitation="",
+    calibration_or_areal_correction_coefficient="",
+    calibration_or_areal_correction_exponent="",
+    minimum_interception_evaporation="",
+    maximum_interception_evaporation="",
+    winter_storm_type_id="",
+    spring_storm_type_id="",
+    summer_storm_type_id="",
+    autumn_storm_type_id="",
+    version=6.00,
+    input_units_code=1,
+):
+    """
+    Generate the AnnAGNPS climate station file for this current query (unless overriden)
+    Will generate a "climate_station.csv" file in the specified output_dir.
+
+    ### Arguments:
+    - output_dir (Path): The directory where to save the file. Defaults to the current working directory.
+    - version (str or float): The version number. Defaults to 6.00.
+    - input_units_code (int): The input units code. Defaults to 1 for SI units.
+    - climate_station_name (str): The climate station name. Defaults to "Station".
+    - beginning_climate_date (str): The beginning climate date in 'mm/dd/yyyy' format.
+    - ending_climate_date (str): The ending climate date in 'mm/dd/yyyy' format.
+    - latitude (float): The latitude.
+    - longitude (float): The longitude.
+    - elevation (float/str):
+        - (float): the elevation.
+        - (str): '3dep' (default) queries the elevation at (longitude, latitude) querying the 3dep service
+    - temperature_lapse_rate (float): The temperature lapse rate. Defaults to an empty string.
+    - precipitation_n (float): Precipitation N. Defaults to an empty string.
+    - global_storm_type_id (str): Global storm type ID. Defaults to an empty string.
+    - first_elevation_difference (float): First elevation difference. Defaults to an empty string.
+    - first_elevation_rain_factor (float): First elevation rain factor. Defaults to an empty string.
+    - second_elevation_difference (float): Second elevation difference. Defaults to an empty string.
+    - second_elevation_rain_factor (float): Second elevation rain factor. Defaults to an empty string.
+    - two_year_24_hour_precipitation (float): 2 Yr 24 hr Precipitation. Defaults to an empty string.
+    - calibration_or_areal_correction_coefficient (float): Calibration or Areal Correction Coefficient. Defaults to an empty string.
+    - calibration_or_areal_correction_exponent (float): Calibration or Areal Correction Exponent. Defaults to an empty string.
+    - minimum_interception_evaporation (float): Minimum Interception Evaporation. Defaults to an empty string.
+    - maximum_interception_evaporation (float): Maximum Interception Evaporation. Defaults to an empty string.
+    - winter_storm_type_id (str): Winter storm type ID. Defaults to an empty string.
+    - spring_storm_type_id (str): Spring storm type ID. Defaults to an empty string.
+    - summer_storm_type_id (str): Summer storm type ID. Defaults to an empty string.
+    - autumn_storm_type_id (str): Autumn storm type ID. Defaults to an empty string.
+    """
+
+    data = {
+        "Version": str(version),
+        "Input Units Code": input_units_code,
+        "Climate Station Name": climate_station_name,
+        "Beginning Climate Date 'mm/dd/yyyy'": beginning_climate_date,
+        "Ending Climate Date 'mm/dd/yyyy'": ending_climate_date,
+        "Latitude": latitude,
+        "Longitude": longitude,
+        "Elevation": elevation,
+        "Temperature Lapse Rate": temperature_lapse_rate,
+        "Precipitation N": precipitation_n,
+        "Global Storm Type ID": global_storm_type_id,
+        "1st Elevation Difference": first_elevation_difference,
+        "1st Elevation Rain Factor": first_elevation_rain_factor,
+        "2nd Elevation Difference": second_elevation_difference,
+        "2nd Elevation Rain Factor": second_elevation_rain_factor,
+        "2 Yr 24 hr Precipitation": two_year_24_hour_precipitation,
+        "Calibration or Areal Correction Coefficient": calibration_or_areal_correction_coefficient,
+        "Calibration or Areal Correction Exponent": calibration_or_areal_correction_exponent,
+        "Minimum Interception Evaporation": minimum_interception_evaporation,
+        "Maximum Interception Evaporation": maximum_interception_evaporation,
+        "Winter Storm Type ID": winter_storm_type_id,
+        "Spring Storm Type ID": spring_storm_type_id,
+        "Summer Storm Type ID": summer_storm_type_id,
+        "Autumn Storm Type ID": autumn_storm_type_id,
+    }
+
+    if elevation == "3dep":
+        elevation = py3dep.elevation_bycoords(
+            (data["Longitude"], data["Latitude"]), source="tep"
+        )
+        data["Elevation"] = elevation
+    elif not (isinstance(elevation, float)):
+        raise Exception(
+            f"Invalid elevation: {elevation}, please provide an elevation in meters (float) or '3dep' to query the elevation automatically"
+        )
+
+    df = pd.DataFrame(data, index=[0])
+    df.to_csv(output_filepath, float_format="%1.3f", index=False)
+
+    # # Write header line
+    # output_filepath.write_text(f"{','.join(data.keys())}\n")
+    # # Write values:
+    # with output_filepath.open(mode='a') as f:
+    #     f.write(f"{','.join([str(x) for x in data.values()])}")
+
+    return df
 
 
 def compute_esat(Tair, Tunit="K"):
