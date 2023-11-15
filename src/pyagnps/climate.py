@@ -24,7 +24,7 @@ os.environ[
 class ClimateAnnAGNPSCoords:
     def __init__(
         self,
-        coords: tuple,
+        coords: tuple = None,
         start: str = "2022-01-01",
         end: str = "2022-12-31",
         date_mode: str = "local",
@@ -46,10 +46,62 @@ class ClimateAnnAGNPSCoords:
                            UTC timezone
         """
 
+        self.coords = coords
+
+        self.update_coords_start_end_dates(coords=coords,
+                                           start=start,
+                                           end=end,
+                                           date_mode=date_mode)
+
+        self.clm = None  # DataFrame
+        self.clm_resampled = None  # DataFrame resampled
+        self.ds = None  # xarray.DataSet for CMIP6 outputs
+        self.ds_select = (
+            None  # xarray.DataSet for ds selection for coord and time bounds
+        )
+
+    def update_coords_start_end_dates(self,
+                               coords: tuple = None,
+                               start: str = None,
+                               end: str = None,
+                               date_mode: str = "local"):
+        """
+        ## Positional arguments:
+        - coords: (longitude, latitude) in EPSG:4326 projection. Optional, if blank previous coords are kept
+        - start: Start date YYYY-MM-DD (assumes it starts at Midnight)
+                 Can specify hour too: YYYY-MM-DDTHH
+                 The data point returned will cover the time period YYYY-MM-DDTHH to YYYY-MM-DDT HH+1
+        - end: End date, same specification as start
+
+            - [Start date ------- Included Range ------- End date]
+
+        ## Key-value arguments:
+        - date_mode: "local" will assume that the start and end dates are provided
+                             in the coords local time zone
+                     "utc" will assume that the start and end dates are provided in
+                           UTC timezone
+        """
+
+        if not coords:
+            coords = self.coords
+            # If no coords were provided to begin with we just keep None for coords
+            # and assume the dates are UTC
+            if coords is None:
+                date_mode = "utc"
+
+        if not start:
+            start = self.start
+            date_mode = "utc"
+
+        if not end:
+            end = self.end
+            date_mode = "utc"
+
         if date_mode.lower() == "utc":
             self.start = pd.Timestamp(start)
             self.end = pd.Timestamp(end)
             self.timezone = "UTC"
+
         elif date_mode.lower() == "local":
             # Identify timezone:
             lon, lat = coords
@@ -71,13 +123,7 @@ class ClimateAnnAGNPSCoords:
 
         self.coords = coords
         self.coords_actual = None  # Actual coordinates queried using nearest method
-
-        self.clm = None  # DataFrame
-        self.clm_resampled = None  # DataFrame resampled
-        self.ds = None  # xarray.DataSet for CMIP6 outputs
-        self.ds_select = (
-            None  # xarray.DataSet for ds selection for coord and time bounds
-        )
+        
 
     def _query_nldas2_climate(
         self,
@@ -199,6 +245,10 @@ class ClimateAnnAGNPSCoords:
             Format to save the output file, by default 'csv', also accepts 'parquet'
         - float_format : str, optional, default= '%.3f' for printing csv file
         """
+
+        if not self.coords:
+            raise Exception("Coordinates are missing. Please provide coords!")
+
         self._query_nldas2_climate(source="netcdf")
         # Test if there are any NaN values
         if self.clm.isna().any().any():
@@ -406,6 +456,10 @@ class ClimateAnnAGNPSCoords:
         """
         Slices the CMIP6 or CMIP6-MACAv2-METDATA xarray.DataSet for the coords
         """
+
+        if not self.coords:
+            raise Exception("Coordinates are missing. Please provide coords!")
+
         longitude = (
             self.coords[0] + 360
         ) % 360  # For CMIP6 and CMIP5 the longitude needs to be in the [0, 360[ range
@@ -487,6 +541,43 @@ class ClimateAnnAGNPSCoords:
         self._compute_wind_direction()
         self._keep_annagnps_columns_only()
 
+    def generate_cmip_lon_lat_secondary_climate_id(self, coords=None) -> int:
+        """
+        Generate a secondary climate ID based on provided coordinates and a climate dataset.
+
+        ### Parameters:
+        - coords : (lon, lat) tuple in (EPSG:4326) 
+            A tuple containing latitude and longitude values for which the secondary climate ID is generated.
+
+            Optional. If not provided, the self.coords values will be used
+
+        ### Returns:
+        - int
+            A unique secondary climate ID calculated from the nearest indices of the provided latitude and longitude in the dataset.
+
+        ### Notes:
+        This function calculates the nearest indices for the given latitude and longitude inside the provided climate dataset 
+        and generates a unique secondary climate ID using these indices.
+        """
+
+        ds = self.ds
+
+        if not coords:
+            coords = self.coords
+
+        N_lon = ds.dims['lon']
+
+        lon, lat = coords
+
+        lon = (lon + 360) % 360  # For CMIP6 and CMIP5 the longitude needs to be in the [0, 360[ range
+
+        # find nearest index inside ds for each lat lon
+        idx_lat = abs(ds['lat']-lat).argmin().item()
+        idx_lon = abs(ds['lon']-lon).argmin().item()
+
+        # Generate unique id for this pair
+        return idx_lon + idx_lat * N_lon
+    
     def _compute_wind_speed(self):
         clm = self.clm
         clm["wind_speed"] = compute_wind_speed(clm["wind_u"], clm["wind_v"])
