@@ -45,11 +45,11 @@ path_to_thucs = Path(
     "/aims-nas/luc/data/tophuc_S_M_40000_closed_holes_with_container_thuc_merged_bbox_area_first_kept.gpkg"
 )
 
-path_to_raster = Path("/aims-nas/data/datasets/Management/CDL_Annual/CDL_2022.tif")
+raster_CDL_path = Path("/aims-nas/data/datasets/Management/CDL_Annual/CDL_2022.tif")
 
-track_files_dir = Path("/aims-nas/luc/thuc_field_ID_CDL/")
+track_files_dir = Path("/aims-nas/luc/thuc_field_ID_CDL_db_fix/")
 path_to_management_class_names = Path(
-    "/aims-nas/data/datasets/Management/CDL_Annual/definition_of_CDL_Class_Names_for_use_in_AIMS/CDL_Field_ID_dictionary.csv"
+    "/aims-nas/data/datasets/Management/CDL_Annual/definition_of_CDL_Class_Names_for_use_in_AIMS/CDL_All_Codes.csv"
 )
 
 log_dir = track_files_dir / "LOGS"
@@ -61,24 +61,23 @@ print("Reading and initializing files...")
 thucs = gpd.read_file(
     path_to_thucs
 )  # GeoDataFrame containing the thucs and their geometry
-thucs = thucs.sort_values(by=["bbox_area_sqkm"], ascending=True)
+thucs = thucs.sort_values(by=["bbox_area_sqkm"], ascending=False)
 
 df_cdl = pd.read_csv(path_to_management_class_names)
-dico = (
-    df_cdl[["CDL_Value", "Modified_CDL_Category"]]
-    .set_index("CDL_Value")
-    .to_dict(orient="dict")["Modified_CDL_Category"]
-)
+dico = df_cdl[['Value','Class_Name']].set_index('Value').to_dict(orient='dict')['Class_Name']
+dico = {key: '' if isinstance(value,float) else value for key, value in dico.items()}
 
-runlist = thucs["tophucid"].to_list()
-# runlist = ["1002", "1004"]
-# runlist = ["1002"]
+classes = set(dico.values())
+# Remove classes that need 
+already_valid_classes = classes - set(["", "Clouds_No_Data", "Developed"])
+reversed_already_valid_dico = {dico[val]: val for val in dico if dico[val] in already_valid_classes}
+invalid_field_ids_to_fix = ("'NaN'", "'Clouds_No_Data'", "'Developed'")
+
+# runlist = thucs["tophucid"].to_list()
+runlist = ["0596", "1004"]
 
 track_files_dir.mkdir(parents=True, exist_ok=True)
 log_dir.mkdir(parents=True, exist_ok=True)
-
-# runlist = pd.read_csv(path_to_thuc_runlist, dtype=object)
-# runlist = runlist.iloc[:,0].to_list() # Get the list of thucs that need to be
 
 for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
     goodsofar = True
@@ -101,92 +100,118 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
     else:
         thuc_dir.mkdir(parents=True)
 
-    # Collect thuc cells geometry from database
+    # Update Table and columns for valid existing categories
     try:
         now = get_current_time()
         log_to_file(
             general_log,
-            f"{now}: {nodename}: {thuc_id}: Querying cells from database...",
+            f"{now}: {nodename}: {thuc_id}: Adding columns and updating columns for valid mgmt_field_id...",
         )
-        query = f"SELECT * FROM thuc_{thuc_id}_annagnps_cell_ids"
 
-        with engine.connect() as conn:
-            cells = gpd.read_postgis(sql=sql_text(query), con=conn, geom_col="geom")
+        with engine.connect() as connection:
+            # Make sure that mgmt_field_id column is indeed text 
+            # create a column for cdl value 2022
+            # if the mgmt field values are NULL, NaN, Clouds_No_Data, or Developed the cdl_value is set to -1
+            query = f"""
+            ALTER TABLE thuc_{thuc_id}_annagnps_cell_data_section
+            ALTER COLUMN mgmt_field_id SET DATA TYPE text USING CAST(mgmt_field_id AS text);
 
-        utm = cells.estimate_utm_crs()
-        cells = cells.to_crs(utm)
+            ALTER TABLE thuc_{thuc_id}_annagnps_cell_data_section
+            ADD COLUMN IF NOT EXISTS cdl_value_2022 INT;
+
+            UPDATE thuc_{thuc_id}_annagnps_cell_data_section 
+            SET cdl_value_2022 = CASE 
+                WHEN mgmt_field_id IS NULL OR mgmt_field_id IN ({', '.join(invalid_field_ids_to_fix)}) THEN -1 
+                ELSE NULL 
+            END
+            """
+
+            connection.execute(sql_text(query))
+            connection.commit()
 
     except Exception as e:
+        connection.rollback()
         goodsofar = False
         now = get_current_time()
         log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e}")
 
-    # Apply plurality analysis
+    # Find mgmt_field_id that have a cdl_value_2022 different than -1 and we apply the mapping
     if goodsofar:
-        try:
-            now = get_current_time()
-            log_to_file(
-                general_log,
-                f"{now}: {nodename}: {thuc_id}: Performing plurality analysis",
-            )
-            cells = sdm.assign_attr_zonal_stats_raster_layer(
-                cells, path_to_raster, agg_method="majority", attr="CDL_Value"
-            )
-
-            # Reformat the CDL Value column and map with the correct value
-            cells["CDL_Value"] = cells["CDL_Value"].astype("Int32")
-            cells.loc[
-                cells["CDL_Value"] == 0, "CDL_Value"
-            ] = 81  # Set 0 value to 81 = Cloud_No_Data
-            cells["Mgmt_Field_ID"] = cells["CDL_Value"].map(dico)
-            # this function uses rasterstats.zonal_stats and the "majority" function actually does the plurality operation by selecting the most common value
-
-            cells = cells.rename(columns={"dn": "cell_id"})
-
-            data_to_update = cells[["cell_id", "Mgmt_Field_ID"]].to_dict(
-                orient="records"
-            )
-
-        except Exception as e:
-            goodsofar = False
-            now = get_current_time()
-            log_to_file(general_log, f"{now}: {nodename}: {thuc_id}: {e}")
-    else:
-        pass
-
-    # Update table schema and make sure that mgmt_field_id is of type text
-    if goodsofar:
+        
         now = get_current_time()
         log_to_file(
             general_log,
-            f"{now}: {nodename}: {thuc_id}: Changing mgmt_field_id column type to TEXT",
+            f"{now}: {nodename}: {thuc_id}: Applying mapping to already valid cells",
         )
+
+        query = f"SELECT mgmt_field_id FROM thuc_{thuc_id}_annagnps_cell_data_section WHERE cdl_value_2022 <> -1 OR cdl_value_2022 IS NULL"
+        df = pd.read_sql_query(sql=sql_text(query), con=engine.connect())
+        df = df.drop_duplicates().reset_index(drop=True) # Find the unique classes present in that THUC
+
         with engine.connect() as connection:
             try:
-                query = f"ALTER TABLE thuc_{thuc_id}_annagnps_cell_data_section ALTER COLUMN mgmt_field_id TYPE TEXT"
-                connection.execute(sql_text(query))
-                # Commit the transaction explicitly
+
+                query = f"""
+                UPDATE thuc_{thuc_id}_annagnps_cell_data_section
+                SET cdl_value_2022 = CASE WHEN mgmt_field_id = :Mgmt_Field_ID THEN :CDL_Value_2022 ELSE -1 END
+                WHERE mgmt_field_id = :Mgmt_Field_ID
+                """
+            
+                for _, class_name in df.iterrows():
+                    name = class_name['mgmt_field_id']
+                    connection.execute(sql_text(query), {"CDL_Value_2022": reversed_already_valid_dico[name], "Mgmt_Field_ID": name})
+
                 connection.commit()
 
             except Exception as e:
-                goodsofar = False
-
-                now = get_current_time()
-                log_to_file(
-                    general_log, f"{now}: {nodename}: {thuc_id}: {e} (rolling back)"
-                )
-
-                # Rollback the transaction in case of an error
+                print(f"Error for THUC {thuc_id}")
+                print(e)
                 connection.rollback()
+
     else:
         pass
 
-    # Update database
+
+    # Query remaining cells and apply zonal startistic only to those
     if goodsofar:
+        
         now = get_current_time()
         log_to_file(
             general_log,
-            f"{now}: {nodename}: {thuc_id}: Populating Field_ID with CDL data...",
+            f"{now}: {nodename}: {thuc_id}: Performing plurality analysis on remaining invalid cells",
+        )
+
+        # Get cell ids to reprocess
+        query = f"SELECT cell_id FROM thuc_{thuc_id}_annagnps_cell_data_section WHERE cdl_value_2022 = -1 OR cdl_value_2022 IS NULL"
+        df = pd.read_sql_query(sql=sql_text(query), con=engine.connect())
+        cells_ids_to_reprocess = tuple(df['cell_id'].to_list())
+
+        # Collect cells geometries from database
+        query = f"SELECT * FROM thuc_{thuc_id}_annagnps_cell_ids WHERE dn in {cells_ids_to_reprocess}"
+
+        with engine.connect() as conn:
+            cells = gpd.read_postgis(sql=sql_text(query), con=conn, geom_col="geom")
+            utm = cells.estimate_utm_crs()
+            cells = cells.to_crs(utm)
+
+        # Perform the plurality analysis
+        cells = sdm.assign_attr_zonal_stats_raster_layer(cells, raster_CDL_path, agg_method='majority', attr='CDL_Value')
+        cells['CDL_Value'] = cells['CDL_Value'].astype('Int32')
+        cells['Mgmt_Field_ID'] = cells['CDL_Value'].map(dico)
+        cells = cells.rename(columns={"dn": "cell_id"})
+
+        data_to_update = cells[["cell_id", "Mgmt_Field_ID", "CDL_Value"]].to_dict(orient="records")
+
+    else:
+        pass
+
+    # Populate data
+    if goodsofar:
+
+        now = get_current_time()
+        log_to_file(
+            general_log,
+            f"{now}: {nodename}: {thuc_id}: Populating cells that were reprocessed",
         )
 
         try:
@@ -198,20 +223,18 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
             transaction = session.begin()
 
             # execute your update query here
-            query = f"UPDATE thuc_{thuc_id}_annagnps_cell_data_section SET Mgmt_Field_ID = :Mgmt_Field_ID WHERE cell_id = :cell_id"
+            query = f"""UPDATE thuc_{thuc_id}_annagnps_cell_data_section 
+            SET mgmt_field_id = :Mgmt_Field_ID,
+                cdl_value_2022 = :CDL_Value
+            WHERE cell_id = :cell_id"""
+            
             session.execute(sql_text(query), data_to_update)
             # commit the transaction
             transaction.commit()
 
         except Exception as e:
-            goodsofar = False
             # rollback the transaction on error
             transaction.rollback()
-            now = get_current_time()
-            log_to_file(
-                general_log,
-                f"{now}: {nodename}: {thuc_id}: Failed to update DB, rolling back... : {e}",
-            )
 
         finally:
             # close the session
