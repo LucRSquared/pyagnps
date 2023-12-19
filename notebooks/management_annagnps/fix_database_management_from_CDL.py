@@ -167,6 +167,7 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
                 print(f"Error for THUC {thuc_id}")
                 print(e)
                 connection.rollback()
+                goodsofar = False
 
     else:
         pass
@@ -181,26 +182,37 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
             f"{now}: {nodename}: {thuc_id}: Performing plurality analysis on remaining invalid cells",
         )
 
-        # Get cell ids to reprocess
-        query = f"SELECT cell_id FROM thuc_{thuc_id}_annagnps_cell_data_section WHERE cdl_value_2022 = -1 OR cdl_value_2022 IS NULL"
-        df = pd.read_sql_query(sql=sql_text(query), con=engine.connect())
-        cells_ids_to_reprocess = tuple(df['cell_id'].to_list())
+        try:
 
-        # Collect cells geometries from database
-        query = f"SELECT * FROM thuc_{thuc_id}_annagnps_cell_ids WHERE dn in {cells_ids_to_reprocess}"
+            # Get cell ids to reprocess
+            query = f"SELECT cell_id FROM thuc_{thuc_id}_annagnps_cell_data_section WHERE cdl_value_2022 = -1 OR cdl_value_2022 IS NULL"
+            df = pd.read_sql_query(sql=sql_text(query), con=engine.connect())
+            cells_ids_to_reprocess = tuple(df['cell_id'].to_list())
 
-        with engine.connect() as conn:
-            cells = gpd.read_postgis(sql=sql_text(query), con=conn, geom_col="geom")
-            utm = cells.estimate_utm_crs()
-            cells = cells.to_crs(utm)
+            # Collect cells geometries from database
+            query = f"SELECT * FROM thuc_{thuc_id}_annagnps_cell_ids WHERE dn in {cells_ids_to_reprocess}"
 
-        # Perform the plurality analysis
-        cells = sdm.assign_attr_zonal_stats_raster_layer(cells, raster_CDL_path, agg_method='majority', attr='CDL_Value')
-        cells['CDL_Value'] = cells['CDL_Value'].astype('Int32')
-        cells['Mgmt_Field_ID'] = cells['CDL_Value'].map(dico)
-        cells = cells.rename(columns={"dn": "cell_id"})
+            with engine.connect() as conn:
+                cells = gpd.read_postgis(sql=sql_text(query), con=conn, geom_col="geom")
+                utm = cells.estimate_utm_crs()
+                cells = cells.to_crs(utm)
 
-        data_to_update = cells[["cell_id", "Mgmt_Field_ID", "CDL_Value"]].to_dict(orient="records")
+            # Perform the plurality analysis
+            cells = sdm.assign_attr_zonal_stats_raster_layer(cells, raster_CDL_path, agg_method='majority', attr='CDL_Value')
+            try:
+                cells['CDL_Value'] = cells['CDL_Value'].astype('Int32')
+            except Exception as e:
+                log_to_file(
+                general_log,
+                f"{now}: {nodename}: {thuc_id}: {e}",
+            )
+                
+            cells['Mgmt_Field_ID'] = cells['CDL_Value'].map(dico)
+            cells = cells.rename(columns={"dn": "cell_id"})
+
+            data_to_update = cells[["cell_id", "Mgmt_Field_ID", "CDL_Value"]].to_dict(orient="records")
+        except:
+            goodsofar = False
 
     else:
         pass
@@ -235,6 +247,7 @@ for _, tuc in tqdm(thucs.iterrows(), total=thucs.shape[0]):
         except Exception as e:
             # rollback the transaction on error
             transaction.rollback()
+            goodsofar = False
 
         finally:
             # close the session
