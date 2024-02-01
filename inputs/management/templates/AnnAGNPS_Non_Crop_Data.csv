@@ -1,0 +1,6 @@
+Non-Crop_ID,Non-Crop_Description,Annual_Root_Mass,Annual_Cover_Ratio,Annual_Rain_Fall_Height,Surface_Cover_Residue,USLE_C-Fctr,Basal_Crop_Coef_Mid,Growing_Season_Start_Month,Growing_Season_Start_Day,Growing_Season_End_Month,Growing_Season_End_Day,Basal_Crop_Coef_Climate_Adjust,Input_Units_Code
+Forest,,5000,0.5,20,100,,,,,,,,0
+Commercial,,1,1,0.1,0.1,,,,,,,,0
+fallow,,1,1,0.1,0.1,,,,,,,,0
+residential,,1,1,0.1,1,,,,,,,,0
+roads,,1,1,0.1,1,,,,,,,,0

@@ -1,0 +1,12 @@
+Data Section ID,File Name
+AnnAGNPS ID,AnnAGNPS_ID.csv
+Crop Data,AnnAGNPS_Crop_Data.csv
+Crop Growth Data,AnnAGNPS_Crop_Growth_Data.csv
+Management Field Data,AnnAGNPS_Management_Field_Data.csv
+Management Operation Data,AnnAGNPS_Management_Operation_Data.csv
+Management Schedule Data,AnnAGNPS_Management_Schedule_Data.csv
+Non-Crop Data,AnnAGNPS_Non_Crop_Data.csv
+Runoff Curve Number Data,Runoff_Curve_Number_Data.csv
+Output Options - Global,Output_Options_Global.csv
+Output Options - AA,Output_Options_AA.csv
+Output Options - TBL,Output_Options_tbl.csv
