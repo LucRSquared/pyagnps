@@ -1,8 +1,11 @@
+from pathlib import Path
 import rasterio
 from rasterio import features
 from shapely.geometry import shape
 from shapely.geometry.polygon import Polygon, LinearRing
 import numpy as np
+
+import pandas as pd
 import geopandas as gpd
 import shutil, os, glob, sys
 
@@ -159,3 +162,13 @@ def get_date_from_string(date_string, outputtype=np.datetime64):
         return np.datetime64(date)
     else:
         raise TypeError("outputtype must be datetime or np.datetime64")
+
+def write_csv_from_dict(data_dict, output_path='control.csv'):
+    # Writes the contents of kwargs with the key as a column and the value as the value
+    # at output_path
+    output_path = Path(output_path)
+    # Create a DataFrame concisely using a list of tuples
+    df = pd.DataFrame([list(data_dict.values())], columns=data_dict.keys())
+
+    # Write the DataFrame to a CSV file, ensuring header row
+    df.to_csv(output_path, index=False, header=True)
