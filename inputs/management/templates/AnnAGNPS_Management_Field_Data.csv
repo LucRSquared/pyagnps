@@ -1,129 +1,129 @@
-Field_ID                    ,Landuse_Type_ID ,Mgmt_Schd_ID                ,Greg_Yr_for_1st_Yr_of_Rotation ,Percent_Rock_Cover ,Interrill_Erosion_Code ,Random_Roughness ,Terrace_Horizontal_Distance ,Terrace_Grade ,Tile_Drain_ID ,Input_Units_Code , CDL_Category                ,CDL_Value ,Modified_CDL_Category
-Alfalfa                     ,CROPLAND        ,Alfalfa                     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Alfalfa                     ,       36 ,Alfalfa                     
-Almonds                     ,CROPLAND        ,Almonds                     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Almonds                     ,       75 ,Almonds                     
-Apples                      ,CROPLAND        ,Apples                      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Apples                      ,       68 ,Apples                      
-Apricots                    ,CROPLAND        ,Apricots                    ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Apricots                    ,      223 ,Apricots                    
-Aquaculture                 ,URBAN           ,Aquaculture                 ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Developed                   ,       92 ,Developed                   
-Asparagus                   ,CROPLAND        ,Asparagus                   ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Asparagus                   ,      207 ,Asparagus                   
-Avocados                    ,CROPLAND        ,Avocados                    ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Avocados                    ,      215 ,Avocados                    
-Barley                      ,CROPLAND        ,Barley                      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Barley                      ,       21 ,Barley                      
-Barren                      ,RANGELAND       ,Barren                      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Barren                      ,       65 ,Barren                      
-Blueberries                 ,CROPLAND        ,Blueberries                 ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Blueberries                 ,      242 ,Blueberries                 
-Broccoli                    ,CROPLAND        ,Broccoli                    ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Broccoli                    ,      214 ,Broccoli                    
-Buckwheat                   ,CROPLAND        ,Buckwheat                   ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Buckwheat                   ,       39 ,Buckwheat                   
-Cabbage                     ,CROPLAND        ,Cabbage                     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Cabbage                     ,      243 ,Cabbage                     
-Camelina                    ,CROPLAND        ,Camelina                    ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Camelina                    ,       38 ,Camelina                    
-Caneberries                 ,CROPLAND        ,Caneberries                 ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Caneberries                 ,       55 ,Caneberries                 
-Canola                      ,CROPLAND        ,Canola                      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Canola                      ,       31 ,Canola                      
-Cantaloupes                 ,CROPLAND        ,Cantaloupes                 ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Cantaloupes                 ,      209 ,Cantaloupes                 
-Carrots                     ,CROPLAND        ,Carrots                     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Carrots                     ,      206 ,Carrots                     
-Cauliflower                 ,CROPLAND        ,Cauliflower                 ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Cauliflower                 ,      244 ,Cauliflower                 
-Celery                      ,CROPLAND        ,Celery                      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Celery                      ,      245 ,Celery                      
-Cherries                    ,CROPLAND        ,Cherries                    ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Cherries                    ,       66 ,Cherries                    
-Chick_Peas                  ,CROPLAND        ,Chick_Peas                  ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Chick Peas                  ,       51 ,Chick_Peas                  
-Christmas_Trees             ,FOREST          ,Christmas_Trees             ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Christmas Trees             ,       70 ,Christmas_Trees             
-Citrus                      ,CROPLAND        ,Citrus                      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Citrus                      ,       72 ,Citrus                      
-Clouds_No_Data              ,PASTURE         ,Clouds_No_Data              ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Clouds_No_Data              ,       81 ,Clouds_No_Data              
-Clover_Wildflowers          ,CROPLAND        ,Clover_Wildflowers          ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Clover/Wildflowers          ,       58 ,Clover_Wildflowers          
-Corn                        ,CROPLAND        ,Corn                        ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Corn                        ,        1 ,Corn                        
-Cotton                      ,CROPLAND        ,Cotton                      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Cotton                      ,        2 ,Cotton                      
-Cranberries                 ,CROPLAND        ,Cranberries                 ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Cranberries                 ,      250 ,Cranberries                 
-Cucumbers                   ,CROPLAND        ,Cucumbers                   ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Cucumbers                   ,       50 ,Cucumbers                   
-Dbl_Crop_Barley_Corn        ,CROPLAND        ,Dbl_Crop_Barley_Corn        ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Dbl Crop Barley/Corn        ,      237 ,Dbl_Crop_Barley_Corn        
-Dbl_Crop_Barley_Sorghum     ,CROPLAND        ,Dbl_Crop_Barley_Sorghum     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Dbl Crop Barley/Sorghum     ,      235 ,Dbl_Crop_Barley_Sorghum     
-Dbl_Crop_Barley_Soybeans    ,CROPLAND        ,Dbl_Crop_Barley_Soybeans    ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Dbl Crop Barley/Soybeans    ,      254 ,Dbl_Crop_Barley_Soybeans    
-Dbl_Crop_Corn_Soybeans      ,CROPLAND        ,Dbl_Crop_Corn_Soybeans      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Dbl Crop Corn/Soybeans      ,      241 ,Dbl_Crop_Corn_Soybeans      
-Dbl_Crop_Durum_Wht_Sorghum  ,CROPLAND        ,Dbl_Crop_Durum_Wht_Sorghum  ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Dbl Crop Durum Wht/Sorghum  ,      234 ,Dbl_Crop_Durum_Wht_Sorghum  
-Dbl_Crop_Lettuce_Barley     ,CROPLAND        ,Dbl_Crop_Lettuce_Barley     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Dbl Crop Lettuce/Barley     ,      233 ,Dbl_Crop_Lettuce_Barley     
-Dbl_Crop_Lettuce_Cantaloupe ,CROPLAND        ,Dbl_Crop_Lettuce_Cantaloupe ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Dbl Crop Lettuce/Cantaloupe ,      231 ,Dbl_Crop_Lettuce_Cantaloupe 
-Dbl_Crop_Lettuce_Cotton     ,CROPLAND        ,Dbl_Crop_Lettuce_Cotton     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Dbl Crop Lettuce/Cotton     ,      232 ,Dbl_Crop_Lettuce_Cotton     
-Dbl_Crop_Lettuce_Durum_Wht  ,CROPLAND        ,Dbl_Crop_Lettuce_Durum_Wht  ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Dbl Crop Lettuce/Durum Wht  ,      230 ,Dbl_Crop_Lettuce_Durum_Wht  
-Dbl_Crop_Oats_Corn          ,CROPLAND        ,Dbl_Crop_Oats_Corn          ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Dbl Crop Oats/Corn          ,      226 ,Dbl_Crop_Oats_Corn          
-Dbl_Crop_Soybeans_Cotton    ,CROPLAND        ,Dbl_Crop_Soybeans_Cotton    ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Dbl Crop Soybeans/Cotton    ,      239 ,Dbl_Crop_Soybeans_Cotton    
-Dbl_Crop_Soybeans_Oats      ,CROPLAND        ,Dbl_Crop_Soybeans_Oats      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Dbl Crop Soybeans/Oats      ,      240 ,Dbl_Crop_Soybeans_Oats      
-Dbl_Crop_Triticale_Corn     ,CROPLAND        ,Dbl_Crop_Triticale_Corn     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Dbl_Crop_Triticale_Corn     ,      228 ,Dbl_Crop_Triticale_Corn     
-Dbl_Crop_WinWht_Corn        ,CROPLAND        ,Dbl_Crop_WinWht_Corn        ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Dbl Crop WinWht/Corn        ,      225 ,Dbl_Crop_WinWht_Corn        
-Dbl_Crop_WinWht_Cotton      ,CROPLAND        ,Dbl_Crop_WinWht_Cotton      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Dbl Crop WinWht/Cotton      ,      238 ,Dbl_Crop_WinWht_Cotton      
-Dbl_Crop_WinWht_Sorghum     ,CROPLAND        ,Dbl_Crop_WinWht_Sorghum     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Dbl Crop WinWht/Sorghum     ,      236 ,Dbl_Crop_WinWht_Sorghum     
-Dbl_Crop_WinWht_Soybeans    ,CROPLAND        ,Dbl_Crop_WinWht_Soybeans    ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Dbl Crop WinWht/Soybeans    ,       26 ,Dbl_Crop_WinWht_Soybeans    
-Deciduous_Forest            ,FOREST          ,Deciduous_Forest            ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Deciduous Forest            ,      141 ,Deciduous_Forest            
-Developed                   ,URBAN           ,Developed                   ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Developed                   ,       82 ,Developed                   
-Developed_High_Intensity    ,URBAN           ,Developed_High_Intensity    ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Developed/High Intensity    ,      124 ,Developed_High_Intensity    
-Developed_Low_Intensity     ,URBAN           ,Developed_Low_Intensity     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Developed/Low Intensity     ,      122 ,Developed_Low_Intensity     
-Developed_Med_Intensity     ,URBAN           ,Developed_Med_Intensity     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Developed/Med Intensity     ,      123 ,Developed_Med_Intensity     
-Developed_Open_Space        ,URBAN           ,Developed_Open_Space        ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Developed/Open Space        ,      121 ,Developed_Open_Space        
-Dry_Beans                   ,CROPLAND        ,Dry_Beans                   ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Dry Beans                   ,       42 ,Dry_Beans                   
-Durum_Wheat                 ,CROPLAND        ,Durum_Wheat                 ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Durum Wheat                 ,       22 ,Durum_Wheat                 
-Eggplants                   ,CROPLAND        ,Eggplants                   ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Eggplants                   ,      248 ,Eggplants                   
-Evergreen_Forest            ,FOREST          ,Evergreen_Forest            ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Evergreen Forest            ,      142 ,Evergreen_Forest            
-Fallow_Idle_Cropland        ,PASTURE         ,Fallow_Idle_Cropland        ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Fallow/Idle Cropland        ,       61 ,Fallow_Idle_Cropland        
-Flaxseed                    ,CROPLAND        ,Flaxseed                    ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Flaxseed                    ,       32 ,Flaxseed                    
-Forest                      ,FOREST          ,Forest                      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Forest                      ,       63 ,Forest                      
-Garlic                      ,CROPLAND        ,Garlic                      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Garlic                      ,      208 ,Garlic                      
-Gourds                      ,CROPLAND        ,Gourds                      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Gourds                      ,      249 ,Gourds                      
-Grapes                      ,CROPLAND        ,Grapes                      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Grapes                      ,       69 ,Grapes                      
-Grassland_Pasture           ,CROPLAND        ,Grassland_Pasture           ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Grassland/Pasture           ,      176 ,Grassland_Pasture           
-Greens                      ,CROPLAND        ,Greens                      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Greens                      ,      219 ,Greens                      
-Herbaceous_Wetlands         ,URBAN           ,Herbaceous_Wetlands         ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Herbaceous Wetlands         ,      195 ,Developed                   
-Herbs                       ,CROPLAND        ,Herbs                       ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Herbs                       ,       57 ,Herbs                       
-Honeydew_Melons             ,CROPLAND        ,Cantaloupes                 ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Honeydew Melons             ,      213 ,Honeydew_Melons             
-Hops                        ,CROPLAND        ,Hops                        ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Hops                        ,       56 ,Hops                        
-Lentils                     ,CROPLAND        ,Lentils                     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Lentils                     ,       52 ,Lentils                     
-Lettuce                     ,CROPLAND        ,Lettuce                     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Lettuce                     ,      227 ,Lettuce                     
-Millet                      ,CROPLAND        ,Millet                      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Millet                      ,       29 ,Millet                      
-Mint                        ,CROPLAND        ,Mint                        ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Mint                        ,       14 ,Mint                        
-Misc_Vegs_Fruits            ,CROPLAND        ,Misc_Vegs_Fruits            ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Misc Vegs & Fruits          ,       47 ,Misc_Vegs_Fruits            
-Mixed_Forest                ,FOREST          ,Mixed_Forest                ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Mixed Forest                ,      143 ,Mixed_Forest                
-Mustard                     ,CROPLAND        ,Mustard                     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Mustard                     ,       35 ,Mustard                     
-Nectarines                  ,CROPLAND        ,Nectarines                  ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Nectarines                  ,      218 ,Nectarines                  
-Nonag_Undefined             ,FOREST          ,Nonag_Undefined             ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Nonag/Undefined             ,       88 ,Nonag_Undefined             
-Oats                        ,CROPLAND        ,Oats                        ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Oats                        ,       28 ,Oats                        
-Olives                      ,CROPLAND        ,Olives                      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Olives                      ,      211 ,Olives                      
-Onions                      ,CROPLAND        ,Onions                      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Onions                      ,       49 ,Onions                      
-Oranges                     ,CROPLAND        ,Oranges                     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Oranges                     ,      212 ,Oranges                     
-Other_Crops                 ,CROPLAND        ,Other_Crops                 ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Other Crops                 ,       44 ,Other_Crops                 
-Other_Hay_Non_Alfalfa       ,CROPLAND        ,Other_Hay_Non_Alfalfa       ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Other Hay/Non Alfalfa       ,       37 ,Other_Hay_Non_Alfalfa       
-Other_Small_Grains          ,CROPLAND        ,Other_Small_Grains          ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Other Small Grains          ,       25 ,Other_Small_Grains          
-Other_Tree_Crops            ,CROPLAND        ,Other_Tree_Crops            ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Other Tree Crops            ,       71 ,Other_Tree_Crops            
-Pasture_Grass               ,CROPLAND        ,Pasture_Grass               ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Pasture/Grass               ,       62 ,Pasture_Grass               
-Peaches                     ,CROPLAND        ,Peaches                     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Peaches                     ,       67 ,Peaches                     
-Peanuts                     ,CROPLAND        ,Peanuts                     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Peanuts                     ,       10 ,Peanuts                     
-Pears                       ,CROPLAND        ,Pears                       ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Pears                       ,       77 ,Pears                       
-Peas                        ,CROPLAND        ,Peas                        ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Peas                        ,       53 ,Peas                        
-Pecans                      ,CROPLAND        ,Pecans                      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Pecans                      ,       74 ,Pecans                      
-Peppers                     ,CROPLAND        ,Peppers                     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Peppers                     ,      216 ,Peppers                     
-Pistachios                  ,CROPLAND        ,Pistachios                  ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Pistachios                  ,      204 ,Pistachios                  
-Plums                       ,CROPLAND        ,Plums                       ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Plums                       ,      220 ,Plums                       
-Pomegranates                ,CROPLAND        ,Pomegranates                ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Pomegranates                ,      217 ,Pomegranates                
-Pop_or_Orn_Corn             ,CROPLAND        ,Pop_or_Orn_Corn             ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Pop or Orn Corn             ,       13 ,Pop_or_Orn_Corn             
-Potatoes                    ,CROPLAND        ,Potatoes                    ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Potatoes                    ,       43 ,Potatoes                    
-Prunes                      ,CROPLAND        ,Prunes                      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Prunes                      ,      210 ,Prunes                      
-Pumpkins                    ,CROPLAND        ,Pumpkins                    ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Pumpkins                    ,      229 ,Pumpkins                    
-Radishes                    ,CROPLAND        ,Radishes                    ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Radishes                    ,      246 ,Radishes                    
-Rape_Seed                   ,CROPLAND        ,Rape_Seed                   ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Rape Seed                   ,       34 ,Rape_Seed                   
-Rice                        ,CROPLAND        ,Rice                        ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Rice                        ,        3 ,Rice                        
-Rye                         ,CROPLAND        ,Rye                         ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Rye                         ,       27 ,Rye                         
-Safflower                   ,CROPLAND        ,Safflower                   ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Safflower                   ,       33 ,Safflower                   
-Shrubland                   ,RANGELAND       ,Shrubland                   ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Shrubland                   ,       64 ,Shrubland                   
-Sod_Grass_Seed              ,PASTURE         ,Sod_Grass_Seed              ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Sod/Grass Seed              ,       59 ,Sod_Grass_Seed              
-Sorghum                     ,CROPLAND        ,Sorghum                     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Sorghum                     ,        4 ,Sorghum                     
-Soybeans                    ,CROPLAND        ,Soybeans                    ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Soybeans                    ,        5 ,Soybeans                    
-Speltz                      ,CROPLAND        ,Speltz                      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Speltz                      ,       30 ,Speltz                      
-Spring_Wheat                ,CROPLAND        ,Spring_Wheat                ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Spring Wheat                ,       23 ,Spring_Wheat                
-Squash                      ,CROPLAND        ,Squash                      ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Squash                      ,      222 ,Squash                      
-Strawberries                ,CROPLAND        ,Strawberries                ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Strawberries                ,      221 ,Strawberries                
-Sugarbeets                  ,CROPLAND        ,Sugarbeets                  ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Sugarbeets                  ,       41 ,Sugarbeets                  
-Sugarcane                   ,CROPLAND        ,Sugarcane                   ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Sugarcane                   ,       45 ,Sugarcane                   
-Sunflower                   ,CROPLAND        ,Sunflower                   ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Sunflower                   ,        6 ,Sunflower                   
-Sweet_Corn                  ,CROPLAND        ,Sweet_Corn                  ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Sweet Corn                  ,       12 ,Sweet_Corn                  
-Sweet_Potatoes              ,CROPLAND        ,Sweet_Potatoes              ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Sweet Potatoes              ,       46 ,Sweet_Potatoes              
-Switchgrass                 ,CROPLAND        ,Switchgrass                 ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Switchgrass                 ,       60 ,Switchgrass                 
-Tobacco                     ,CROPLAND        ,Tobacco                     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Tobacco                     ,       11 ,Tobacco                     
-Tomatoes                    ,CROPLAND        ,Tomatoes                    ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Tomatoes                    ,       54 ,Tomatoes                    
-Triticale                   ,CROPLAND        ,Triticale                   ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Triticale                   ,      205 ,Triticale                   
-Turnips                     ,CROPLAND        ,Turnips                     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Turnips                     ,      247 ,Turnips                     
-Vetch                       ,CROPLAND        ,Vetch                       ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Vetch                       ,      224 ,Vetch                       
-Walnuts                     ,CROPLAND        ,Walnuts                     ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Walnuts                     ,       76 ,Walnuts                     
-Watermelons                 ,CROPLAND        ,Watermelons                 ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Watermelons                 ,       48 ,Watermelons                 
-Wetlands                    ,URBAN           ,Wetlands                    ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Wetlands                    ,       87 ,Developed                   
-Winter_Wheat                ,CROPLAND        ,Winter_Wheat                ,                               ,                   ,                       ,                 ,                            ,              ,              ,               1 , Winter Wheat                ,       24 ,Winter_Wheat                
+Field_ID,Landuse_Type_ID,Mgmt_Schd_ID,Greg_Yr_for_1st_Yr_of_Rotation,Percent_Rock_Cover,Interrill_Erosion_Code,Random_Roughness,Terrace_Horizontal_Distance,Terrace_Grade,Tile_Drain_ID,Input_Units_Code,CDL_Category,CDL_Value,Modified_CDL_Category
+Alfalfa,CROPLAND,Alfalfa,,,,,,,,1,Alfalfa,36,Alfalfa
+Almonds,CROPLAND,Almonds,,,,,,,,1,Almonds,75,Almonds
+Apples,CROPLAND,Apples,,,,,,,,1,Apples,68,Apples
+Apricots,CROPLAND,Apricots,,,,,,,,1,Apricots,223,Apricots
+Aquaculture,URBAN,Aquaculture,,,,,,,,1,Developed,92,Developed
+Asparagus,CROPLAND,Asparagus,,,,,,,,1,Asparagus,207,Asparagus
+Avocados,CROPLAND,Avocados,,,,,,,,1,Avocados,215,Avocados
+Barley,CROPLAND,Barley,,,,,,,,1,Barley,21,Barley
+Barren,RANGELAND,Barren,,,,,,,,1,Barren,65,Barren
+Blueberries,CROPLAND,Blueberries,,,,,,,,1,Blueberries,242,Blueberries
+Broccoli,CROPLAND,Broccoli,,,,,,,,1,Broccoli,214,Broccoli
+Buckwheat,CROPLAND,Buckwheat,,,,,,,,1,Buckwheat,39,Buckwheat
+Cabbage,CROPLAND,Cabbage,,,,,,,,1,Cabbage,243,Cabbage
+Camelina,CROPLAND,Camelina,,,,,,,,1,Camelina,38,Camelina
+Caneberries,CROPLAND,Caneberries,,,,,,,,1,Caneberries,55,Caneberries
+Canola,CROPLAND,Canola,,,,,,,,1,Canola,31,Canola
+Cantaloupes,CROPLAND,Cantaloupes,,,,,,,,1,Cantaloupes,209,Cantaloupes
+Carrots,CROPLAND,Carrots,,,,,,,,1,Carrots,206,Carrots
+Cauliflower,CROPLAND,Cauliflower,,,,,,,,1,Cauliflower,244,Cauliflower
+Celery,CROPLAND,Celery,,,,,,,,1,Celery,245,Celery
+Cherries,CROPLAND,Cherries,,,,,,,,1,Cherries,66,Cherries
+Chick_Peas,CROPLAND,Chick_Peas,,,,,,,,1,Chick Peas,51,Chick_Peas
+Christmas_Trees,FOREST,Christmas_Trees,,,,,,,,1,Christmas Trees,70,Christmas_Trees
+Citrus,CROPLAND,Citrus,,,,,,,,1,Citrus,72,Citrus
+Clouds_No_Data,PASTURE,Clouds_No_Data,,,,,,,,1,Clouds_No_Data,81,Clouds_No_Data
+Clover_Wildflowers,CROPLAND,Clover_Wildflowers,,,,,,,,1,Clover/Wildflowers,58,Clover_Wildflowers
+Corn,CROPLAND,Corn,,,,,,,,1,Corn,1,Corn
+Cotton,CROPLAND,Cotton,,,,,,,,1,Cotton,2,Cotton
+Cranberries,CROPLAND,Cranberries,,,,,,,,1,Cranberries,250,Cranberries
+Cucumbers,CROPLAND,Cucumbers,,,,,,,,1,Cucumbers,50,Cucumbers
+Dbl_Crop_Barley_Corn,CROPLAND,Dbl_Crop_Barley_Corn,,,,,,,,1,Dbl Crop Barley/Corn,237,Dbl_Crop_Barley_Corn
+Dbl_Crop_Barley_Sorghum,CROPLAND,Dbl_Crop_Barley_Sorghum,,,,,,,,1,Dbl Crop Barley/Sorghum,235,Dbl_Crop_Barley_Sorghum
+Dbl_Crop_Barley_Soybeans,CROPLAND,Dbl_Crop_Barley_Soybeans,,,,,,,,1,Dbl Crop Barley/Soybeans,254,Dbl_Crop_Barley_Soybeans
+Dbl_Crop_Corn_Soybeans,CROPLAND,Dbl_Crop_Corn_Soybeans,,,,,,,,1,Dbl Crop Corn/Soybeans,241,Dbl_Crop_Corn_Soybeans
+Dbl_Crop_Durum_Wht_Sorghum,CROPLAND,Dbl_Crop_Durum_Wht_Sorghum,,,,,,,,1,Dbl Crop Durum Wht/Sorghum,234,Dbl_Crop_Durum_Wht_Sorghum
+Dbl_Crop_Lettuce_Barley,CROPLAND,Dbl_Crop_Lettuce_Barley,,,,,,,,1,Dbl Crop Lettuce/Barley,233,Dbl_Crop_Lettuce_Barley
+Dbl_Crop_Lettuce_Cantaloupe,CROPLAND,Dbl_Crop_Lettuce_Cantaloupe,,,,,,,,1,Dbl Crop Lettuce/Cantaloupe,231,Dbl_Crop_Lettuce_Cantaloupe
+Dbl_Crop_Lettuce_Cotton,CROPLAND,Dbl_Crop_Lettuce_Cotton,,,,,,,,1,Dbl Crop Lettuce/Cotton,232,Dbl_Crop_Lettuce_Cotton
+Dbl_Crop_Lettuce_Durum_Wht,CROPLAND,Dbl_Crop_Lettuce_Durum_Wht,,,,,,,,1,Dbl Crop Lettuce/Durum Wht,230,Dbl_Crop_Lettuce_Durum_Wht
+Dbl_Crop_Oats_Corn,CROPLAND,Dbl_Crop_Oats_Corn,,,,,,,,1,Dbl Crop Oats/Corn,226,Dbl_Crop_Oats_Corn
+Dbl_Crop_Soybeans_Cotton,CROPLAND,Dbl_Crop_Soybeans_Cotton,,,,,,,,1,Dbl Crop Soybeans/Cotton,239,Dbl_Crop_Soybeans_Cotton
+Dbl_Crop_Soybeans_Oats,CROPLAND,Dbl_Crop_Soybeans_Oats,,,,,,,,1,Dbl Crop Soybeans/Oats,240,Dbl_Crop_Soybeans_Oats
+Dbl_Crop_Triticale_Corn,CROPLAND,Dbl_Crop_Triticale_Corn,,,,,,,,1,Dbl_Crop_Triticale_Corn,228,Dbl_Crop_Triticale_Corn
+Dbl_Crop_WinWht_Corn,CROPLAND,Dbl_Crop_WinWht_Corn,,,,,,,,1,Dbl Crop WinWht/Corn,225,Dbl_Crop_WinWht_Corn
+Dbl_Crop_WinWht_Cotton,CROPLAND,Dbl_Crop_WinWht_Cotton,,,,,,,,1,Dbl Crop WinWht/Cotton,238,Dbl_Crop_WinWht_Cotton
+Dbl_Crop_WinWht_Sorghum,CROPLAND,Dbl_Crop_WinWht_Sorghum,,,,,,,,1,Dbl Crop WinWht/Sorghum,236,Dbl_Crop_WinWht_Sorghum
+Dbl_Crop_WinWht_Soybeans,CROPLAND,Dbl_Crop_WinWht_Soybeans,,,,,,,,1,Dbl Crop WinWht/Soybeans,26,Dbl_Crop_WinWht_Soybeans
+Deciduous_Forest,FOREST,Deciduous_Forest,,,,,,,,1,Deciduous Forest,141,Deciduous_Forest
+Developed,URBAN,Developed,,,,,,,,1,Developed,82,Developed
+Developed_High_Intensity,URBAN,Developed_High_Intensity,,,,,,,,1,Developed/High Intensity,124,Developed_High_Intensity
+Developed_Low_Intensity,URBAN,Developed_Low_Intensity,,,,,,,,1,Developed/Low Intensity,122,Developed_Low_Intensity
+Developed_Med_Intensity,URBAN,Developed_Med_Intensity,,,,,,,,1,Developed/Med Intensity,123,Developed_Med_Intensity
+Developed_Open_Space,URBAN,Developed_Open_Space,,,,,,,,1,Developed/Open Space,121,Developed_Open_Space
+Dry_Beans,CROPLAND,Dry_Beans,,,,,,,,1,Dry Beans,42,Dry_Beans
+Durum_Wheat,CROPLAND,Durum_Wheat,,,,,,,,1,Durum Wheat,22,Durum_Wheat
+Eggplants,CROPLAND,Eggplants,,,,,,,,1,Eggplants,248,Eggplants
+Evergreen_Forest,FOREST,Evergreen_Forest,,,,,,,,1,Evergreen Forest,142,Evergreen_Forest
+Fallow_Idle_Cropland,PASTURE,Fallow_Idle_Cropland,,,,,,,,1,Fallow/Idle Cropland,61,Fallow_Idle_Cropland
+Flaxseed,CROPLAND,Flaxseed,,,,,,,,1,Flaxseed,32,Flaxseed
+Forest,FOREST,Forest,,,,,,,,1,Forest,63,Forest
+Garlic,CROPLAND,Garlic,,,,,,,,1,Garlic,208,Garlic
+Gourds,CROPLAND,Gourds,,,,,,,,1,Gourds,249,Gourds
+Grapes,CROPLAND,Grapes,,,,,,,,1,Grapes,69,Grapes
+Grassland_Pasture,CROPLAND,Grassland_Pasture,,,,,,,,1,Grassland/Pasture,176,Grassland_Pasture
+Greens,CROPLAND,Greens,,,,,,,,1,Greens,219,Greens
+Herbaceous_Wetlands,URBAN,Herbaceous_Wetlands,,,,,,,,1,Herbaceous Wetlands,195,Developed
+Herbs,CROPLAND,Herbs,,,,,,,,1,Herbs,57,Herbs
+Honeydew_Melons,CROPLAND,Cantaloupes,,,,,,,,1,Honeydew Melons,213,Honeydew_Melons
+Hops,CROPLAND,Hops,,,,,,,,1,Hops,56,Hops
+Lentils,CROPLAND,Lentils,,,,,,,,1,Lentils,52,Lentils
+Lettuce,CROPLAND,Lettuce,,,,,,,,1,Lettuce,227,Lettuce
+Millet,CROPLAND,Millet,,,,,,,,1,Millet,29,Millet
+Mint,CROPLAND,Mint,,,,,,,,1,Mint,14,Mint
+Misc_Vegs_Fruits,CROPLAND,Misc_Vegs_Fruits,,,,,,,,1,Misc Vegs & Fruits,47,Misc_Vegs_Fruits
+Mixed_Forest,FOREST,Mixed_Forest,,,,,,,,1,Mixed Forest,143,Mixed_Forest
+Mustard,CROPLAND,Mustard,,,,,,,,1,Mustard,35,Mustard
+Nectarines,CROPLAND,Nectarines,,,,,,,,1,Nectarines,218,Nectarines
+Nonag_Undefined,FOREST,Nonag_Undefined,,,,,,,,1,Nonag/Undefined,88,Nonag_Undefined
+Oats,CROPLAND,Oats,,,,,,,,1,Oats,28,Oats
+Olives,CROPLAND,Olives,,,,,,,,1,Olives,211,Olives
+Onions,CROPLAND,Onions,,,,,,,,1,Onions,49,Onions
+Oranges,CROPLAND,Oranges,,,,,,,,1,Oranges,212,Oranges
+Other_Crops,CROPLAND,Other_Crops,,,,,,,,1,Other Crops,44,Other_Crops
+Other_Hay_Non_Alfalfa,CROPLAND,Other_Hay_Non_Alfalfa,,,,,,,,1,Other Hay/Non Alfalfa,37,Other_Hay_Non_Alfalfa
+Other_Small_Grains,CROPLAND,Other_Small_Grains,,,,,,,,1,Other Small Grains,25,Other_Small_Grains
+Other_Tree_Crops,CROPLAND,Other_Tree_Crops,,,,,,,,1,Other Tree Crops,71,Other_Tree_Crops
+Pasture_Grass,CROPLAND,Pasture_Grass,,,,,,,,1,Pasture/Grass,62,Pasture_Grass
+Peaches,CROPLAND,Peaches,,,,,,,,1,Peaches,67,Peaches
+Peanuts,CROPLAND,Peanuts,,,,,,,,1,Peanuts,10,Peanuts
+Pears,CROPLAND,Pears,,,,,,,,1,Pears,77,Pears
+Peas,CROPLAND,Peas,,,,,,,,1,Peas,53,Peas
+Pecans,CROPLAND,Pecans,,,,,,,,1,Pecans,74,Pecans
+Peppers,CROPLAND,Peppers,,,,,,,,1,Peppers,216,Peppers
+Pistachios,CROPLAND,Pistachios,,,,,,,,1,Pistachios,204,Pistachios
+Plums,CROPLAND,Plums,,,,,,,,1,Plums,220,Plums
+Pomegranates,CROPLAND,Pomegranates,,,,,,,,1,Pomegranates,217,Pomegranates
+Pop_or_Orn_Corn,CROPLAND,Pop_or_Orn_Corn,,,,,,,,1,Pop or Orn Corn,13,Pop_or_Orn_Corn
+Potatoes,CROPLAND,Potatoes,,,,,,,,1,Potatoes,43,Potatoes
+Prunes,CROPLAND,Prunes,,,,,,,,1,Prunes,210,Prunes
+Pumpkins,CROPLAND,Pumpkins,,,,,,,,1,Pumpkins,229,Pumpkins
+Radishes,CROPLAND,Radishes,,,,,,,,1,Radishes,246,Radishes
+Rape_Seed,CROPLAND,Rape_Seed,,,,,,,,1,Rape Seed,34,Rape_Seed
+Rice,CROPLAND,Rice,,,,,,,,1,Rice,3,Rice
+Rye,CROPLAND,Rye,,,,,,,,1,Rye,27,Rye
+Safflower,CROPLAND,Safflower,,,,,,,,1,Safflower,33,Safflower
+Shrubland,RANGELAND,Shrubland,,,,,,,,1,Shrubland,64,Shrubland
+Sod_Grass_Seed,PASTURE,Sod_Grass_Seed,,,,,,,,1,Sod/Grass Seed,59,Sod_Grass_Seed
+Sorghum,CROPLAND,Sorghum,,,,,,,,1,Sorghum,4,Sorghum
+Soybeans,CROPLAND,Soybeans,,,,,,,,1,Soybeans,5,Soybeans
+Speltz,CROPLAND,Speltz,,,,,,,,1,Speltz,30,Speltz
+Spring_Wheat,CROPLAND,Spring_Wheat,,,,,,,,1,Spring Wheat,23,Spring_Wheat
+Squash,CROPLAND,Squash,,,,,,,,1,Squash,222,Squash
+Strawberries,CROPLAND,Strawberries,,,,,,,,1,Strawberries,221,Strawberries
+Sugarbeets,CROPLAND,Sugarbeets,,,,,,,,1,Sugarbeets,41,Sugarbeets
+Sugarcane,CROPLAND,Sugarcane,,,,,,,,1,Sugarcane,45,Sugarcane
+Sunflower,CROPLAND,Sunflower,,,,,,,,1,Sunflower,6,Sunflower
+Sweet_Corn,CROPLAND,Sweet_Corn,,,,,,,,1,Sweet Corn,12,Sweet_Corn
+Sweet_Potatoes,CROPLAND,Sweet_Potatoes,,,,,,,,1,Sweet Potatoes,46,Sweet_Potatoes
+Switchgrass,CROPLAND,Switchgrass,,,,,,,,1,Switchgrass,60,Switchgrass
+Tobacco,CROPLAND,Tobacco,,,,,,,,1,Tobacco,11,Tobacco
+Tomatoes,CROPLAND,Tomatoes,,,,,,,,1,Tomatoes,54,Tomatoes
+Triticale,CROPLAND,Triticale,,,,,,,,1,Triticale,205,Triticale
+Turnips,CROPLAND,Turnips,,,,,,,,1,Turnips,247,Turnips
+Vetch,CROPLAND,Vetch,,,,,,,,1,Vetch,224,Vetch
+Walnuts,CROPLAND,Walnuts,,,,,,,,1,Walnuts,76,Walnuts
+Watermelons,CROPLAND,Watermelons,,,,,,,,1,Watermelons,48,Watermelons
+Wetlands,URBAN,Wetlands,,,,,,,,1,Wetlands,87,Developed
+Winter_Wheat,CROPLAND,Winter_Wheat,,,,,,,,1,Winter Wheat,24,Winter_Wheat
