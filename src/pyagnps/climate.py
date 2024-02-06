@@ -1089,6 +1089,14 @@ def compute_dew_point(RH, Tair, Tunit="K"):
         d = 0
 
     magnus_exp_arg_ratio = A1 * (Tair - d) / (B1 + (Tair - d))
+
+    # Set Relative Humidity to 1% if it ends up being an invalid value
+    # If remaining NaN values subsist backward or forward fill where appropriate
+
+    RH.loc[RH<0] = 1
+    RH.loc[RH>100] = 100
+    RH = RH.ffill().bfill()
+
     log_RH = np.log(RH / 100)
 
     Tdew = (
