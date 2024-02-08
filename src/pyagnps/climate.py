@@ -53,6 +53,7 @@ class ClimateAnnAGNPSCoords:
                                            end=end,
                                            date_mode=date_mode)
 
+        self.warnings = []
         self.clm = None  # DataFrame
         self.clm_resampled = None  # DataFrame resampled
         self.ds = None  # xarray.DataSet for CMIP6 outputs
@@ -252,6 +253,7 @@ class ClimateAnnAGNPSCoords:
         self._query_nldas2_climate(source="netcdf")
         # Test if there are any NaN values
         if self.clm.isna().any().any():
+            self.warnings.append('NaN values were found in the NLDAS-2 data, values supplemented by DAYMET data') 
             # Use alternative method using Day Met
             self._query_nldas2_climate(
                 source="grib",
