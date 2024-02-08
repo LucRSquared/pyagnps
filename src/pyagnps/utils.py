@@ -48,7 +48,13 @@ def polygonize_cell_reach_IDs_asc(
         return gdf
     else:
         return
-
+    
+def get_bounds_from_cells(gdf, buffer=0.00001):
+    bounds = gdf[[gdf.geometry.name]].copy(deep=True)
+    bounds.geometry = bounds.geometry.buffer(buffer)
+    bounds = bounds.dissolve()
+    bounds = bounds.to_crs('epsg:4326')
+    return bounds
 
 def get_geometry_boundary(geom):
     if isinstance(geom, LinearRing):
