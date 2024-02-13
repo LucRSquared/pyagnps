@@ -134,6 +134,13 @@ def copy_files_from_dir_to_dir(path_to_dir, path_to_new_dir):
 
     return copy_error_files
 
+def relative_input_file_path(output_folder, path_to_file):
+    path_to_file = Path(path_to_file)
+    output_folder = Path(output_folder)
+    relative_path = str(path_to_file.relative_to(output_folder))
+    relative_path = relative_path.replace('\\', '/')
+    relative_path = f"./{relative_path}"
+    return relative_path
 
 def log_to_file(filepath, message):
     original_stdout = sys.stdout
