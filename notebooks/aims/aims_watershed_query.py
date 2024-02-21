@@ -24,6 +24,8 @@ watershed_location = 'Mississippi'
 
 lon, lat = -89.91651, 34.23151 # Goodwin Creek
 
+selected_reaches_for_output = ['OUTLET']
+
 climate_method = 'cmip5' # valid options ares 'nldas2', 'cmip5'
 
 # Time period in YYYY-MM-DD format (both bounds included)
@@ -419,6 +421,13 @@ outopts_tbl_path = simulation_dir / 'outopts_tbl.csv'
 DEFAULT_OUTPUT_OPTIONS_TBL = pyagnps.constants.DEFAULT_OUTPUT_OPTIONS_TBL
 pyagnps.utils.write_csv_control_file_from_dict(DEFAULT_OUTPUT_OPTIONS_TBL, outopts_tbl_path)
 
+# Output Options - Reach
+# outopts_reach_path = simulation_dir / 'outopts_rch.csv'
+
+# OUTPUT_REACHES = {'Reach_ID': selected_reaches_for_output}
+# df_outopts_rch = pd.DataFrame(OUTPUT_REACHES)
+# df_outopts_rch.to_csv(outopts_reach_path, index=False) # Not oding that for now
+
 # AnnAGNPS ID file
 annaid_path = simulation_dir / 'annaid.csv'
 
@@ -464,9 +473,9 @@ master_file = {
     'Output Options - Global': relative_input_file_path(output_folder, outopts_global_path),
     'Output Options - AA': relative_input_file_path(output_folder, outopts_aa_path),
     'Output Options - TBL': relative_input_file_path(output_folder, outopts_tbl_path),
+    # 'Output Options - Reach': relative_input_file_path(output_folder, outopts_reach_path),
     'CLIMATE DATA - DAILY': relative_input_file_path(output_folder, climate_dir / 'climate_daily.csv'),
     'CLIMATE DATA - STATION': relative_input_file_path(output_folder, climate_dir / 'climate_station.csv')
-    # 'Output Options - Reach'
 }
 
 df_master = pd.DataFrame({
