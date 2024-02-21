@@ -176,7 +176,7 @@ def get_date_from_string(date_string, outputtype=np.datetime64):
     else:
         raise TypeError("outputtype must be datetime or np.datetime64")
 
-def write_csv_from_dict(data_dict, output_path='control.csv'):
+def write_csv_control_file_from_dict(data_dict, output_path='control.csv'):
     # Writes the contents of kwargs with the key as a column and the value as the value
     # at output_path
     output_path = Path(output_path)
