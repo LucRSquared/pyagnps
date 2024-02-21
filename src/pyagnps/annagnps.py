@@ -20,7 +20,7 @@ def make_df_reaches_valid(df_reaches):
         return df_reaches_valid
 
 def make_annagnps_inputs_dirs(output_folder=Path().cwd(), subdirs=['general', 'climate', 'simulation', 'watershed', 'GIS']):
-    output_folder.mkdir(exist_ok=True)
+    output_folder.mkdir(exist_ok=True, parents=True)
     subdirs_paths = []
     for subdir in subdirs:
         category_dir = output_folder / subdir
