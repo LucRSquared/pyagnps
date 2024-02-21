@@ -103,6 +103,9 @@ class ClimateAnnAGNPSCoords:
             self.end = pd.Timestamp(end)
             self.timezone = "UTC"
 
+            self.start_input = self.start.tz_localize(None)
+            self.end_input = self.end.tz_localize(None)
+
         elif date_mode.lower() == "local":
             # Identify timezone:
             lon, lat = coords
@@ -113,8 +116,13 @@ class ClimateAnnAGNPSCoords:
             start_stamp_local, end_stamp_local = pd.Timestamp(
                 start, tz=tmz_name
             ), pd.Timestamp(end, tz=tmz_name)
+
+            self.start_input = start_stamp_local.tz_localize(None)
+            self.end_input = end_stamp_local.tz_localize(None)
+
             start_stamp_utc = start_stamp_local.tz_convert("UTC").tz_localize(None)
             end_stamp_utc = end_stamp_local.tz_convert("UTC").tz_localize(None)
+
             self.start = start_stamp_utc
             self.end = end_stamp_utc
         else:
@@ -466,8 +474,11 @@ class ClimateAnnAGNPSCoords:
             self.coords[0] + 360
         ) % 360  # For CMIP6 and CMIP5 the longitude needs to be in the [0, 360[ range
         latitude = self.coords[1]
+        # self.ds_select = self.ds.sel(lat=latitude, lon=longitude, method="nearest").sel(
+        #     time=slice(self.start.floor('D'), self.end.floor('D'))
+        # )
         self.ds_select = self.ds.sel(lat=latitude, lon=longitude, method="nearest").sel(
-            time=slice(self.start, self.end)
+            time=slice(self.start, self.end + pd.Timedelta('1D'))
         )
 
         self.coords_actual = (
@@ -684,6 +695,8 @@ class ClimateAnnAGNPSCoords:
                 "Input_Units_Code",
             ]
         )
+        # Readjust index so that it matches the input
+        df.index = df.index - (df.index[0] - self.start_input)
 
         # Get the time series for the nearest grid cell
         df["Day"] = df.index.day
