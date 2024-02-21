@@ -100,6 +100,9 @@ reaches_query = f"SELECT geom, reach_id FROM thuc_reach_geo_tr({lon},{lat}, '{th
 cells_geometry = gpd.read_postgis(sql=sql_text(cells_query), con=engine.connect(), geom_col='geom')
 reaches_geometry = gpd.read_postgis(sql=sql_text(reaches_query), con=engine.connect(), geom_col='geom')
 
+cells_geometry = cells_geometry.dissolve(by='cell_id')
+reaches_geometry = reaches_geometry.dissolve(by='reach_id')
+
 cells_list = cells_geometry['cell_id'].unique() # List of cell_ids
 reaches_list = reaches_geometry['reach_id'].unique()
 
@@ -188,7 +191,8 @@ else:
 
 #----------------- GENERATE CLIMATE DATA ---------------------
 # /!\ This centroid is computed in degrees coordinates
-lon0, lat0 = cells_geometry.dissolve().centroid.x[0], cells_geometry.dissolve().centroid.y[0]
+watershed_centroid = bounds.centroid
+lon0, lat0 = watershed_centroid.x[0], watershed_centroid.centroid.y[0] 
 
 # Reset secondary climate file id
 cells_geometry['secondary_climate_file_id'] = None
@@ -309,9 +313,14 @@ while retry_climate:
         # WRITING
         if idx_clim == 0: # If it's the first one, we write a copy of the first station
             climate_path = climate_dir / f"climate_daily.csv"
+            climate_station_path_temp = climate_dir / f"climate_station.csv"
+            climate_station_path_old = climate_data[clim_id]['climate_station']['output_filepath']
+            climate_data[clim_id]['climate_station']['output_filepath'] = climate_station_path_temp
+
             if not(climate_path.exists()):
                 climate_data[clim_id]['data'].to_csv(climate_path, index=False, float_format="%.3f")
                 pyagnps.climate.generate_climate_station_file(**climate_data[clim_id]['climate_station'])
+                climate_data[clim_id]['climate_station']['output_filepath'] = climate_station_path_old
 
         climate_path = climate_dir / f"climate_daily_{clim_id}.csv"
         if climate_path.exists():
@@ -383,38 +392,38 @@ WATERSHED_DATA = {
 }
 watershed_path = watershed_dir / 'watershed_data.csv'
 
-pyagnps.utils.write_csv_from_dict(WATERSHED_DATA, output_path=watershed_path)
+pyagnps.utils.write_csv_control_file_from_dict(WATERSHED_DATA, output_path=watershed_path)
 
 # GLOBAL IDs Factors and Flag Data
 globfac_path = simulation_dir / 'globfac.csv'
 
 DEFAULT_GLOBAL_FACTORS_FLAGS = pyagnps.constants.DEFAULT_GLOBAL_FACTORS_FLAGS
 DEFAULT_GLOBAL_FACTORS_FLAGS['Wshd_Storm_Type_ID'] = main_storm_type
-pyagnps.utils.write_csv_from_dict(DEFAULT_GLOBAL_FACTORS_FLAGS, globfac_path)
+pyagnps.utils.write_csv_control_file_from_dict(DEFAULT_GLOBAL_FACTORS_FLAGS, globfac_path)
 
 # Output Options - GLOBAL
 outopts_global_path = simulation_dir / 'outopts_global.csv'
 
 DEFAULT_OUTPUT_OPTIONS_GLOBAL = pyagnps.constants.DEFAULT_OUTPUT_OPTIONS_GLOBAL
-pyagnps.utils.write_csv_from_dict(DEFAULT_OUTPUT_OPTIONS_GLOBAL, outopts_global_path)
+pyagnps.utils.write_csv_control_file_from_dict(DEFAULT_OUTPUT_OPTIONS_GLOBAL, outopts_global_path)
 
 # Output Options - AA
 outopts_aa_path = simulation_dir / 'outopts_aa.csv'
 
 DEFAULT_OUTPUT_OPTIONS_AA = pyagnps.constants.DEFAULT_OUTPUT_OPTIONS_AA
-pyagnps.utils.write_csv_from_dict(DEFAULT_OUTPUT_OPTIONS_AA, outopts_aa_path)
+pyagnps.utils.write_csv_control_file_from_dict(DEFAULT_OUTPUT_OPTIONS_AA, outopts_aa_path)
 
 # Output Options - TABLE
 outopts_tbl_path = simulation_dir / 'outopts_tbl.csv'
 
 DEFAULT_OUTPUT_OPTIONS_TBL = pyagnps.constants.DEFAULT_OUTPUT_OPTIONS_TBL
-pyagnps.utils.write_csv_from_dict(DEFAULT_OUTPUT_OPTIONS_TBL, outopts_tbl_path)
+pyagnps.utils.write_csv_control_file_from_dict(DEFAULT_OUTPUT_OPTIONS_TBL, outopts_tbl_path)
 
 # AnnAGNPS ID file
 annaid_path = simulation_dir / 'annaid.csv'
 
 DEFAULT_ANNAGNPS_ID = pyagnps.constants.DEFAULT_ANNAGNPS_ID
-pyagnps.utils.write_csv_from_dict(DEFAULT_ANNAGNPS_ID, annaid_path)
+pyagnps.utils.write_csv_control_file_from_dict(DEFAULT_ANNAGNPS_ID, annaid_path)
 
 # Simulation Period Data
 sim_period_path = simulation_dir / 'sim_period.csv'
@@ -433,7 +442,7 @@ DEFAULT_SIM_PERIOD_DATA['Rainfall_Fctr'] = weighted_R_fctr
 DEFAULT_SIM_PERIOD_DATA['10-Year_EI'] = weighted_10_year_EI
 DEFAULT_SIM_PERIOD_DATA['EI_Number'] = dominant_EI
 
-pyagnps.utils.write_csv_from_dict(DEFAULT_SIM_PERIOD_DATA, sim_period_path)
+pyagnps.utils.write_csv_control_file_from_dict(DEFAULT_SIM_PERIOD_DATA, sim_period_path)
 
 # AnnAGNPS Master File
 master_file = {
