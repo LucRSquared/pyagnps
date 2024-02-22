@@ -77,6 +77,7 @@ DEFAULT_OUTPUT_OPTIONS_GLOBAL = {
     'V1_EV': 'T'
  }
 
+# As given by Ron
 DEFAULT_OUTPUT_OPTIONS_TBL = {
     'CCHE1D': 'T',
     'CONCEPTS_XML': '',
@@ -84,6 +85,15 @@ DEFAULT_OUTPUT_OPTIONS_TBL = {
     'REMM': '',
     'Gaging_Station_Evt': ''
 }
+
+# For AIMS this is what I think we should do with just the outlet reach
+# DEFAULT_OUTPUT_OPTIONS_TBL = {
+#     'CCHE1D': 'F',
+#     'CONCEPTS_XML': '',
+#     'Gaging_Station_Hyd': 'T',
+#     'REMM': '',
+#     'Gaging_Station_Evt': ''
+# }
 
 DEFAULT_ANNAGNPS_ID = {
     'Version': 6.0,

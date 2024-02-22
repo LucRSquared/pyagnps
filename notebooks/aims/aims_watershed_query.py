@@ -426,7 +426,7 @@ pyagnps.utils.write_csv_control_file_from_dict(DEFAULT_OUTPUT_OPTIONS_TBL, outop
 
 # OUTPUT_REACHES = {'Reach_ID': selected_reaches_for_output}
 # df_outopts_rch = pd.DataFrame(OUTPUT_REACHES)
-# df_outopts_rch.to_csv(outopts_reach_path, index=False) # Not oding that for now
+# df_outopts_rch.to_csv(outopts_reach_path, index=False) # Not doing that for now
 
 # AnnAGNPS ID file
 annaid_path = simulation_dir / 'annaid.csv'
