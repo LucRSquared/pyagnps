@@ -97,42 +97,119 @@ def remove_all_files_from_dir_except_from_list(path_to_dir, keep_list=None):
     return delete_error_files
 
 
-def move_files_from_dir_to_dir(path_to_dir, path_to_new_dir):
+# def move_files_from_dir_to_dir(path_to_dir, path_to_new_dir):
+#     """
+#     path_to_dir : directory containing files to be moved
+#     path_to_new_dir : directory where files will be moved
+#     """
+
+#     move_error_files = []
+
+#     all_files = glob.glob(f"{path_to_dir}/*")
+
+#     for elem in all_files:
+#         try:
+#             shutil.move(elem, path_to_new_dir)
+#         except:
+#             move_error_files.append(elem)
+
+#     return move_error_files
+
+def move_files_from_dir_to_dir(source_dir: Path, destination_dir: Path) -> list[str]:
+    """Moves files from one directory to another, handling both string and Path objects.
+
+    Args:
+        source_dir (Path or str): The source directory containing files to be moved.
+        destination_dir (Path or str): The destination directory where files will be moved.
+
+    Returns:
+        list[str]: A list of files that failed to move.
     """
-    path_to_dir : directory containing files to be moved
-    path_to_new_dir : directory where files will be moved
-    """
+
+    source_dir = Path(source_dir)  # Convert source_dir to Path object
+    destination_dir = Path(destination_dir)  # Convert destination_dir to Path object
 
     move_error_files = []
 
-    all_files = glob.glob(f"{path_to_dir}/*")
-
-    for elem in all_files:
-        try:
-            shutil.move(elem, path_to_new_dir)
-        except:
-            move_error_files.append(elem)
+    for file in source_dir.iterdir():
+        if file.is_file():  # Ensure it's a file
+            try:
+                shutil.move(file, destination_dir / file.name)  # Use pathlib for path handling
+            except Exception as e:
+                move_error_files.append(file.name)
+                print(f"Error moving {file.name}: {e}")  # Print error message
 
     return move_error_files
 
 
-def copy_files_from_dir_to_dir(path_to_dir, path_to_new_dir):
+# def copy_files_from_dir_to_dir(path_to_dir, path_to_new_dir):
+#     """
+#     path_to_dir : directory containing files to be copied
+#     path_to_new_dir : directory where files will be copied
+#     """
+
+#     copy_error_files = []
+
+#     all_files = glob.glob(f"{path_to_dir}/*")
+
+#     for elem in all_files:
+#         try:
+#             shutil.copy2(elem, path_to_new_dir)
+#         except:
+#             copy_error_files.append(elem)
+
+#     return copy_error_files
+
+def copy_files_from_dir_to_dir(source_dir: Path, destination_dir: Path) -> list[str]:
+    """Copies files from one directory to another, handling both string and Path objects.
+
+    Args:
+        source_dir (Path or str): The source directory containing files to be copied.
+        destination_dir (Path or str): The destination directory where files will be copied.
+
+    Returns:
+        list[str]: A list of files that failed to copy.
     """
-    path_to_dir : directory containing files to be copied
-    path_to_new_dir : directory where files will be copied
-    """
+
+    source_dir = Path(source_dir)  # Convert source_dir to Path object
+    destination_dir = Path(destination_dir)  # Convert destination_dir to Path object
 
     copy_error_files = []
 
-    all_files = glob.glob(f"{path_to_dir}/*")
-
-    for elem in all_files:
-        try:
-            shutil.copy2(elem, path_to_new_dir)
-        except:
-            copy_error_files.append(elem)
+    for file in source_dir.iterdir():
+        if file.is_file():  # Ensure it's a file
+            try:
+                shutil.copy2(file, destination_dir / file.name)  # Use pathlib for copying
+            except Exception as e:
+                copy_error_files.append(file.name)
+                print(f"Error copying {file.name}: {e}")  # Print error message
 
     return copy_error_files
+
+def get_relative_path(source_path: Path, target_path: Path) -> Path:
+  """
+  Calculates the relative path from the source path to the target path.
+
+  Args:
+      source_path (Path): The path from which the relative path is calculated.
+      target_path (Path): The target path for which the relative path is desired.
+
+  Returns:
+      Path: The relative path from source_path to target_path.
+  """
+
+  source_parts = source_path.parts
+  target_parts = target_path.parts
+  num_common_parts = 0
+
+  # Find the number of common path components
+  while num_common_parts < len(source_parts) and num_common_parts < len(target_parts) and source_parts[num_common_parts] == target_parts[num_common_parts]:
+    num_common_parts += 1
+
+  # Build the relative path
+  relative_parts = [Path("..")] * (len(source_parts) - num_common_parts)
+  relative_parts.extend(target_parts[num_common_parts:])
+  return Path(*relative_parts)
 
 def relative_input_file_path(output_folder, path_to_file):
     path_to_file = Path(path_to_file)
