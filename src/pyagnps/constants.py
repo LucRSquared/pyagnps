@@ -162,6 +162,7 @@ DEFAULT_GLOBAL_FACTORS_FLAGS = {
     'Critical_Shear_Stress': '',
     'RUSLE2_Flag': '',
     'Dflt_RUSLE2_ID': '',
+    'Reach_Routing_Flag':'',
     'Input_Units_Code': 0
 }
 
