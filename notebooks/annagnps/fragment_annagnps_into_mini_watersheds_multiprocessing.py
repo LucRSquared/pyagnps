@@ -86,7 +86,7 @@ if __name__ == '__main__':
     # p_og_annagnps = Path("C:/Users/Luc/projects/AnnAGNPS/AnnAGNPS_simulations_by_AIMS/TESTS_1055_NESTED/Iowa_1055_Reach_30366")
     # p_og_annagnps = Path("C:/Users/Luc/projects/AnnAGNPS/AnnAGNPS_simulations_by_AIMS/TESTS_1055_NESTED/Iowa_1055_Reach_29996")
     # p_og_annagnps = Path("C:/Users/Luc/projects/AnnAGNPS/AnnAGNPS_simulations_by_AIMS/TESTS_1055_NESTED/Iowa_1055_Reach_28857")
-    p_og_annagnps = Path("C:/Users/Luc/projects/AnnAGNPS/AnnAGNPS_simulations_by_AIMS/TESTS_1055_NESTED/Iowa_1055_Reach_5465")
+    p_og_annagnps = Path("C:/Users/Luc/projects/AnnAGNPS/AnnAGNPS_simulations_by_AIMS/TESTS_1055_NESTED/Iowa_1055_Reach_5464")
     p_og_master = p_og_annagnps / 'annagnps_master.csv'
 
     df_og_master = pd.read_csv(p_og_master)
