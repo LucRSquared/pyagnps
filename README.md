@@ -13,7 +13,7 @@ if you can execute without errors the following line of code within your environ
 python -c "from osgeo import gdal"
 ```
 
-## 1. Installating GDAL for Linux/MacOS
+## 1. Installing GDAL for Linux/MacOS
 
 If you're using Linux/macOS, you need to install the system GDAL libraries before installing the GDAL Python bindings
 
