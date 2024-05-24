@@ -46,11 +46,6 @@ dependencies = [
     "nc-time-axis>=1.4.1",
     "dask>=2023.9.3",
     "xarray>=2023.9.0",
-    #"GDAL ; sys_platform =='linux'",
-    "GDAL==3.6.2 ; sys_platform =='linux'",
-    #"GDAL=='$(gdal-config --version).*' ; sys_platform =='linux'",
-    #"gdal @ https://github.com/girder/large_image_wheels/raw/wheelhouse/GDAL-3.8.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl#sha256=6ffc00dbc0ed7f1903cdd476b2513b526525c19bc51b29dd67c6ea9439700ca6 ; sys_platform=='linux'",
-    "gdal @ https://download.lfd.uci.edu/pythonlibs/archived/GDAL-3.4.3-cp311-cp311-win_amd64.whl ; sys_platform=='win32'",
     "psycopg2>=2.9.6 ; sys_platform == 'win32'"
 ]
 requires-python = ">=3.9"
