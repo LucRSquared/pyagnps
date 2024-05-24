@@ -22,12 +22,12 @@ def get_gdal_version_linux():
 def install_gdal():
     if sys.platform.startswith('linux'):
         try:
-            gdal_version_output = subprocess.check_output(['gdal-bin', '--version']).decode().strip()
+            gdal_version_output = subprocess.check_output(['gdal-config', '--version']).decode().strip()
             gdal_version = gdal_version_output.split(',')[0].split()[1]
             print(f"Detected GDAL version: {gdal_version}")
             subprocess.check_call([sys.executable, '-m', 'pip', 'install', f'GDAL=={gdal_version}'])
         except FileNotFoundError:
-            print("gdal-bin is not installed. Please install gdal-bin and libgdal-dev on your system.")
+            print("gdal-config is not installed. Please install python3-gdal and libgdal-dev on your system.")
             sys.exit(1)
         except subprocess.CalledProcessError as e:
             print(f"Error checking GDAL version: {e}")
