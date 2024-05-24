@@ -48,7 +48,7 @@ The `install_gdal.py` will attempt to find a suitable wheel to install in your p
 ## 3. Running `install_gdal.py`
 
 - For Linux/macOS this will install the python bindings for GDAL
-- For Windows this will download and install a GDAL wheel from Christophe Gohlke's website. If it doesn't work then God be with you, you're on your own, use your favorite search engine to figure out how to install GDAL refer to the TL;DR, that's what you want to achieve.
+- For Windows this will download and install a GDAL wheel from [Christoph Gohlke's website](https://www.cgohlke.com/). If it doesn't work then God be with you, you're on your own, use your favorite search engine to figure out how to install GDAL refer to the TL;DR, that's what you want to achieve.
 
 - Run the following command to download and execute the `install_gdal.py` script:
 
