@@ -6,6 +6,16 @@ This README outlines the steps to install the `pyagnps` package along with its G
 
 # Installation
 
+If you don't intend to use the `topagnps` and `subannagnps` submodules, then GDAL is not necessary and you can ignore the rest of this installation tutorial. Just run:
+
+```Bash
+pip install git+https://github.com/LucRSquared/pyagnps.git
+```
+
+And you're good to go! Otherwise, see below
+
+# Installation of GDAL
+
 ## TL;DR
 
 if you can execute without errors the following line of code within your environment then go to step 4
