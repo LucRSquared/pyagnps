@@ -17,8 +17,7 @@ nohup.out
 .venv/*
 *egg-info*
 .vscode
-db_credentials.json
-db_credentials_old.json
+db_credentials*.json
 inputs/soil/soil_data_US_with_mukey.csv
 inputs/soil/ALL_US_v2_SSURGO_STATSGO2_RSS/*
 inputs/soil/ALL_US_v3_SSURGO_STATSGO2_RSS/*
