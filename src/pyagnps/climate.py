@@ -236,7 +236,8 @@ class ClimateAnnAGNPSCoords:
 
         # Linearly interpolate possibly missing values
         clm_daily.interpolate(inplace=True)
-        clm_daily.set_index("date", inplace=True)
+        if clm_daily.index.name != "date":
+            clm_daily.set_index("date", inplace=True)
 
         # Compute Dew Point
         clm_daily["tdew"] = compute_dew_point(clm_daily["RH"], clm_daily["temp"])
