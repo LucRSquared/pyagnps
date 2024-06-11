@@ -1109,6 +1109,7 @@ def compute_dew_point(RH, Tair, Tunit="K"):
     # Set Relative Humidity to 1% if it ends up being an invalid value
     # If remaining NaN values subsist backward or forward fill where appropriate
 
+    RH = RH.copy()  # Ensure we are working with a copy
     RH.loc[RH<0] = 1
     RH.loc[RH>100] = 100
     RH = RH.ffill().bfill()
