@@ -1,4 +1,4 @@
-import psycopg2
+# import psycopg2
 
 
 from pathlib import Path
@@ -13,14 +13,12 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 
-from shapely.geometry import Point, box
-import folium
+from shapely.geometry import Point
 
+from sqlalchemy import URL, create_engine, text as sql_text
+# from sqlalchemy.orm import sessionmaker
 
-from sqlalchemy import URL, create_engine, inspect, text as sql_text
-from sqlalchemy.orm import sessionmaker
-
-from geoalchemy2 import Geometry
+# from geoalchemy2 import Geometry
 
 from pyagnps import climate
 
@@ -58,9 +56,9 @@ def main():
 
 
     # PARAMETERS
-    thucs_to_process = set(['1148'])
-    START_DATE = "2000-01-01"
-    END_DATE = "2021-01-31"
+    thucs_to_process = set(['0593','1148'])
+    START_DATE = "1980-01-01"
+    END_DATE = "1999-12-31"
 
     print(f"Processing stations in THUCS {thucs_to_process}")
     print(f"Processing stations between {START_DATE} and {END_DATE}")
@@ -79,7 +77,7 @@ def main():
     MAXITER_SINGLE_STATION = 10
 
     for thuc_id in thucs_to_process:
-        print(f"Performing Join Operation to get list of stations in THUCS {thuc_id}")
+        print(f"Overlapping polygon on NLDAS-2 grid to get list of stations in THUCS {thuc_id}")
         # Perform the spatial join to get list of stations in the buffered THUC
         my_thuc = thucs.loc[thucs['tophucid']==thuc_id,:]
         buffered_geom = my_thuc.geometry.iloc[0].buffer(math.sqrt(2)/2*0.125) # We buffer by sqrt(2)/2 * (nldas_2 spacing) in degrees to get all the likely needed gird points
@@ -89,6 +87,8 @@ def main():
         contained_stations = gpd.sjoin(nldas2_grid, buffered_thuc, how='inner', predicate='within')
 
         stations_to_process = contained_stations['nldas2_grid_ID'].map(str).to_list()
+
+        print(f"Number of stations in THUCS {thuc_id}: {len(stations_to_process)}")
 
         # MAIN LOOP
         for iter_global in range(MAXITER_GLOBAL):
@@ -112,14 +112,12 @@ def main():
                 else:
                     del incomplete_stations[station_id]
 
-            if not incomplete_stations:
-                break
-
             num_incomplete_stations = len(incomplete_stations)
             if num_incomplete_stations > 0:
                 print(f"Number of NLDAS-2 stations with incomplete data for THUC {thuc_id}: {num_incomplete_stations}")
             else:
                 print(f"All NLDAS-2 stations have complete data for THUC {thuc_id}")
+                break
 
 
             for station_id, data in incomplete_stations.items():
