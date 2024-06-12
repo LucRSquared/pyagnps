@@ -1,5 +1,5 @@
 # import psycopg2
-
+import argparse
 
 from pathlib import Path
 from datetime import datetime
@@ -23,58 +23,81 @@ from sqlalchemy import URL, create_engine, text as sql_text
 from pyagnps import climate
 
 
-def main():
+def main(START_DATE, END_DATE, path_thucs, path_grid, path_to_creds, thucs_to_process, MAXITER_GLOBAL, MAXITER_SINGLE_STATION):
+    """
+    Parameters
+    ----------
+    START_DATE : str
+        YYYY-MM-DD
+    END_DATE : str
+        YYYY-MM-DD
+    path_thucs : str
+        Path to THUCS shapefile
+    path_grid : str
+        Path to NLDAS-2 grid shapefile
+    path_to_creds : str
+        Path to credentials json file
+        * Must contain the entries:
+        - 'user'
+        - 'password'
+        - 'host'
+        - 'port'
+        - 'database'
+    thucs_to_process : list
+        List of THUCS IDs to process
+    """
 
     # DATABASE SETUP
-    path_to_creds_aims = Path("../../inputs/db_credentials.json")
+    path_to_creds = Path(path_to_creds)
     # path_to_creds_menderes = Path("../../inputs/db_credentials_menderes.json")
 
-    creds = {
-        'aims': open_creds_dict(path_to_creds_aims),
-        # 'menderes': open_creds_dict(path_to_creds_menderes),
-        'docker': {
-                'user': 'postgres',
-                'password': 'postgres_pass',
-                'host': 'localhost',
-                'port': '5432',
-                'database': 'test_db'
-            }
-    }
+    # creds = {
+    #     'aims': open_creds_dict(path_to_creds),
+    #     # 'menderes': open_creds_dict(path_to_creds_menderes),
+    #     'docker': {
+    #             'user': 'postgres',
+    #             'password': 'postgres_pass',
+    #             'host': 'localhost',
+    #             'port': '5432',
+    #             'database': 'test_db'
+    #         }
+    # }
 
-    url_object = lambda db : URL.create(
-                        "postgresql",
-                        username=creds[db]['user'],
-                        password=creds[db]['password'],
-                        host=creds[db]['host'],
-                        port=creds[db]['port'],
-                        database=creds[db]['database'])
+    creds = open_creds_dict(path_to_creds)
 
-    db_url = url_object('aims')
+
+    db_url = URL.create(
+                    "postgresql",
+                    username=creds['user'],
+                    password=creds['password'],
+                    host=creds['host'],
+                    port=creds['port'],
+                    database=creds['database']
+                    )
+
 
     engine = create_engine(db_url)
-    conn = engine.connect().execution_options(stream_results=True)
-
 
     # PARAMETERS
-    thucs_to_process = set(['0593','1148'])
-    START_DATE = "1980-01-01"
-    END_DATE = "1999-12-31"
+    thucs_to_process = set(thucs_to_process)
+    # START_DATE = "1980-01-01"
+    # END_DATE = "1999-12-31"
 
     print(f"Processing stations in THUCS {thucs_to_process}")
     print(f"Processing stations between {START_DATE} and {END_DATE}")
 
     print(f"Reading THUC GPKG")
     # THUCS
-    path_thucs = Path('../../inputs/thucs/tophuc_S_M_40000_closed_holes_with_container_thuc_merged_bbox_area_first_kept.gpkg')
+    path_thucs = Path(path_thucs)
     thucs = gpd.read_file(path_thucs)
 
     print(f"Reading NLDAS2 GPKG")
     # NLDAS2
-    path_grid = Path('../../inputs/climate/NLDAS2_GRID_CENTROIDS_epsg4326.gpkg')
+    path_grid = Path(path_grid)
     nldas2_grid = gpd.read_file(path_grid)
 
-    MAXITER_GLOBAL = 10
-    MAXITER_SINGLE_STATION = 10
+    # MAXITER_GLOBAL = 10
+    # MAXITER_SINGLE_STATION = 10
 
     for thuc_id in thucs_to_process:
         print(f"Overlapping polygon on NLDAS-2 grid to get list of stations in THUCS {thuc_id}")
@@ -151,7 +174,7 @@ def main():
                             print(f"THUC {thuc_id}, [{iter_global+1}/{MAXITER_GLOBAL} global attempts], {station_id}, x = {x}, y = {y}: Failed with error: {e}: RETRYING ({iter_station+1}/{MAXITER_SINGLE_STATION})")
                             time.sleep(1)
 
-    print(f"All done! for THUCS {thucs_to_process}")
+    print(f"All done! for THUCS {thucs_to_process} for {START_DATE} to {END_DATE}")
 
 def find_continuous_periods(missing_dates):
 # Find continuous periods of dates
@@ -290,4 +313,30 @@ def str2date(date_str):
     return datetime.strptime(date_str, "%Y-%m-%d").date()
 
 if __name__ == "__main__":
-    main()
+
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description="Query climate data from NLDAS2 and populate it to the AIMS database")
+
+    parser.add_argument('--thucs_to_process',       help='List of THUCS IDs to process',               type=str, nargs='+', required=True)
+    parser.add_argument('--start_date',             help='Start date in YYYY-MM-DD format',            type=str, default="2000-01-01")
+    parser.add_argument('--end_date',               help='End date in YYYY-MM-DD format',              type=str, default="2021-12-31")
+    parser.add_argument('--path_thucs',             help='Path to the THUCS GeoPackage file',          type=str, default="../../inputs/thucs/tophuc_S_M_40000_closed_holes_with_container_thuc_merged_bbox_area_first_kept.gpkg")
+    parser.add_argument('--path_grid',              help='Path to the NLDAS2 grid GeoPackage file',    type=str, default="../../inputs/climate/NLDAS2_GRID_CENTROIDS_epsg4326.gpkg")
+    parser.add_argument('--path_to_creds',          help='Path to the database credentials JSON file', type=str, default="../../inputs/db_credentials.json")
+    parser.add_argument('--maxiter_global',         help='Maximum number of global iterations',        type=int, default=10)
+    parser.add_argument('--maxiter_single_station', help='Maximum number of iterations per station',   type=int, default=10)
+
+    args = parser.parse_args()
+
+    main(
+        START_DATE=args.start_date,
+        END_DATE=args.end_date,
+        path_thucs=args.path_thucs,
+        path_grid=args.path_grid,
+        path_to_creds=args.path_to_creds,
+        thucs_to_process=args.thucs_to_process,
+        MAXITER_GLOBAL=args.maxiter_global,
+        MAXITER_SINGLE_STATION=args.maxiter_single_station
+    )
+    
+    # main()
