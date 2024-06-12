@@ -4,8 +4,8 @@
 [metadata]
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
-lock_version = "4.4"
-content_hash = "sha256:bfdb367649f1b891cb80e4a10179d5891e19cd45addeee55dc18e81390cb358b"
+lock_version = "4.4.1"
+content_hash = "sha256:41cf428a8547b2cc9bb07c88376c2b02511c78a6ceaa065e36a96a2b38bf11d9"
 
 [[package]]
 name = "affine"
@@ -1151,13 +1151,17 @@ files = [
 ]
 
 [[package]]
-name = "gdal"
-version = "3.4.3"
-requires_python = ">=3.6.0"
-url = "https://download.lfd.uci.edu/pythonlibs/archived/GDAL-3.4.3-cp311-cp311-win_amd64.whl"
-summary = "GDAL: Geospatial Data Abstraction Library"
+name = "geoalchemy2"
+version = "0.15.1"
+requires_python = ">=3.7"
+summary = "Using SQLAlchemy with Spatial Databases"
+dependencies = [
+    "SQLAlchemy>=1.4",
+    "packaging",
+]
 files = [
-    {file = "GDAL-3.4.3-cp311-cp311-win_amd64.whl", hash = "sha256:f78861fb5115d5c2f8cf3c52a492ff548da9e1256dc84088947379f90e77e5b6"},
+    {file = "GeoAlchemy2-0.15.1-py3-none-any.whl", hash = "sha256:c1083cc3270608c3d5000a5487069ac9e75ac21a8ef2b7ebc29e060a0d4719ec"},
+    {file = "geoalchemy2-0.15.1.tar.gz", hash = "sha256:33df0cd901abf8518ec0985f9201d42cce65887127cf59f40be38cf758a9a6dc"},
 ]
 
 [[package]]
@@ -3424,7 +3428,7 @@ version = "2.0.21"
 requires_python = ">=3.7"
 summary = "Database Abstraction Library"
 dependencies = [
-    "greenlet!=0.4.17; platform_machine == \"aarch64\" or (platform_machine == \"ppc64le\" or (platform_machine == \"x86_64\" or (platform_machine == \"amd64\" or (platform_machine == \"AMD64\" or (platform_machine == \"win32\" or platform_machine == \"WIN32\")))))",
+    "greenlet!=0.4.17; platform_machine == \"win32\" or platform_machine == \"WIN32\" or platform_machine == \"AMD64\" or platform_machine == \"amd64\" or platform_machine == \"x86_64\" or platform_machine == \"ppc64le\" or platform_machine == \"aarch64\"",
     "typing-extensions>=4.2.0",
 ]
 files = [
