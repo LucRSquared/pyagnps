@@ -1,7 +1,7 @@
 # import psycopg2
 import argparse
 
-import os
+import os, socket
 from pathlib import Path
 from datetime import datetime
 
@@ -49,7 +49,7 @@ def main(START_DATE, END_DATE, path_thucs, path_grid, path_to_creds, thucs_to_pr
         - 'database'
     thucs_to_process : list
         List of THUCS IDs to process
-    randomize : bool
+    randomize : str 'yes' or 'no' (default)
         Randomize the order of the THUCS IDs
     """
 
@@ -93,7 +93,7 @@ def main(START_DATE, END_DATE, path_thucs, path_grid, path_to_creds, thucs_to_pr
     thucs_to_process = list(set(thucs_to_process))
 
 
-    if randomize:
+    if randomize.lower() in ['yes', 'y', 'true', 'oui', '1']:
         random.shuffle(thucs_to_process)
 
     print(f"Processing stations in THUCS {thucs_to_process}")
@@ -187,7 +187,7 @@ def main(START_DATE, END_DATE, path_thucs, path_grid, path_to_creds, thucs_to_pr
                             time.sleep(1)
 
             if num_incomplete_stations == 0:
-                log_to_file("nldas2_population.log", f"{thuc_id},{START_DATE},{END_DATE}")
+                log_to_file(f"{socket.gethostname()}_nldas2_population.log", f"{thuc_id},{START_DATE},{END_DATE}")
             
 
     print(f"All done! for THUCS {thucs_to_process} for {START_DATE} to {END_DATE}")
@@ -355,7 +355,7 @@ if __name__ == "__main__":
     parser.add_argument('--path_to_creds',          help='Path to the database credentials JSON file', type=str, default="../../inputs/db_credentials.json")
     parser.add_argument('--maxiter_global',         help='Maximum number of global iterations',        type=int, default=10)
     parser.add_argument('--maxiter_single_station', help='Maximum number of iterations per station',   type=int, default=10)
-    parser.add_argument('--randomize',              help='Randomize the order of the THUCS IDs',       type=bool, default=False)
+    parser.add_argument('--randomize',              help='Randomize the order of the THUCS IDs',       type=str, default='no')
 
     args = parser.parse_args()
 
