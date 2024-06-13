@@ -1,6 +1,15 @@
+
+
+import warnings
+
+try:
+    from osgeo import gdal
+except ModuleNotFoundError:
+    warnings.warn("GDAL not found. Please install GDAL. See install_gdal.py. The subannagnpss will not work")
+
 import pandas as pd
 import numpy as np
-from osgeo import gdal
+
 import networkx as nx
 import os
 
