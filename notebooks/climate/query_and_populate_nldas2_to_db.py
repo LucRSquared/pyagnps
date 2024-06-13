@@ -1,6 +1,7 @@
 # import psycopg2
 import argparse
 
+import os
 from pathlib import Path
 from datetime import datetime
 
@@ -21,6 +22,7 @@ from sqlalchemy import URL, create_engine, text as sql_text
 # from geoalchemy2 import Geometry
 
 from pyagnps import climate
+from pyagnps.utils import log_to_file, get_current_time
 
 
 def main(START_DATE, END_DATE, path_thucs, path_grid, path_to_creds, thucs_to_process, MAXITER_GLOBAL, MAXITER_SINGLE_STATION):
@@ -79,27 +81,28 @@ def main(START_DATE, END_DATE, path_thucs, path_grid, path_to_creds, thucs_to_pr
     engine = create_engine(db_url)
 
     # PARAMETERS
-    thucs_to_process = set(thucs_to_process)
-    # START_DATE = "1980-01-01"
-    # END_DATE = "1999-12-31"
+    # Parse thucs_to_process if it's a string that ends with .csv so that it can be read as a list
+    if isinstance(thucs_to_process[0], str) and thucs_to_process[0].endswith(".csv"):
+        print(f"Reading list of THUCS to process from {thucs_to_process[0]}")
+        thucs_to_process = pd.read_csv(Path(thucs_to_process[0]), header=None, usecols=[0], dtype=object).iloc[:,0].to_list() # Get the list of thucs that need to be processed, if it's a csv
 
+    thucs_to_process = set(thucs_to_process)
     print(f"Processing stations in THUCS {thucs_to_process}")
     print(f"Processing stations between {START_DATE} and {END_DATE}")
 
     print(f"Reading THUC GPKG")
-    # THUCS
     path_thucs = Path(path_thucs)
     thucs = gpd.read_file(path_thucs)
 
     print(f"Reading NLDAS2 GPKG")
-    # NLDAS2
     path_grid = Path(path_grid)
     nldas2_grid = gpd.read_file(path_grid)
 
-    # MAXITER_GLOBAL = 10
-    # MAXITER_SINGLE_STATION = 10
 
     for thuc_id in thucs_to_process:
+
+        delete_hyriver_cache()
+
         print(f"Overlapping polygon on NLDAS-2 grid to get list of stations in THUCS {thuc_id}")
         # Perform the spatial join to get list of stations in the buffered THUC
         my_thuc = thucs.loc[thucs['tophucid']==thuc_id,:]
@@ -168,11 +171,15 @@ def main(START_DATE, END_DATE, path_thucs, path_grid, path_to_creds, thucs_to_pr
                             num_incomplete_stations -= 1
 
                             print(f"THUC {thuc_id}, [{iter_global+1}/{MAXITER_GLOBAL} global attempts], {station_id}, x = {x}, y = {y}: Populated after {iter_station+1} attempt(s), {num_incomplete_stations} station(s) remaining")
-
                             break
+
                         except Exception as e:
                             print(f"THUC {thuc_id}, [{iter_global+1}/{MAXITER_GLOBAL} global attempts], {station_id}, x = {x}, y = {y}: Failed with error: {e}: RETRYING ({iter_station+1}/{MAXITER_SINGLE_STATION})")
                             time.sleep(1)
+
+            if num_incomplete_stations == 0:
+                log_to_file("nldas2_population.log", f"{thuc_id},{START_DATE},{END_DATE}")
+            
 
     print(f"All done! for THUCS {thucs_to_process} for {START_DATE} to {END_DATE}")
 
@@ -312,14 +319,28 @@ def str2date(date_str):
     """
     return datetime.strptime(date_str, "%Y-%m-%d").date()
 
+def delete_hyriver_cache():
+    """
+    Delete the HyRiver cache folder
+    """
+    try:
+        path_to_cache = Path(os.environ["HYRIVER_CACHE_NAME"])
+        print("Deleting HyRiver cache")
+        path_to_cache.unlink(missing_ok=True)
+    except KeyError:
+        pass
+
 if __name__ == "__main__":
 
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description="Query climate data from NLDAS2 and populate it to the AIMS database")
 
+    # THUCS can be provided directly in the command line or if it's a path to a file with a .csv extension (without headers) it will read it
     parser.add_argument('--thucs_to_process',       help='List of THUCS IDs to process',               type=str, nargs='+', required=True)
+
+
     parser.add_argument('--start_date',             help='Start date in YYYY-MM-DD format',            type=str, default="2000-01-01")
-    parser.add_argument('--end_date',               help='End date in YYYY-MM-DD format',              type=str, default="2021-12-31")
+    parser.add_argument('--end_date',               help='End date in YYYY-MM-DD format',              type=str, default="2022-12-31")
     parser.add_argument('--path_thucs',             help='Path to the THUCS GeoPackage file',          type=str, default="../../inputs/thucs/tophuc_S_M_40000_closed_holes_with_container_thuc_merged_bbox_area_first_kept.gpkg")
     parser.add_argument('--path_grid',              help='Path to the NLDAS2 grid GeoPackage file',    type=str, default="../../inputs/climate/NLDAS2_GRID_CENTROIDS_epsg4326.gpkg")
     parser.add_argument('--path_to_creds',          help='Path to the database credentials JSON file', type=str, default="../../inputs/db_credentials.json")
