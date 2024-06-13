@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 from datetime import datetime
 
+import random
+
 import json
 import time
 
@@ -25,7 +27,7 @@ from pyagnps import climate
 from pyagnps.utils import log_to_file, get_current_time
 
 
-def main(START_DATE, END_DATE, path_thucs, path_grid, path_to_creds, thucs_to_process, MAXITER_GLOBAL, MAXITER_SINGLE_STATION):
+def main(START_DATE, END_DATE, path_thucs, path_grid, path_to_creds, thucs_to_process, MAXITER_GLOBAL, MAXITER_SINGLE_STATION, randomize):
     """
     Parameters
     ----------
@@ -47,6 +49,8 @@ def main(START_DATE, END_DATE, path_thucs, path_grid, path_to_creds, thucs_to_pr
         - 'database'
     thucs_to_process : list
         List of THUCS IDs to process
+    randomize : bool
+        Randomize the order of the THUCS IDs
     """
 
     # DATABASE SETUP
@@ -86,7 +90,12 @@ def main(START_DATE, END_DATE, path_thucs, path_grid, path_to_creds, thucs_to_pr
         print(f"Reading list of THUCS to process from {thucs_to_process[0]}")
         thucs_to_process = pd.read_csv(Path(thucs_to_process[0]), header=None, usecols=[0], dtype=object).iloc[:,0].to_list() # Get the list of thucs that need to be processed, if it's a csv
 
-    thucs_to_process = set(thucs_to_process)
+    thucs_to_process = list(set(thucs_to_process))
+
+
+    if randomize:
+        random.shuffle(thucs_to_process)
+
     print(f"Processing stations in THUCS {thucs_to_process}")
     print(f"Processing stations between {START_DATE} and {END_DATE}")
 
@@ -346,6 +355,7 @@ if __name__ == "__main__":
     parser.add_argument('--path_to_creds',          help='Path to the database credentials JSON file', type=str, default="../../inputs/db_credentials.json")
     parser.add_argument('--maxiter_global',         help='Maximum number of global iterations',        type=int, default=10)
     parser.add_argument('--maxiter_single_station', help='Maximum number of iterations per station',   type=int, default=10)
+    parser.add_argument('--randomize',              help='Randomize the order of the THUCS IDs',       type=bool, default=False)
 
     args = parser.parse_args()
 
