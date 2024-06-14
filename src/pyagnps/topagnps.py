@@ -1,7 +1,12 @@
 """
 TopAGNPS related functions
 """
-from osgeo import gdal
+import sys
+try:
+    from osgeo import gdal
+except: 
+    sys.exit("Please install GDAL (see install_gdal.py). The topagnps module will not work without it")
+
 
 # from importlib.resources import path
 import os
