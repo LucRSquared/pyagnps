@@ -367,7 +367,6 @@ if __name__ == "__main__":
         path_to_creds=args.path_to_creds,
         thucs_to_process=args.thucs_to_process,
         MAXITER_GLOBAL=args.maxiter_global,
-        MAXITER_SINGLE_STATION=args.maxiter_single_station
+        MAXITER_SINGLE_STATION=args.maxiter_single_station,
+        randomize=args.randomize
     )
-    
-    # main()
