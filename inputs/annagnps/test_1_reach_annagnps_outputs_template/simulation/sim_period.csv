@@ -1,0 +1,2 @@
+Simulation_Begin_Month,Simulation_Begin_Day,Simulation_Begin_Year,Simulation_End_Month,Simulation_End_Day,Simulation_End_Year,Rainfall_Fctr,10-Year_EI,EI_Number,Irrigation_Climate_Code,Soil_Moisture_Steps,Annual_K_Fctr_Code,Variable_K_Fctr_Code,Number_Init_Years,Init_Method_Code,Winter_Bouts,Input_Units_Code
+1,1,2010,12,31,2019,397.9713241,130.508,106,,,,,2,,,0

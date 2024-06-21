@@ -1,0 +1,19 @@
+Field_ID,Landuse_Type_ID,Mgmt_Schd_ID,Greg_Yr_for_1st_Yr_of_Rotation,Percent_Rock_Cover,Interrill_Erosion_Code,Random_Roughness,Terrace_Horizontal_Distance,Terrace_Grade,Tile_Drain_ID,Input_Units_Code,CDL_Category,CDL_Value,Modified_CDL_Category
+Alfalfa,CROPLAND,Alfalfa,,,,,,,,1,Alfalfa,36,Alfalfa
+Barley,CROPLAND,Barley,,,,,,,,1,Barley,21,Barley
+Barren,RANGELAND,Barren,,,,,,,,1,Barren,65,Barren
+Corn,CROPLAND,Corn,,,,,,,,1,Corn,1,Corn
+Developed_Open_Space,URBAN,Developed_Open_Space,,,,,,,,1,Developed/Open Space,121,Developed_Open_Space
+Grassland_Pasture,CROPLAND,Grassland_Pasture,,,,,,,,1,Grassland/Pasture,176,Grassland_Pasture
+Herbaceous_Wetlands,URBAN,Herbaceous_Wetlands,,,,,,,,1,Herbaceous Wetlands,195,Developed
+Mixed_Forest,FOREST,Mixed_Forest,,,,,,,,1,Mixed Forest,143,Mixed_Forest
+Oats,CROPLAND,Oats,,,,,,,,1,Oats,28,Oats
+Other_Hay_Non_Alfalfa,CROPLAND,Other_Hay_Non_Alfalfa,,,,,,,,1,Other Hay/Non Alfalfa,37,Other_Hay_Non_Alfalfa
+Peas,CROPLAND,Peas,,,,,,,,1,Peas,53,Peas
+Potatoes,CROPLAND,Potatoes,,,,,,,,1,Potatoes,43,Potatoes
+Rye,CROPLAND,Rye,,,,,,,,1,Rye,27,Rye
+Shrubland,RANGELAND,Shrubland,,,,,,,,1,Shrubland,64,Shrubland
+Sod_Grass_Seed,PASTURE,Sod_Grass_Seed,,,,,,,,1,Sod/Grass Seed,59,Sod_Grass_Seed
+Soybeans,CROPLAND,Soybeans,,,,,,,,1,Soybeans,5,Soybeans
+Sweet_Corn,CROPLAND,Sweet_Corn,,,,,,,,1,Sweet Corn,12,Sweet_Corn
+Winter_Wheat,CROPLAND,Winter_Wheat,,,,,,,,1,Winter Wheat,24,Winter_Wheat

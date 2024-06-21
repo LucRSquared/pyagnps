@@ -1,0 +1,59 @@
+areasymbol,areaname,musym,mukey,hydgrp,kwfact,albedodry_r,restrictiondepthr,partdensity,compname,texdesc,hzdepb_r,dbovendry_r,claytotal_r,silttotal_r,sandtotal_r,fragvol,sandvf_r,caco3_r,ksat_r,wthirdbar_r,wfifteenbar_r,om_r,ph1to1h2o_r,comppct_r
+MS107,"Panola County, Mississippi",CaB,568308,C/D,0.43,0.3,54,,Calloway,Silt loam,64.0,1.55,20.0,68.6,11.4,,6.6,0.0,9.17,28.7,13.5,1.25,5.3,90
+MS107,"Panola County, Mississippi",CaB,568308,C/D,0.55,0.3,54,,Calloway,Silt loam,163.0,1.52,21.0,67.7,11.3,,6.6,0.0,0.92,27.9,12.5,0.25,5.3,90
+MS107,"Panola County, Mississippi",CaB,568308,C/D,0.55,0.3,54,,Calloway,Silt loam,173.0,1.57,24.0,66.7,9.3,,6.5,0.0,0.92,29.4,14.5,0.1,6.5,90
+MS107,"Panola County, Mississippi",Cm,568309,B,0.49,0.3,>200,,Collins,Silt loam,20.0,1.52,11.5,67.7,20.8,,13.4,0.0,9.17,24.2,8.4,1.25,5.0,90
+MS107,"Panola County, Mississippi",Cm,568309,B,0.64,0.3,>200,,Collins,Silt loam,157.0,1.52,11.5,67.7,20.8,,13.4,0.0,9.17,22.6,6.9,0.15,5.0,90
+MS107,"Panola County, Mississippi",Co,568310,B,0.49,0.3,>200,,Collins,Silt loam,20.0,1.52,11.5,67.7,20.8,,13.4,0.0,9.17,24.2,8.4,1.25,5.0,90
+MS107,"Panola County, Mississippi",Co,568310,B,0.64,0.3,>200,,Collins,Silt loam,157.0,1.52,11.5,67.7,20.8,,13.4,0.0,9.17,22.6,6.9,0.15,5.0,90
+MS107,"Panola County, Mississippi",Fa,568313,B/D,0.43,0.3,>200,,Falaya,Silt loam,127.0,1.41,12.0,67.3,20.7,,13.3,0.0,9.17,24.6,8.7,1.75,5.0,90
+MS107,"Panola County, Mississippi",Fa,568313,B/D,0.55,0.3,>200,,Falaya,Silt loam,165.0,1.44,19.0,69.4,11.6,,6.7,0.0,7.27,26.4,10.7,0.2,5.0,90
+MS107,"Panola County, Mississippi",Fl,568314,B/D,0.43,0.3,>200,,Falaya,Silt loam,127.0,1.41,12.0,67.3,20.7,,13.3,0.0,9.17,24.6,8.7,1.75,5.0,90
+MS107,"Panola County, Mississippi",Fl,568314,B/D,0.55,0.3,>200,,Falaya,Silt loam,165.0,1.44,19.0,69.4,11.6,,6.7,0.0,7.27,26.4,10.7,0.2,5.0,90
+MS107,"Panola County, Mississippi",GrB2,568319,C/D,0.49,0.3,61,,Grenada,Silt loam,13.0,1.52,14.0,71.8,14.2,,8.6,0.0,9.17,25.6,9.8,1.25,5.3,90
+MS107,"Panola County, Mississippi",GrB2,568319,C/D,0.55,0.3,61,,Grenada,Silt loam,53.0,1.52,24.0,66.7,9.3,,6.5,0.0,9.17,29.3,14.3,0.3,5.3,90
+MS107,"Panola County, Mississippi",GrB2,568319,C/D,0.64,0.3,61,,Grenada,Silt loam,61.0,1.5,14.0,71.8,14.2,,8.6,0.0,9.17,24.1,8.3,0.2,5.3,90
+MS107,"Panola County, Mississippi",GrB2,568319,C/D,0.55,0.3,61,,Grenada,Silt loam,107.0,1.6,23.5,67.1,9.4,,6.6,0.0,0.92,29.4,14.5,0.1,5.3,90
+MS107,"Panola County, Mississippi",GrB2,568319,C/D,0.55,0.3,61,,Grenada,Silt loam,152.0,1.6,23.5,67.1,9.4,,6.6,0.0,0.92,29.4,14.5,0.1,6.2,90
+MS107,"Panola County, Mississippi",GrC3,568322,D,0.49,0.3,69,,Grenada,Silt loam,8.0,1.52,14.0,71.8,14.2,,8.6,0.0,9.17,25.6,9.8,1.25,5.3,90
+MS107,"Panola County, Mississippi",GrC3,568322,D,0.55,0.3,69,,Grenada,Silt loam,48.0,1.52,24.0,66.7,9.3,,6.5,0.0,9.17,29.3,14.3,0.3,5.3,90
+MS107,"Panola County, Mississippi",GrC3,568322,D,0.64,0.3,69,,Grenada,Silt loam,56.0,1.5,14.0,71.8,14.2,,8.6,0.0,9.17,24.1,8.3,0.2,5.3,90
+MS107,"Panola County, Mississippi",GrC3,568322,D,0.55,0.3,69,,Grenada,Silt loam,102.0,1.6,23.5,67.1,9.4,,6.6,0.0,0.92,29.4,14.5,0.1,5.3,90
+MS107,"Panola County, Mississippi",GrC3,568322,D,0.55,0.3,69,,Grenada,Silt loam,152.0,1.6,23.5,67.1,9.4,,6.6,0.0,0.92,29.4,14.5,0.1,6.2,90
+MS107,"Panola County, Mississippi",Gu,568326,,0.55,0.3,>200,,Gullied land,Silt loam,23.0,1.46,13.0,72.7,14.3,,8.7,0.0,9.17,24.6,8.7,0.25,5.3,90
+MS107,"Panola County, Mississippi",Gu,568326,,0.43,0.3,>200,,Gullied land,Silty clay loam,58.0,1.46,27.5,60.5,12.0,,4.0,0.0,9.17,30.1,15.5,0.1,5.3,90
+MS107,"Panola County, Mississippi",Gu,568326,,0.55,0.3,>200,,Gullied land,Silt loam,203.0,1.46,18.5,70.5,11.0,,3.0,0.0,9.17,26.2,10.5,0.1,5.3,90
+MS107,"Panola County, Mississippi",LoB2,568328,C,0.43,0.29,69,,Loring,Silt loam,13.0,1.42,18.0,77.0,5.0,,2.9,0.0,9.17,27.4,11.9,1.5,5.3,90
+MS107,"Panola County, Mississippi",LoB2,568328,C,0.49,0.29,69,,Loring,Silty clay loam,69.0,1.51,27.0,71.0,2.0,,1.0,0.0,9.17,29.2,14.2,0.3,5.2,90
+MS107,"Panola County, Mississippi",LoB2,568328,C,0.64,0.29,69,,Loring,Silt loam,142.0,1.58,19.0,79.0,2.0,,1.0,0.0,0.21,27.3,11.8,0.09,5.2,90
+MS107,"Panola County, Mississippi",LoB2,568328,C,0.55,0.29,69,,Loring,Silt loam,203.0,1.47,17.5,78.5,4.0,,2.4,0.0,9.0,25.8,10.0,0.07,5.5,90
+MS107,"Panola County, Mississippi",LoB3,568329,C/D,0.49,0.29,61,,Loring,Silt loam,8.0,1.48,16.0,82.0,2.0,,1.0,0.0,9.0,26.3,10.6,1.0,5.3,90
+MS107,"Panola County, Mississippi",LoB3,568329,C/D,0.49,0.29,61,,Loring,Silty clay loam,61.0,1.54,27.0,71.0,2.0,,1.0,0.0,9.0,30.5,16.0,0.3,5.2,90
+MS107,"Panola County, Mississippi",LoB3,568329,C/D,0.55,0.29,61,,Loring,Silt loam,122.0,1.58,19.0,79.0,2.0,,1.0,0.0,0.91,27.3,11.8,0.09,5.2,90
+MS107,"Panola County, Mississippi",LoB3,568329,C/D,0.55,0.29,61,,Loring,Silt loam,165.0,1.47,17.5,78.5,4.0,,2.4,0.0,9.0,25.8,10.0,0.07,5.5,90
+MS107,"Panola County, Mississippi",LoC3,568332,C/D,0.49,0.29,61,,Loring,Silt loam,8.0,1.48,16.0,82.0,2.0,,1.0,0.0,9.0,26.3,10.6,1.0,5.3,90
+MS107,"Panola County, Mississippi",LoC3,568332,C/D,0.49,0.29,61,,Loring,Silty clay loam,61.0,1.54,27.0,71.0,2.0,,1.0,0.0,9.0,30.5,16.0,0.3,5.2,90
+MS107,"Panola County, Mississippi",LoC3,568332,C/D,0.55,0.29,61,,Loring,Silt loam,122.0,1.58,19.0,79.0,2.0,,1.0,0.0,0.91,27.3,11.8,0.09,5.2,90
+MS107,"Panola County, Mississippi",LoC3,568332,C/D,0.55,0.29,61,,Loring,Silt loam,165.0,1.47,17.5,78.5,4.0,,2.4,0.0,9.0,25.8,10.0,0.07,5.5,90
+MS107,"Panola County, Mississippi",LoD2,568334,D,0.49,0.23,58,,Loring,Silt loam,10.0,1.45,16.0,76.0,8.0,,6.0,0.0,9.0,26.4,10.7,1.25,5.3,90
+MS107,"Panola County, Mississippi",LoD2,568334,D,0.49,0.23,58,,Loring,Silty clay loam,58.0,1.56,32.0,65.0,3.0,,2.0,0.0,9.0,32.5,19.3,0.25,5.3,90
+MS107,"Panola County, Mississippi",LoD2,568334,D,0.49,0.23,58,,Loring,Silty clay loam,183.0,1.64,32.5,64.5,3.0,,2.0,0.0,0.9,33.1,20.3,0.09,5.3,90
+MS107,"Panola County, Mississippi",LoD2,568334,D,0.24,0.23,58,,Loring,Sandy loam,215.0,1.68,18.0,19.0,63.0,,11.0,0.0,9.17,21.6,12.4,0.07,5.4,90
+MS107,"Panola County, Mississippi",LoD3,568335,D,0.49,0.23,58,,Loring,Silt loam,10.0,1.41,13.0,79.0,8.0,,6.0,0.0,9.0,28.0,12.6,1.25,5.3,90
+MS107,"Panola County, Mississippi",LoD3,568335,D,0.55,0.23,58,,Loring,Silt loam,58.0,1.55,25.0,72.0,3.0,,1.7,0.0,9.17,29.8,15.0,0.25,5.3,90
+MS107,"Panola County, Mississippi",LoD3,568335,D,0.49,0.23,58,,Loring,Silty clay loam,183.0,1.64,31.0,66.0,3.0,,1.7,0.0,1.0,32.5,19.3,0.09,5.3,90
+MS107,"Panola County, Mississippi",LoD3,568335,D,0.24,0.23,58,,Loring,Sandy loam,215.0,1.68,18.0,19.0,63.0,,11.0,0.0,9.17,21.6,12.4,0.07,5.4,90
+MS107,"Panola County, Mississippi",LoE2,568336,D,0.49,0.3,63,,Loring,Silt loam,13.0,1.46,13.0,72.7,14.3,,8.7,0.0,9.17,24.8,8.9,1.25,5.3,90
+MS107,"Panola County, Mississippi",LoE2,568336,D,0.55,0.3,63,,Loring,Silt loam,53.0,1.52,25.0,68.1,6.9,,4.8,0.0,9.17,29.6,14.8,0.25,5.3,90
+MS107,"Panola County, Mississippi",LoE2,568336,D,0.55,0.3,63,,Loring,Silt loam,168.0,1.67,22.5,68.0,9.5,,6.7,0.0,0.92,29.5,14.6,0.15,5.3,90
+MS107,"Panola County, Mississippi",LoE2,568336,D,0.55,0.3,63,,Loring,Silt loam,183.0,1.52,17.5,68.9,13.6,,8.2,0.0,7.76,26.0,10.3,0.1,5.5,90
+MS107,"Panola County, Mississippi",LoE3,568337,D,0.55,0.3,63,,Loring,Silt loam,8.0,1.46,13.0,72.7,14.3,,8.7,0.0,9.17,24.8,8.9,1.25,5.3,90
+MS107,"Panola County, Mississippi",LoE3,568337,D,0.55,0.3,63,,Loring,Silt loam,48.0,1.52,25.0,68.1,6.9,,4.8,0.0,9.17,29.6,14.8,0.25,5.3,90
+MS107,"Panola County, Mississippi",LoE3,568337,D,0.55,0.3,63,,Loring,Silt loam,163.0,1.67,22.5,68.0,9.5,,6.7,0.0,0.92,29.5,14.6,0.15,5.3,90
+MS107,"Panola County, Mississippi",LoE3,568337,D,0.55,0.3,63,,Loring,Silt loam,183.0,1.52,17.5,68.9,13.6,,8.2,0.0,7.76,26.0,10.3,0.1,5.5,90
+MS107,"Panola County, Mississippi",MlF2,568341,B,0.43,0.3,>200,,Memphis,Silt loam,13.0,1.46,15.0,71.0,14.0,,8.5,0.0,9.17,26.1,10.4,1.5,5.3,60
+MS107,"Panola County, Mississippi",MlF2,568341,B,0.49,0.3,>200,,Memphis,Silty clay loam,84.0,1.46,27.5,65.4,7.1,,2.9,0.0,9.17,30.2,15.7,0.25,5.3,60
+MS107,"Panola County, Mississippi",MlF2,568341,B,0.55,0.3,>200,,Memphis,Silt loam,203.0,1.46,18.5,69.8,11.7,,6.7,0.0,9.17,26.2,10.5,0.1,5.3,60
+MS107,"Panola County, Mississippi",MnF2,568343,B,0.43,0.3,>200,,Memphis,Silt loam,13.0,1.46,15.0,71.0,14.0,,8.5,0.0,9.17,26.1,10.4,1.5,5.3,50
+MS107,"Panola County, Mississippi",MnF2,568343,B,0.49,0.3,>200,,Memphis,Silty clay loam,84.0,1.46,27.5,65.4,7.1,,2.9,0.0,9.17,30.2,15.7,0.25,5.3,50
+MS107,"Panola County, Mississippi",MnF2,568343,B,0.55,0.3,>200,,Memphis,Silt loam,203.0,1.46,18.5,69.8,11.7,,6.7,0.0,9.17,26.2,10.5,0.1,5.3,50

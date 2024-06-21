@@ -26,3 +26,4 @@ build
 tmp/
 outputs/soil_data_market/db_population/thuc_cells_no_soil.json
 inputs/soil/NITA/NITA_User_Manual.pdf
+inputs/annagnps/test_1_reach_annagnps_outputs/*

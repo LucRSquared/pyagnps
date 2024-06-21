@@ -1,0 +1,3 @@
+reach_id,receiving_reach,vegetation_code,elevation,slope,mannings_n,infiltration_rate,hydraulic_geom_id,length,top_width,flow_depth,valley_width,valley_mannings_n,start_diversion,stop_diversion,travel_time,clay_scour_code,silt_scour_code,sand_scour_code,small_agg_scour_code,large_agg_scour_code,valley_clay_scour_code,valley_silt_scour_code,valley_sand_scour_code,valley_small_agg_scour_code,valley_large_agg_scour_code,delivery_ratio,input_units_code
+5462,OUTLET,,173.77000,0.00044,,,,0.00000,,,,,,,,,,,,,,,,,,,1
+5464,5462,,173.77000,0.00044,,,,459.41000,,,,,,,,,,,,,,,,,,,1

@@ -1,0 +1,23 @@
+Data Section ID,File Name
+AnnAGNPS ID,./simulation/annaid.csv
+Cell Data,./watershed/cell_data_section.csv
+Crop Data,./general/crop_data.csv
+Crop Growth Data,./general/crop_growth.csv
+Global IDs Factors and Flags Data,./simulation/globfac.csv
+Management Field Data,./general/management_field.csv
+Management Operation Data,./general/management_oper.csv
+Management Schedule Data,./general/management_schedule.csv
+Non-Crop Data,./general/non_crop.csv
+Reach Data,./watershed/reach_data_section.csv
+Runoff Curve Number Data,./general/runoffcurve.csv
+Simulation Period Data,./simulation/sim_period.csv
+Soil Data,./general/soil_data.csv
+Soil Layer Data,./general/soil_layers_data.csv
+Watershed Data,./watershed/watershed_data.csv
+Output Options - Global,./simulation/outopts_global.csv
+Output Options - AA,./simulation/outopts_aa.csv
+Output Options - TBL,./simulation/outopts_tbl.csv
+Output Options - SIM,./simulation/outopts_sim.csv
+Output Options - Reach,./simulation/outopts_rch.csv
+CLIMATE DATA - DAILY,./climate/climate_daily.csv
+CLIMATE DATA - STATION,./climate/climate_station.csv

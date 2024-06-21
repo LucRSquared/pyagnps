@@ -262,3 +262,20 @@ def write_csv_control_file_from_dict(data_dict, output_path='control.csv'):
 
     # Write the DataFrame to a CSV file, ensuring header row
     df.to_csv(output_path, index=False, header=True)
+
+def find_rows_containing_pattern(file, pattern, skiprows=0):
+    # Returns the list of row numbers (0-indexed)for the lines that contains the pattern
+    # does not return row numbers smaller than skiprows
+
+    row_nums = []
+
+    with open(file, 'r') as f:
+        lines = f.readlines()
+
+        for i, line in enumerate(lines):
+            if i < skiprows:
+                continue
+            if pattern in line:
+                row_nums.append(i)
+
+    return row_nums
