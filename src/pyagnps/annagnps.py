@@ -60,7 +60,28 @@ def read_all_annagnps_output_files(output_folder):
     processed_outputs = {}
 
     for file in output_folder.glob('CSV_Output_Files/UA_RR_Output/*.csv'):
-        continue
+        name = file.with_suffix('').name
+
+        if name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_All') or \
+           name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_All') or \
+           name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_Clay') or \
+           name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_Gully') or \
+           name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_Lg_Agg') or \
+           name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_Sand') or \
+           name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_Silt') or \
+           name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_Sm_Agg') or \
+           name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_SnR_Gly_Pnd') or \
+           name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_SnR') or \
+           name.startswith('AnnAGNPS_AA_Sediment_yield_UA_RR_Total_All') or \
+           name.startswith('AnnAGNPS_AA_Sediment_yield_UA_RR_Total_Clay') or \
+           name.startswith('AnnAGNPS_AA_Sediment_yield_UA_RR_Total_Gully') or \
+           name.startswith('AnnAGNPS_AA_Sediment_yield_UA_RR_Total_Sand') or \
+           name.startswith('AnnAGNPS_AA_Sediment_yield_UA_RR_Total_Silt') or \
+           name.startswith('AnnAGNPS_AA_Sediment_yield_UA_RR_Total_SnR_Gly_Pnd') or \
+           name.startswith('AnnAGNPS_AA_Sediment_yield_UA_RR_Total_SnR') or \
+           name.startswith('AnnAGNPS_AA_Water_yield_UA_RR_Total'):
+            
+            processed_outputs[name] = pd.read_csv(file, index_col=False)
 
     # Read all .csv files in the root folder
     for file in output_folder.glob('*.csv'):
@@ -72,43 +93,22 @@ def read_all_annagnps_output_files(output_folder):
             processed_outputs[f"{name}_nitrogen"] = df_aa_n
             processed_outputs[f"{name}_organic_carbon"] = df_aa_oc
             processed_outputs[f"{name}_phosphorus"] = df_aa_p
+        
+        elif name.startswith('AnnAGNPS_AA_Water_yield_(unit-area)') or \
+             name.startswith('AnnAGNPS_AA_Sediment_yield_(unit-area)') or \
+             name.startswith('AnnAGNPS_AA_Sediment_erosion_(unit-area)'):
+            
+            header_row = find_rows_containing_pattern(file, 'Cell ID')[0]
 
-        elif name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_All'):
-            processed_outputs['AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_All'] = pd.read_csv(file, index_col=False)
-        elif name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_All'):
-            processed_outputs['AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_All'] = pd.read_csv(file, index_col=False)
-        elif name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_Clay'):
-            processed_outputs['AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_Clay'] = pd.read_csv(file, index_col=False)
-        elif name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_Gully'):
-            processed_outputs['AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_Gully'] = pd.read_csv(file, index_col=False)
-        elif name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_Lg_Agg'):
-            processed_outputs['AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_Lg_Agg'] = pd.read_csv(file, index_col=False)
-        elif name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_Sand'):
-            processed_outputs['AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_Sand'] = pd.read_csv(file, index_col=False)
-        elif name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_Silt'):
-            processed_outputs['AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_Silt'] = pd.read_csv(file, index_col=False)
-        elif name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_Sm_Agg'):
-            processed_outputs['AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_Sm_Agg'] = pd.read_csv(file, index_col=False)
-        elif name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_SnR_Gly_Pnd'):
-            processed_outputs['AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_SnR_Gly_Pnd'] = pd.read_csv(file, index_col=False)
-        elif name.startswith('AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_SnR'):
-            processed_outputs['AnnAGNPS_AA_Sediment_erosion_UA_RR_Total_SnR'] = pd.read_csv(file, index_col=False)
-        elif name.startswith('AnnAGNPS_AA_Sediment_yield_UA_RR_Total_All'):
-            processed_outputs['AnnAGNPS_AA_Sediment_yield_UA_RR_Total_All'] = pd.read_csv(file, index_col=False)
-        elif name.startswith('AnnAGNPS_AA_Sediment_yield_UA_RR_Total_Clay'):
-            processed_outputs['AnnAGNPS_AA_Sediment_yield_UA_RR_Total_Clay'] = pd.read_csv(file, index_col=False)
-        elif name.startswith('AnnAGNPS_AA_Sediment_yield_UA_RR_Total_Gully'):
-            processed_outputs['AnnAGNPS_AA_Sediment_yield_UA_RR_Total_Gully'] = pd.read_csv(file, index_col=False)
-        elif name.startswith('AnnAGNPS_AA_Sediment_yield_UA_RR_Total_Sand'):
-            processed_outputs['AnnAGNPS_AA_Sediment_yield_UA_RR_Total_Sand'] = pd.read_csv(file, index_col=False)
-        elif name.startswith('AnnAGNPS_AA_Sediment_yield_UA_RR_Total_Silt'):
-            processed_outputs['AnnAGNPS_AA_Sediment_yield_UA_RR_Total_Silt'] = pd.read_csv(file, index_col=False)
-        elif name.startswith('AnnAGNPS_AA_Sediment_yield_UA_RR_Total_SnR_Gly_Pnd'):
-            processed_outputs['AnnAGNPS_AA_Sediment_yield_UA_RR_Total_SnR_Gly_Pnd'] = pd.read_csv(file, index_col=False)
-        elif name.startswith('AnnAGNPS_AA_Sediment_yield_UA_RR_Total_SnR'):
-            processed_outputs['AnnAGNPS_AA_Sediment_yield_UA_RR_Total_SnR'] = pd.read_csv(file, index_col=False)
-        elif name.startswith('AnnAGNPS_AA_Water_yield_UA_RR_Total'):
-            processed_outputs['AnnAGNPS_AA_Water_yield_UA_RR_Total'] = pd.read_csv(file, index_col=False)
+            if name.startswith('AnnAGNPS_AA_Water_yield_(unit-area)'):
+                last_row = find_rows_containing_pattern(file, 'Watershed Totals')[0]
+            else:
+                last_row = find_rows_containing_pattern(file, 'Watershed,Totals')[0]
+                
+
+            processed_outputs[name] = pd.read_csv(file, skiprows=header_row, 
+                                                  nrows=last_row-header_row-1, 
+                                                  index_col=False)      
 
     return processed_outputs
         
@@ -142,4 +142,4 @@ def read_annagnps_aa_file(aa_file):
                 df_p = pd.read_csv(aa_file, skiprows=n_header, nrows=n_last-n_header-1, index_col=False)
 
     # Return the dataframes
-    return df_n, df_oc, df_p
+    return df_n, df_oc, df_p  
