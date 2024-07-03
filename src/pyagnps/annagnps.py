@@ -99,25 +99,27 @@ def read_all_annagnps_output_files(output_folder):
             # processed_outputs[f"{name}_organic_carbon"] = df_aa_oc
             # processed_outputs[f"{name}_phosphorus"] = df_aa_p
         
-        elif name.startswith('AnnAGNPS_AA_Water_yield_(unit-area)') or \
-             name.startswith('AnnAGNPS_AA_Sediment_yield_(unit-area)') or \
-             name.startswith('AnnAGNPS_AA_Sediment_erosion_(unit-area)'):
+        # THESE FILES ARE REDUNDANT
+        
+        # elif name.startswith('AnnAGNPS_AA_Water_yield_(unit-area)') or \
+        #      name.startswith('AnnAGNPS_AA_Sediment_yield_(unit-area)') or \
+        #      name.startswith('AnnAGNPS_AA_Sediment_erosion_(unit-area)'):
             
-            header_row = find_rows_containing_pattern(file, 'Cell ID')[0]
+        #     header_row = find_rows_containing_pattern(file, 'Cell ID')[0]
 
-            if name.startswith('AnnAGNPS_AA_Water_yield_(unit-area)'):
-                last_row = find_rows_containing_pattern(file, 'Watershed Totals')[0]
-            else:
-                last_row = find_rows_containing_pattern(file, 'Watershed,Totals')[0]
+        #     if name.startswith('AnnAGNPS_AA_Water_yield_(unit-area)'):
+        #         last_row = find_rows_containing_pattern(file, 'Watershed Totals')[0]
+        #     else:
+        #         last_row = find_rows_containing_pattern(file, 'Watershed,Totals')[0]
                 
-            df_tmp = pd.read_csv(file, skiprows=header_row, 
-                                nrows=last_row-header_row-1, 
-                                index_col=False)
+        #     df_tmp = pd.read_csv(file, skiprows=header_row, 
+        #                         nrows=last_row-header_row-1, 
+        #                         index_col=False)
             
-            if "Source" in df_tmp.columns:
-                df_tmp = df_tmp[df_tmp["Source"] != "Subtotal"]
-                
-            processed_outputs[name] = df_tmp.copy(deep=True)
+        #     if "Source" in df_tmp.columns:
+        #         df_tmp = df_tmp[df_tmp["Source"] != "Subtotal"]
+
+        #     processed_outputs[name] = df_tmp.copy(deep=True)
             
     # Concatenate all the dataframes that contain "AnnAGNPS_AA_Sediment_erosion_UA_RR_Total"
     df_tmp = pd.concat([processed_outputs.pop(x) for x in list(processed_outputs.keys()) if "Sediment_erosion_UA_RR_Total" in x])
