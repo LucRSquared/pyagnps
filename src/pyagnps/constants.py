@@ -185,3 +185,138 @@ DEFAULT_SIM_PERIOD_DATA = {
     'Winter_Bouts': float('nan'),
     'Input_Units_Code': 0
 }
+
+
+# NLDAS-2
+
+# GRIB format
+_NLDAS_PRODUCTS_002 = { 'NLDAS_FORA0125_H.002':
+                            {'type': 'hourly',
+                             'fileroot': 'NLDAS_FORA0125_H.A',
+                             'description': 'NLDAS-2 hourly primary forcing dataset, File A'},
+                        'NLDAS_FORA0125_M.002':
+                            {'type': 'monthly',
+                             'fileroot': 'NLDAS_FORA0125_M.A',
+                             'description': 'NLDAS-2 monthly primary forcing dataset, File A'},
+                        'NLDAS_FORA0125_MC.002':
+                            {'type': 'monthly_climatology',
+                             'fileroot': 'NLDAS_FORA0125_MC.ACLIM',
+                             'description': 'NLDAS-2 monthly climatology primary forcing dataset, File A (30y averaged, 1980-2009)'},
+                        'NLDAS_FORB0125_H.002':
+                            {'type': 'hourly',
+                             'fileroot': 'NLDAS_FORB0125_H.A',
+                             'description': 'NLDAS-2 hourly secondary forcing dataset, File B'},
+                        'NLDAS_FORB0125_M.002':
+                            {'type': 'monthly',
+                             'fileroot': 'NLDAS_FORB0125_M.A',
+                             'description': 'NLDAS-2 monthly secondary forcing dataset, File B'},
+                        'NLDAS_FORB0125_MC.002':
+                            {'type': 'monthly_climatology',
+                             'fileroot': 'NLDAS_FORB0125_MC.ACLIM',
+                             'description': 'NLDAS-2 monthly climatology secondary forcing dataset, File B (30y averaged, 1980-2009)'},
+                        'NLDAS_MOS0125_H.002':
+                            {'type': 'hourly',
+                             'fileroot': 'NLDAS_MOS0125_H.A',
+                             'description': 'NLDAS-2 hourly MOSAIC model data'},
+                        'NLDAS_MOS0125_M.002':
+                            {'type': 'monthly',
+                             'fileroot': 'NLDAS_MOS0125_M.A',
+                             'description': 'NLDAS-2 monthly MOSAIC model data'},
+                        'NLDAS_MOS0125_MC.002':
+                            {'type': 'monthly_climatology',
+                             'fileroot': 'NLDAS_MOS0125_MC.ACLIM',
+                             'description': 'NLDAS-2 monthly climatology MOSAIC model dataset (30y averaged, 1980-2009)'},
+                        'NLDAS_NOAH0125_H.002':
+                            {'type': 'hourly',
+                             'fileroot': 'NLDAS_NOAH0125_H.A',
+                             'description': 'NLDAS-2 hourly NOAH model data'},
+                        'NLDAS_NOAH0125_M.002':
+                            {'type': 'monthly',
+                              'fileroot': 'NLDAS_NOAH0125_M.A',
+                                'description': 'NLDAS-2 monthly NOAH model data'},
+                        'NLDAS_NOAH0125_MC.002':
+                            {'type': 'monthly_climatology',
+                             'fileroot': 'NLDAS_NOAH0125_MC.ACLIM',
+                             'description': 'NLDAS-2 monthly climatology NOAH model dataset (30y averaged, 1980-2009)'},
+                        'NLDAS_VIC0125_H.002':
+                            {'type': 'hourly',
+                             'fileroot': 'NLDAS_VIC0125_H.A',
+                             'description': 'NLDAS-2 hourly VIC model data'},
+                        'NLDAS_VIC0125_M.002':
+                            {'type': 'monthly',
+                             'fileroot': 'NLDAS_VIC0125_M.A',
+                             'description': 'NLDAS-2 monthly VIC model data'},
+                        'NLDAS_VIC0125_MC.002':
+                            {'type': 'monthly_climatology',
+                             'fileroot': 'NLDAS_VIC0125_MC.ACLIM',
+                             'description': 'NLDAS-2 monthly climatology VIC model dataset (30y averaged, 1980-2009)'},
+}
+
+# NetCDF format
+_NLDAS_PRODUCTS_20 = { 'NLDAS_FORA0125_H.2.0':
+                            {'type': 'hourly',
+                             'fileroot': 'NLDAS_FORA0125_H.A',
+                             'description': 'NLDAS-2 hourly primary forcing dataset, File A'},
+                        'NLDAS_FORA0125_D.2.0': # Non-NLDAS product, this one was aggregated in hourse
+                            {'type': 'daily',
+                             'fileroot': 'NLDAS_FORA0125_D.A',
+                             'description': 'NLDAS-2 daily primary forcing dataset, File A'},
+                        'NLDAS_FORA0125_M.2.0':
+                            {'type': 'monthly',
+                             'fileroot': 'NLDAS_FORA0125_M.A',
+                             'description': 'NLDAS-2 monthly primary forcing dataset, File A'},
+                        'NLDAS_FORA0125_MC.2.0':
+                            {'type': 'monthly_climatology',
+                             'fileroot': 'NLDAS_FORA0125_MC.ACLIM',
+                             'description': 'NLDAS-2 monthly climatology primary forcing dataset, File A (30y averaged, 1980-2009)'},
+                        'NLDAS_FORB0125_H.2.0':
+                            {'type': 'hourly',
+                             'fileroot': 'NLDAS_FORB0125_H.A',
+                             'description': 'NLDAS-2 hourly secondary forcing dataset, File B'},
+                        'NLDAS_FORB0125_M.2.0':
+                            {'type': 'monthly',
+                             'fileroot': 'NLDAS_FORB0125_M.A',
+                             'description': 'NLDAS-2 monthly secondary forcing dataset, File B'},
+                        'NLDAS_FORB0125_MC.2.0':
+                            {'type': 'monthly_climatology',
+                             'fileroot': 'NLDAS_FORB0125_MC.ACLIM',
+                             'description': 'NLDAS-2 monthly climatology secondary forcing dataset, File B (30y averaged, 1980-2009)'},
+                        'NLDAS_MOS0125_H.2.0':
+                            {'type': 'hourly',
+                             'fileroot': 'NLDAS_MOS0125_H.A',
+                             'description': 'NLDAS-2 hourly MOSAIC model data'},
+                        'NLDAS_MOS0125_M.2.0':
+                            {'type': 'monthly',
+                             'fileroot': 'NLDAS_MOS0125_M.A',
+                             'description': 'NLDAS-2 monthly MOSAIC model data'},
+                        'NLDAS_MOS0125_MC.2.0':
+                            {'type': 'monthly_climatology',
+                             'fileroot': 'NLDAS_MOS0125_MC.ACLIM',
+                             'description': 'NLDAS-2 monthly climatology MOSAIC model dataset (30y averaged, 1980-2009)'},
+                        'NLDAS_NOAH0125_H.2.0':
+                            {'type': 'hourly',
+                             'fileroot': 'NLDAS_NOAH0125_H.A',
+                             'description': 'NLDAS-2 hourly NOAH model data'},
+                        'NLDAS_NOAH0125_M.2.0':
+                            {'type': 'monthly',
+                              'fileroot': 'NLDAS_NOAH0125_M.A',
+                                'description': 'NLDAS-2 monthly NOAH model data'},
+                        'NLDAS_NOAH0125_MC.2.0':
+                            {'type': 'monthly_climatology',
+                             'fileroot': 'NLDAS_NOAH0125_MC.ACLIM',
+                             'description': 'NLDAS-2 monthly climatology NOAH model dataset (30y averaged, 1980-2009)'},
+                        'NLDAS_VIC0125_H.2.0':
+                            {'type': 'hourly',
+                             'fileroot': 'NLDAS_VIC0125_H.A',
+                             'description': 'NLDAS-2 hourly VIC model data'},
+                        'NLDAS_VIC0125_M.2.0':
+                            {'type': 'monthly',
+                             'fileroot': 'NLDAS_VIC0125_M.A',
+                             'description': 'NLDAS-2 monthly VIC model data'},
+                        'NLDAS_VIC0125_MC.2.0':
+                            {'type': 'monthly_climatology',
+                             'fileroot': 'NLDAS_VIC0125_MC.ACLIM',
+                             'description': 'NLDAS-2 monthly climatology VIC model dataset (30y averaged, 1980-2009)'},
+}
+
+_BASE_URL_NLDAS = 'https://hydro1.gesdisc.eosdis.nasa.gov/data/NLDAS/'

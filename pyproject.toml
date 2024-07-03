@@ -1,4 +1,5 @@
 [tool.pdm]
+src-layout = true
 
 [tool.pdm.dev-dependencies]
 dev = [
@@ -52,6 +53,9 @@ dependencies = [
 requires-python = ">=3.9"
 readme = "README.md"
 license = {text = "MIT"}
+
+[project.scripts]
+download-nldas2 = "cli.get_nldas_batch:main"
 
 [build-system]
 requires = ["pdm-backend"]

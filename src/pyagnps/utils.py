@@ -5,9 +5,12 @@ from shapely.geometry import shape
 from shapely.geometry.polygon import Polygon, LinearRing
 import numpy as np
 
+from tqdm import tqdm
+
 import pandas as pd
 import geopandas as gpd
 import shutil, os, glob, sys
+import time
 
 import dateutil
 from datetime import datetime, timezone
@@ -253,6 +256,17 @@ def get_date_from_string(date_string, outputtype=np.datetime64):
     else:
         raise TypeError("outputtype must be datetime or np.datetime64")
 
+def month_difference(from_date, to_date):
+    """
+    gets the number of months between from_date and to_date
+    could be negative or zero
+    example usage:
+        >>> month_difference(datetime(2010,10,1), datetime(2010,11,1))
+        1
+    """
+    return (to_date.year - from_date.year) * 12 + (to_date.month - from_date.month)
+
+
 def write_csv_control_file_from_dict(data_dict, output_path='control.csv'):
     # Writes the contents of kwargs with the key as a column and the value as the value
     # at output_path
@@ -279,3 +293,53 @@ def find_rows_containing_pattern(file, pattern, skiprows=0):
                 row_nums.append(i)
 
     return row_nums
+
+def download_files_from_url(session, urls, out_dir):
+    """
+    visit and download the files from the
+    for the list of urls for the files we wish to retrieve
+    """
+    responses = []
+
+    # display progress bar (thanks tqdm!) and download the files
+    for url in tqdm(urls):
+        # extract the filename from the url to be used when saving the file
+        filename = Path(url).name
+
+        maxattempts = 10
+        attempt = 1
+        while attempt <= maxattempts:
+            try:
+                # save the file
+                out_file = (out_dir / filename).resolve()
+                if out_file.exists():
+                    # print(f'File {filename} already exists, skipping')
+                    break
+                else:
+                    # submit the request using the session
+                    response = session.get(url, stream=True)
+                    responses.append(response)
+
+                    # raise an exception in case of http errors
+                    response.raise_for_status()
+
+                    with out_file.open('wb') as fd:
+                        for chunk in response.iter_content(chunk_size=1024 * 1024):
+                            fd.write(chunk)
+               
+
+            # except requests.exceptions.HTTPError as e:
+            #     print(f'HTTP Error {e.response.status_code} for url {url}, Retrying {attempt}/{maxattempts}')
+            #     attempt += 1
+            #     time.sleep(5)
+            except:
+                print(f'\nHTTP Error for url {url}, Retrying {attempt}/{maxattempts}')
+                attempt += 1
+                time.sleep(5)
+
+            if attempt == maxattempts:
+                print(f'Failed to download {url} after {maxattempts} attempts, appending to file {out_dir}/failed_urls.txt')
+                with (out_dir / 'failed_urls.txt').open('a') as f:
+                    f.write(f'{url}\n')
+
+    return responses

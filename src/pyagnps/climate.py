@@ -1,3 +1,5 @@
+import warnings
+
 from pathlib import Path
 import pynldas2
 import py3dep
@@ -12,6 +14,13 @@ import pandas as pd
 
 import xarray as xr
 
+import time
+from datetime import datetime, timedelta, timezone
+from dateutil.relativedelta import relativedelta
+
+from .utils import get_date_from_string
+
+from .constants import _NLDAS_PRODUCTS_20, _NLDAS_PRODUCTS_002
 # Do not create
 import os
 
@@ -1171,3 +1180,431 @@ def compute_wind_direction(Uwind, Vwind, method="annagnps"):
         raise ValueError(f"Method {method} is not implemented")
 
     return wind_direction
+
+# METHODS TO DOWNLOAD AND PROCESS NLDAS-2 DATA FROM FILES DOWNLOADED FROM GESDISC
+def get_time_indices_from_time_bnds(ds, from_date, to_date):
+    """Get time indices from time bounds."""
+    time_bnds = ds['time_bnds'].values
+    from_date = np.datetime64(from_date)
+    to_date = np.datetime64(to_date)
+
+    bounds_later_than_from = time_bnds[:, 0] >= from_date
+    bounds_earlier_than_to = time_bnds[:, 1] <= to_date
+
+    idx_from = np.argmax(bounds_later_than_from)
+    idx_to = bounds_earlier_than_to.shape[0] - np.argmax(bounds_earlier_than_to[::-1]) - 1
+
+    idx_from = int(idx_from)
+    idx_to = int(idx_to)
+
+    return (idx_from, idx_to)
+
+def get_file_list(root_dir, from_date, to_date, product='NLDAS_FORA0125_H.2.0'):
+    """Get a list of files for a given product and date range (in datetime format)"""
+
+    target_dates = []
+    file_list = []
+
+    if '.002' in product:
+        # GRIB files
+        product_dict = _NLDAS_PRODUCTS_002
+        file_extension = '.002.grb'
+    elif '.2.0' in product:
+        # NetCDF files
+        product_dict = _NLDAS_PRODUCTS_20
+        file_extension = '.020.nc'
+
+    time_type = product_dict[product]['type']
+    fileroot = product_dict[product]['fileroot']
+
+    if time_type == 'hourly':
+        onehour = timedelta(hours=1)
+        # Hourly data
+
+        curr_date = from_date
+
+        while curr_date <= to_date:
+            target_dates.append(curr_date)
+            curr_date += onehour
+
+        for dat in target_dates:
+            file_list.append((f'{root_dir}/'
+                              f'{fileroot}'
+                              f'{dat.year}'
+                              f'{dat.month:02d}'
+                              f'{dat.day:02d}.'
+                              f'{dat.hour:02d}00{file_extension}'
+                                  ))
+
+    elif time_type == 'daily':
+        oneday = timedelta(days=1)
+        curr_date = from_date
+
+        while curr_date <= to_date:
+            target_dates.append(curr_date)
+            curr_date += oneday
+
+        for dat in target_dates:
+            file_list.append((f'{root_dir}/'
+                              f'{fileroot}'
+                              f'{dat.year}'
+                              f'{dat.month:02d}'
+                              f'{dat.day:02d}{file_extension}'))
+
+    elif time_type == 'monthly':
+        for i in range(month_difference(from_date, to_date) + 1):
+            target_dates.append((from_date + relativedelta(months=i)))
+
+        for i in range(len(target_dates)):
+            file_list.append((f'{root_dir}/'
+                              f'{fileroot}{target_dates[i].year}'
+                              f'{target_dates[i].month:02d}{file_extension}'
+                                  ))
+
+    elif time_type == 'monthly_climatology':
+        print(f'Data product is {product} which is a monthly climatology averaged dataset, from_date and to_date will be ignored and all months will be downloaded')
+        for i in range(1, 12 + 1):
+            file_list.append((f'{root_dir}/{fileroot}{i:02d}{file_extension}'))
+
+    return file_list
+
+def read_dataset(root_dir, start_date, end_date_or_timedelta, product='NLDAS_FORA0125_H.2.0', augment=True):
+    """Read dataset (FORA or NOAH or...).
+    
+    Parameters
+    ----------
+    root_dir : str
+        Root directory
+    start_date : str
+        Start date in friend ISO format (YYYY-MM-DD) (hours and timezone can be specified if necessary)
+    end_date_or_timedelta : 
+        str
+        End date (YYYY-MM-DD)
+        OR a timedelta object
+    product : str, optional
+        Product name, by default 'NLDAS_FORA0125_H.2.0'
+    augment : bool, optional
+        Augment forcing data with additional variables, by default True
+    
+    Returns
+    -------
+    forcing_data : xarray.Dataset
+        Forcing data or NOAH data
+    """
+
+    # Get the list of files
+    if isinstance(start_date, str):
+        start_date = get_date_from_string(start_date, outputtype=datetime)
+
+    if isinstance(end_date_or_timedelta, str):
+        end_date = get_date_from_string(end_date_or_timedelta, outputtype=datetime)
+    elif isinstance(end_date_or_timedelta, timedelta) or isinstance(end_date_or_timedelta, relativedelta):
+        end_date = start_date + end_date_or_timedelta
+
+    file_list = get_file_list(root_dir, start_date, end_date, product=product)
+    # Read data
+    data = xr.open_mfdataset(file_list, chunks={'time': 24}, 
+                    parallel=False, combine='nested', concat_dim='time', engine='h5netcdf')
+
+    # Because the way the files are timestamp, to get the data that is within the time range it's safer to make sure with
+    # the time_bnds variable
+    idx_from, idx_to = get_time_indices_from_time_bnds(data, start_date, end_date)
+    data = data.isel(time=slice(idx_from, idx_to+1))
+
+    data = data.rio.write_crs(4087)
+    
+    # Augment forcing data
+    if augment and (product == 'NLDAS_FORA0125_H.2.0'):
+        data = augment_forcing_data(data)
+    
+    return data
+
+def augment_forcing_data(forcing_data):
+    """Augment forcing data with additional variables.
+    
+    Parameters
+    ----------
+    forcing_data : xarray.Dataset
+        Forcing data
+    
+    Returns
+    -------
+    forcing_data : xarray.Dataset
+        Forcing data with additional variables
+    """
+    # Compute relative humidity
+    forcing_data['RH'] = compute_RH(forcing_data['PSurf'], forcing_data['Tair'], forcing_data['Qair'])
+    forcing_data['RH'].attrs['units'] = '%'
+    forcing_data['RH'].attrs['long_name'] = 'Relative humidity at 2m [%]'
+    forcing_data['RH'].attrs['standard_name'] = 'Relative Humidity'
+    forcing_data['RH'].attrs['cell_methods'] = 'time: point'
+    forcing_data['RH'].attrs['vmin'] = forcing_data['RH'].min().values
+    forcing_data['RH'].attrs['vmax'] = forcing_data['RH'].max().values
+
+    # Compute dew point temperature
+    forcing_data['Tdew'] = compute_dew_point(forcing_data['RH'], forcing_data['Tair'])
+    forcing_data['Tdew'].attrs['units'] = 'K'
+    forcing_data['Tdew'].attrs['long_name'] = 'Dew point temperature at 2m [K]'
+    forcing_data['Tdew'].attrs['standard_name'] = 'Dew Point Temperature'
+    forcing_data['Tdew'].attrs['cell_methods'] = 'time: point'
+    forcing_data['Tdew'].attrs['vmin'] = forcing_data['RH'].min().values
+    forcing_data['Tdew'].attrs['vmax'] = forcing_data['RH'].max().values
+
+    # Compute wind speed
+    forcing_data['wind_speed'] = compute_wind_speed(forcing_data['Wind_E'], forcing_data['Wind_N'])
+    forcing_data['wind_speed'].attrs['units'] = 'm/s'
+    forcing_data['wind_speed'].attrs['long_name'] = '10-meter above ground Zonal wind speed [m/s]'
+    forcing_data['wind_speed'].attrs['standard_name'] = 'Near surface magnitude wind speed'
+    forcing_data['wind_speed'].attrs['cell_methods'] = 'time: point'
+    forcing_data['wind_speed'].attrs['vmin'] = forcing_data['wind_speed'].min().values
+    forcing_data['wind_speed'].attrs['vmax'] = forcing_data['wind_speed'].max().values
+
+    # Compute wind direction
+    # pipi = compute_wind_direction(forcing_data['Wind_E'], forcing_data['Wind_N'])
+    forcing_data['wind_direction'] = compute_wind_direction(forcing_data['Wind_E'], forcing_data['Wind_N'])
+    forcing_data['wind_direction'].attrs['units'] = '°'
+    forcing_data['wind_direction'].attrs['long_name'] = 'Wind direction in degrees [°]'
+    forcing_data['wind_direction'].attrs['standard_name'] = 'Wind direction'
+    forcing_data['wind_direction'].attrs['cell_methods'] = 'time: point'
+    forcing_data['wind_direction'].attrs['vmin'] = forcing_data['wind_direction'].min().values
+    forcing_data['wind_direction'].attrs['vmax'] = forcing_data['wind_direction'].max().values
+    
+    return forcing_data
+
+def variable_agg_func_forA(x):
+    """Aggregate variables in a dataset"""
+    # Loop over the variables
+    if x.name in ['Tair', 'Qair', 'PSurf', 'Wind_E', 'Wind_N', 'LWdown', 'CAPE', 'SWdown', 'RH', 'Tdew', 'wind_speed', 'wind_direction']:
+        return x.mean(dim='time')
+    elif x.name in ['Rainf', 'CRainf_frac', 'PotEvap']:
+        return x.sum(dim='time')
+    else:
+        warnings.warn(f"Unexpected variable name, doesn't know what to do with {x.name}, sum, mean, something else?")
+
+def variable_agg_func_forNOAH(x):
+    """Aggregate variables in a dataset"""
+    # Loop over the variables
+    if x.name in ['SWdown', 'LWdown', 'SWnet', 'LWnet', 'Qle', 'Qh', 'Qg', 'Qf', 'AvgSurfT', 'Albedo', 'SWE', 'SnowDepth', 'SnowFrac', \
+                  'SoilT_0_10cm', 'SoilT_10_40cm', 'SoilT_40_100cm', 'SoilT_100_200cm', \
+                  'SoilM_0_10cm', 'SoilM_10_40cm', 'SoilM_40_100cm', 'SoilM_100_200cm', 'SoilM_0_100cm', 'SoilM_0_200cm',
+                  'RootMoist', 'SMLiq_0_10cm', 'SMLiq_10_40cm', 'SMLiq_40_100cm', 'SMLiq_100_200cm', 'SMAvail_0_100cm', 'SMAvail_0_200cm',
+                  'PotEvap', 'ECanop', 'TVeg', 'ESoil', 'SubSnow', 'CanopInt', 'ACond', 'CCond', 'RCS', 'RCT', 'RCQ', 'RCSOL',
+                  'RSmin', 'RSMacr', 'LAI', 'GVEG', 'Streamflow']:
+        return x.mean(dim='time')
+    elif x.name in ['Snowf', 'Rainf', 'Evap', 'Qs', 'Qsb', 'Qsm']:
+        return x.sum(dim='time')
+    else:
+        warnings.warn(f"Unexpected variable name, doesn't know what to do with {x.name}, sum, mean, something else?")
+    
+
+def aggregate_forcing_data(ds, start_date=None, end_date_or_timedelta=None, agg_func=variable_agg_func_forA):
+    """Aggregate forcing data for a given period.
+
+    Parameters
+    ----------
+    ds : xarray.Dataset
+        Dataset containing the forcing data
+    start_date : str
+        Start date of the period to aggregate
+    end_date_or_timedelta : 
+        str
+        End date (YYYY-MM-DD)
+        OR a timedelta object
+    agg_func : function, optional
+        Function to aggregate the variables, by default variable_agg_func_forA
+    """
+
+    if start_date is None:
+        start_date = ds.time.min().values # Use the first date in the dataset
+
+    if end_date_or_timedelta is None:
+        end_date = ds.time.max().values # Use the last date in the dataset
+
+
+    if isinstance(start_date, str):
+        start_date = get_date_from_string(start_date, outputtype=datetime)
+
+    if isinstance(end_date_or_timedelta, str):
+        end_date = get_date_from_string(end_date_or_timedelta)
+    elif isinstance(end_date_or_timedelta, timedelta):
+        end_date = start_date + end_date_or_timedelta
+    elif isinstance(end_date_or_timedelta, datetime):
+        end_date = end_date_or_timedelta
+
+    # Identify indices for the start and end date so that we can use time_bnds
+    idx_from, idx_to = get_time_indices_from_time_bnds(ds, start_date, end_date)
+
+    # Delete useless variables not needed for AnnAGNPS
+    try:
+        del ds['time_bnds'] # Remove time bounds
+    except:
+        pass
+
+    mid_date = start_date + (end_date - start_date)/2
+
+    # Convert all time bounds to np.datetime64
+    start_date = np.datetime64(start_date, 'D')
+    end_date = np.datetime64(end_date, 'D')
+    mid_date = np.datetime64(mid_date, 'D')
+
+    # mid_date = mid_date.astype('datetime64[D]') # Convert to datetime64[D] to avoid issues with time bounds
+    
+    # Aggregate forcing data
+    agg_data = ds.isel(time=slice(idx_from, idx_to + 1)).map(agg_func, keep_attrs=True)
+    # agg_data = ds.sel(time=slice(start_date, end_date)).map(agg_func)
+
+    # Add Tmin and Tmax
+    agg_data['Tmin'] = ds['Tair'].sel(time=slice(start_date, end_date)).min(dim='time', skipna=True, keep_attrs=True)
+    agg_data['Tmax'] = ds['Tair'].sel(time=slice(start_date, end_date)).max(dim='time', skipna=True, keep_attrs=True)
+
+    agg_data['Tmin'].attrs['standard_name'] = 'Near surface 24h minimum temperature'
+    agg_data['Tmin'].attrs['long_name'] = '2-meter above ground 24h minimum temperature [K]'
+
+    agg_data['Tmax'].attrs['standard_name'] = 'Near surface 24h maximum temperature'
+    agg_data['Tmax'].attrs['long_name'] = '2-meter above ground 24h maximum temperature [K]'
+
+    try:
+        del agg_data['Tmin'].attrs['vmin']
+        del agg_data['Tmin'].attrs['vmax']
+    except:
+        pass
+
+    try:
+        del agg_data['Tmax'].attrs['vmin']
+        del agg_data['Tmax'].attrs['vmax']
+    except:
+        pass
+
+    agg_data = agg_data.expand_dims(dim={'time': [mid_date]}, axis=0) # Add a time dimension
+
+    agg_data.attrs['time_definition'] = 'aggregated' 
+
+    return agg_data
+
+def aggregate_noah_data(ds, start_date=None, end_date_or_timedelta=None, agg_func=variable_agg_func_forNOAH):
+    """Aggregate NOAH data for a given period.
+
+    Parameters
+    ----------
+    ds : xarray.Dataset
+        Dataset containing the forcing data
+    start_date : str
+        Start date of the period to aggregate
+    end_date_or_timedelta : 
+        str
+        End date (YYYY-MM-DD)
+        OR a timedelta object
+    agg_func : function, optional
+        Function to aggregate the variables, by default variable_agg_func_forNOAH
+    """
+
+    if start_date is None:
+        start_date = ds.time.min().values # Use the first date in the dataset
+
+    if end_date_or_timedelta is None:
+        end_date = ds.time.max().values # Use the last date in the dataset
+
+
+    if isinstance(start_date, str):
+        start_date = get_date_from_string(start_date, outputtype=datetime)
+
+    if isinstance(end_date_or_timedelta, str):
+        end_date = get_date_from_string(end_date_or_timedelta)
+    elif isinstance(end_date_or_timedelta, timedelta):
+        end_date = start_date + end_date_or_timedelta
+    elif isinstance(end_date_or_timedelta, datetime):
+        end_date = end_date_or_timedelta
+
+    # Identify indices for the start and end date so that we can use time_bnds
+    idx_from, idx_to = get_time_indices_from_time_bnds(ds, start_date, end_date)
+
+    # Delete useless variables not needed for AnnAGNPS
+    try:
+        del ds['time_bnds'] # Remove time bounds
+    except:
+        pass
+
+    mid_date = start_date + (end_date - start_date)/2
+
+    # Convert all time bounds to np.datetime64
+    start_date = np.datetime64(start_date, 'D')
+    end_date = np.datetime64(end_date, 'D')
+    mid_date = np.datetime64(mid_date, 'D')
+
+    # mid_date = mid_date.astype('datetime64[D]') # Convert to datetime64[D] to avoid issues with time bounds
+    
+    # Aggregate forcing data
+    agg_data = ds.isel(time=slice(idx_from, idx_to + 1)).map(agg_func, keep_attrs=True)
+
+    agg_data = agg_data.expand_dims(dim={'time': [mid_date]}, axis=0) # Add a time dimension
+
+    agg_data.attrs['time_definition'] = 'aggregated' 
+
+    return agg_data
+
+def aggregate_forcing_data_daily(ds, start_date=None, end_date_or_timedelta=None, agg_func=variable_agg_func_forA):
+    """Aggregate forcing data for a given period.
+
+    Parameters
+    ----------
+    ds : xarray.Dataset
+        Dataset containing the forcing data
+    start_date : str
+        Start date of the period to aggregate
+    end_date_or_timedelta : 
+        str
+        End date (YYYY-MM-DD)
+        OR a timedelta object
+    agg_func : function, optional
+        Function to aggregate the variables, by default variable_agg_func_forA
+    """
+
+    if start_date is None:
+        start_date = ds.time.min().values # Use the first date in the dataset
+        start_date = datetime.fromtimestamp(start_date.astype(datetime)*1e-9, tz=timezone.utc)
+
+    if end_date_or_timedelta is None:
+        end_date = ds.time.max().values # Use the last date in the dataset
+        end_date = datetime.fromtimestamp(end_date.astype(datetime)*1e-9, tz=timezone.utc)
+
+    if isinstance(start_date, str):
+        start_date = get_date_from_string(start_date, outputtype=datetime)
+
+    if isinstance(end_date_or_timedelta, str):
+        end_date = get_date_from_string(end_date_or_timedelta)
+    elif isinstance(end_date_or_timedelta, timedelta) or isinstance(end_date_or_timedelta, relativedelta):
+        end_date = start_date + end_date_or_timedelta
+    elif isinstance(end_date_or_timedelta, datetime):
+        end_date = end_date_or_timedelta
+    
+
+    # forcing_ds['time_bnds'].values == get_date_from_string('1992-11-01T01:00:00') # To work out later
+    
+    oneday = timedelta(days=1)
+
+    if end_date - start_date < oneday:
+        oneday = end_date - start_date # If the period is less than one day, then use the period length
+
+    # List of datasets
+    ds_list = []
+
+    curr_date = start_date
+
+    while curr_date < end_date:
+        # Aggregate forcing data
+        agg_data_tmp = aggregate_forcing_data(ds.copy(), curr_date, curr_date+oneday)
+
+        try:
+            del agg_data_tmp['time_bnds'] # Remove time bounds
+        except:
+            pass
+
+        ds_list.append(agg_data_tmp)
+
+        curr_date += oneday
+
+    agg_data = xr.concat(ds_list, dim='time')
+
+    agg_data.attrs['time_definition'] = 'aggregated_daily' 
+
+    return agg_data
