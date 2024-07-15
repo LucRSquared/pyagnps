@@ -57,6 +57,7 @@ license = {text = "MIT"}
 
 [project.scripts]
 download-nldas2 = "cli.get_nldas_batch:main"
+aggregate-nldas2 = "cli.aggregate_nldas_batch_daily:main"
 
 [build-system]
 requires = ["pdm-backend"]

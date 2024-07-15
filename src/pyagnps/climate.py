@@ -1119,9 +1119,17 @@ def compute_dew_point(RH, Tair, Tunit="K"):
     # If remaining NaN values subsist backward or forward fill where appropriate
 
     RH = RH.copy()  # Ensure we are working with a copy
-    RH.loc[RH<0] = 1
-    RH.loc[RH>100] = 100
-    RH = RH.ffill().bfill()
+    try: # If it's a DataFrame
+        RH.loc[RH<0] = 1
+        RH.loc[RH>100] = 100
+    except:
+        RH = RH.where(RH <= 0, 1)
+        RH = RH.where(RH >= 100, 100)
+    
+    try: # If it's a DataFrame
+        RH = RH.ffill().bfill()
+    except:
+        RH = RH.ffill(dim="time").bfill(dim="time")
 
     log_RH = np.log(RH / 100)
 
@@ -1448,9 +1456,15 @@ def aggregate_forcing_data(ds, start_date=None, end_date_or_timedelta=None, agg_
     mid_date = np.datetime64(mid_date, 'D')
 
     # mid_date = mid_date.astype('datetime64[D]') # Convert to datetime64[D] to avoid issues with time bounds
+    dscopy = ds.copy()
     
+    try:
+        del dscopy['GMT_OFFSET']
+    except:
+        pass
+
     # Aggregate forcing data
-    agg_data = ds.isel(time=slice(idx_from, idx_to + 1)).map(agg_func, keep_attrs=True)
+    agg_data = dscopy.isel(time=slice(idx_from, idx_to + 1)).map(agg_func, keep_attrs=True)
     # agg_data = ds.sel(time=slice(start_date, end_date)).map(agg_func)
 
     # Add Tmin and Tmax
