@@ -45,10 +45,11 @@ dependencies = [
     "jupyter-bokeh>=3.0.7",
     "pooch>=1.7.0",
     "nc-time-axis>=1.4.1",
-    "dask>=2023.9.3",
+    "dask[dataframe]>=2024.7.0",
     "xarray>=2023.9.0",
     "psycopg2>=2.9.6 ; sys_platform == 'win32'",
     "geoalchemy2>=0.15.1",
+    "bottleneck>=1.4.0",
 ]
 requires-python = ">=3.9"
 readme = "README.md"

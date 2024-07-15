@@ -6,6 +6,7 @@ inputs/TNM_DEM/*.7z
 inputs/TNM_DEM/*.tif
 inputs/soil/gSSURGO/*
 inputs/soil/gNATSGO/*
+inputs/climate/FORA/*
 inputs/management/*.tif
 outputs/topagnps/*
 outputs/soil_data_market/shapefile/*

@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.2"
-content_hash = "sha256:8a751e9694a210017ea042897ceb78a7a98f50cb9abbe0078b4d854ce65cb251"
+content_hash = "sha256:7a3eceb97100f247f9ee53c10f8370f718715553e46ef27c801aeb9496d88082"
 
 [[package]]
 name = "affine"
@@ -383,6 +383,46 @@ dependencies = [
 files = [
     {file = "bokeh-3.4.2-py3-none-any.whl", hash = "sha256:931a43ee59dbf1720383ab904f8205e126b85561aac55592415b800c96f1b0eb"},
     {file = "bokeh-3.4.2.tar.gz", hash = "sha256:a16d5cc0abb93d2d270d70fc35851f3e1b9208814a985a4678e0ba5ef2d9cd42"},
+]
+
+[[package]]
+name = "bottleneck"
+version = "1.4.0"
+summary = "Fast NumPy array functions written in C"
+groups = ["default"]
+dependencies = [
+    "numpy",
+]
+files = [
+    {file = "Bottleneck-1.4.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:2110af22aa8c2779faba8aa021d6b559df04449bdf21d510eacd7910934189fe"},
+    {file = "Bottleneck-1.4.0-cp310-cp310-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:381cbd1e52338fcdf9ff01c962e6aa187b2d8b3b369d42e779b6d33ac61f8d35"},
+    {file = "Bottleneck-1.4.0-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4a91e40bbb8452e77772614d882be2c34b3b514d9f15460f703293525a6e173d"},
+    {file = "Bottleneck-1.4.0-cp310-cp310-musllinux_1_1_i686.whl", hash = "sha256:59604949aea476f5075b965129eaa3c2d90891fd43b0dfaf2ad7621bb5db14a5"},
+    {file = "Bottleneck-1.4.0-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:c2c92545e1bc8e859d8d137aefa3b24843bd374b17c9814dafa3bbcea9fc4ec0"},
+    {file = "Bottleneck-1.4.0-cp310-cp310-win32.whl", hash = "sha256:f63e79bfa2f82a7432c8b147ed321d01ca7769bc17cc04644286a4ce58d30549"},
+    {file = "Bottleneck-1.4.0-cp310-cp310-win_amd64.whl", hash = "sha256:d69907d8d679cb5091a3f479c46bf1076f149f6311ff3298bac5089b86a2fab1"},
+    {file = "Bottleneck-1.4.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:67347b0f01f32a232a6269c37afc1c079e08f6455fa12e91f4a1cd12eb0d11a5"},
+    {file = "Bottleneck-1.4.0-cp311-cp311-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:1490348b3bbc0225523dc2c00c6bb3e66168c537d62797bd29783c0826c09838"},
+    {file = "Bottleneck-1.4.0-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a704165552496cbcc8bcc5921bb679fd6fa66bb1e758888de091b1223231c9f0"},
+    {file = "Bottleneck-1.4.0-cp311-cp311-musllinux_1_1_i686.whl", hash = "sha256:ffb4e4edf7997069719b9269926cc00a2a12c6e015422d1ebc2f621c4541396a"},
+    {file = "Bottleneck-1.4.0-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:5d6bf45ed58d5e7414c0011ef2da75474fe597a51970df83596b0bcb79c14c5e"},
+    {file = "Bottleneck-1.4.0-cp311-cp311-win32.whl", hash = "sha256:ed209f8f3cb9954773764b0fa2510a7a9247ad245593187ac90bd0747771bc5c"},
+    {file = "Bottleneck-1.4.0-cp311-cp311-win_amd64.whl", hash = "sha256:d53f1a72b12cfd76b56934c33bc0cb7c1a295f23a2d3ffba8c764514c9b5e0ff"},
+    {file = "Bottleneck-1.4.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:e720ff24370324c84a82b1a18195274715c23181748b2b9e3dacad24198ca06f"},
+    {file = "Bottleneck-1.4.0-cp312-cp312-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:44305c70c2a1539b0ae968e033f301ad868a6146b47e3cccd73fdfe3fc07c4ee"},
+    {file = "Bottleneck-1.4.0-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1b4dac5d2a871b7bd296c2b92426daa27d5b07aa84ef2557db097d29135da4eb"},
+    {file = "Bottleneck-1.4.0-cp312-cp312-musllinux_1_1_i686.whl", hash = "sha256:fbcdd01db9e27741fb16a02b720cf02389d4b0b99cefe3c834c7df88c2d7412d"},
+    {file = "Bottleneck-1.4.0-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:14b3334a39308fbb05dacd35ac100842aa9e9bc70afbdcebe43e46179d183fd0"},
+    {file = "Bottleneck-1.4.0-cp312-cp312-win32.whl", hash = "sha256:520d7a83cd48b3f58e5df1a258acb547f8a5386a8c21ca9e1058d83a0d622fdf"},
+    {file = "Bottleneck-1.4.0-cp312-cp312-win_amd64.whl", hash = "sha256:b1339b9ad3ee217253f246cde5c3789eb527cf9dd31ff0a1f5a8bf7fc89eadad"},
+    {file = "Bottleneck-1.4.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:28260197ab8a4a6b7adf810523147b1a3e85607f4e26a0f685eb9d155cfc75af"},
+    {file = "Bottleneck-1.4.0-cp39-cp39-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:90d5d188a0cca0b9655ff2904ee61e7f183079e97550be98c2541a2eec358a72"},
+    {file = "Bottleneck-1.4.0-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2861ff645d236f1a6f5c6d1ddb3db37d19af1d91057bdc4fd7b76299a15b3079"},
+    {file = "Bottleneck-1.4.0-cp39-cp39-musllinux_1_1_i686.whl", hash = "sha256:6136ce7dcf825c432a20b80ab1c460264a437d8430fff32536176147e0b6b832"},
+    {file = "Bottleneck-1.4.0-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:889e6855b77345622b4ba927335d3118745d590492941f5f78554f157d259e92"},
+    {file = "Bottleneck-1.4.0-cp39-cp39-win32.whl", hash = "sha256:817aa43a671ede696ea023d8f35839a391244662340cc95a0f46965dda8b35cf"},
+    {file = "Bottleneck-1.4.0-cp39-cp39-win_amd64.whl", hash = "sha256:23834d82177d6997f21fa63156550668cd07a9a6e5a1b66ea80f1a14ac6ffd07"},
+    {file = "bottleneck-1.4.0.tar.gz", hash = "sha256:beb36df519b8709e7d357c0c9639b03b885ca6355bbf5e53752c685de51605b8"},
 ]
 
 [[package]]
@@ -1018,7 +1058,7 @@ files = [
 
 [[package]]
 name = "dask"
-version = "2024.6.2"
+version = "2024.7.0"
 requires_python = ">=3.9"
 summary = "Parallel PyData with Task Scheduling"
 groups = ["default"]
@@ -1028,13 +1068,63 @@ dependencies = [
     "fsspec>=2021.09.0",
     "importlib-metadata>=4.13.0; python_version < \"3.12\"",
     "packaging>=20.0",
-    "partd>=1.2.0",
+    "partd>=1.4.0",
     "pyyaml>=5.3.1",
     "toolz>=0.10.0",
 ]
 files = [
-    {file = "dask-2024.6.2-py3-none-any.whl", hash = "sha256:81b80ee015b2e057b93bb2d1bf13a866136e762e2b24bf54b6b621e8b86b7708"},
-    {file = "dask-2024.6.2.tar.gz", hash = "sha256:d429d6b19e85fd1306ac37c188aaf99d03bbe69a6fe59d2b42882b2ac188686f"},
+    {file = "dask-2024.7.0-py3-none-any.whl", hash = "sha256:0f30f218a1fe1c8e9a6ba8add1207088ba9ff049098d4ea4ce045fd5ff7ca914"},
+    {file = "dask-2024.7.0.tar.gz", hash = "sha256:0060bae9a58b5b3ce7e0d97040e903b4d3db09ba49222101cfc40f9834a8a6bc"},
+]
+
+[[package]]
+name = "dask-expr"
+version = "1.1.7"
+requires_python = ">=3.9"
+summary = "High Level Expressions for Dask "
+groups = ["default"]
+dependencies = [
+    "dask==2024.7.0",
+    "pandas>=2",
+    "pyarrow>=7.0.0",
+]
+files = [
+    {file = "dask_expr-1.1.7-py3-none-any.whl", hash = "sha256:6f45468499b50839e9d9a43f599f7f70a50f50048bce93557c2dea24bfcad3bb"},
+    {file = "dask_expr-1.1.7.tar.gz", hash = "sha256:90a0afae1fcdc2071914daf8f32673d59ee027c12ae041941043bdede63c993c"},
+]
+
+[[package]]
+name = "dask"
+version = "2024.7.0"
+extras = ["array"]
+requires_python = ">=3.9"
+summary = "Parallel PyData with Task Scheduling"
+groups = ["default"]
+dependencies = [
+    "dask==2024.7.0",
+    "numpy>=1.21",
+]
+files = [
+    {file = "dask-2024.7.0-py3-none-any.whl", hash = "sha256:0f30f218a1fe1c8e9a6ba8add1207088ba9ff049098d4ea4ce045fd5ff7ca914"},
+    {file = "dask-2024.7.0.tar.gz", hash = "sha256:0060bae9a58b5b3ce7e0d97040e903b4d3db09ba49222101cfc40f9834a8a6bc"},
+]
+
+[[package]]
+name = "dask"
+version = "2024.7.0"
+extras = ["dataframe"]
+requires_python = ">=3.9"
+summary = "Parallel PyData with Task Scheduling"
+groups = ["default"]
+dependencies = [
+    "dask-expr<1.2,>=1.1",
+    "dask==2024.7.0",
+    "dask[array]",
+    "pandas>=2.0",
+]
+files = [
+    {file = "dask-2024.7.0-py3-none-any.whl", hash = "sha256:0f30f218a1fe1c8e9a6ba8add1207088ba9ff049098d4ea4ce045fd5ff7ca914"},
+    {file = "dask-2024.7.0.tar.gz", hash = "sha256:0060bae9a58b5b3ce7e0d97040e903b4d3db09ba49222101cfc40f9834a8a6bc"},
 ]
 
 [[package]]
