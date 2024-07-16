@@ -1,16 +1,21 @@
+# import os, sys, shutil
 import warnings
 
 # Suppress all warnings
 warnings.filterwarnings("ignore")
+warnings.filterwarnings("ignore", category=RuntimeWarning, module="dask.array.reductions")
 
 import argparse
 from pathlib import Path
 import math
 
+import time
+
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import xarray as xr
 import pandas as pd
+import numpy as np
 
 import geopandas as gpd
 
@@ -19,9 +24,13 @@ from dask.distributed import Client
 from pyagnps.utils import get_date_from_string, download_simple_file
 from pyagnps import climate
 
+
 # This script is used to generate climate data from pre-aggregated netcdf files
 
 def main(**kwargs):
+
+    begin_time = time.time()
+
    
     # Extracting necessary parameters from kwargs
     from_date = kwargs.get('from_date')
@@ -58,7 +67,7 @@ def main(**kwargs):
     if not output_dir_agg_netcdf.exists():
         output_dir_agg_netcdf.mkdir(parents=True, exist_ok=True)
      
-    if args.nldas_grid_gmt_file is None:
+    if nldas_grid_gmt_file is None:
         # Download from : https://github.com/LucRSquared/pyagnps/
         # and save in the same directory if the file doesn't exist there
 
@@ -69,7 +78,7 @@ def main(**kwargs):
         nldas_grid_gmt_file = download_simple_file(url, dirname)
 
     else:
-        nldas_grid_gmt_file = Path(args.nldas_grid_gmt_file)
+        nldas_grid_gmt_file = Path(nldas_grid_gmt_file)
 
     # if args.output_formats is None:
     #     output_formats = ['parquet']
@@ -153,9 +162,9 @@ def main(**kwargs):
     #         print(f'No grid cells with GMT offset = {gmt_offset}')
     #         continue
         
-    with Client() as client:
+    with Client(processes=True) as client:
 
-        print(client)
+        print("Dashboard address:", client.dashboard_link)
 
         curr_date = start_date # THE LOCAL GMT OFFSET IS ADDED HERE. I NEED TO DO MINUS TO EXPRESS IT IN UTC
         end_date_proc = end_date
@@ -213,13 +222,20 @@ def main(**kwargs):
                 # if grouped_agg_list:
                 #     combined_agg = xr.combine_by_coords(grouped_agg_list, combine_attrs='override')
 
-                for t in combined_agg.time.values:
-                    combined_agg_t = combined_agg.sel(time=t)
-                    daystamp = pd.to_datetime(combined_agg_t.time.values)
-                    filename = f'{netcdf_fileroot}A{daystamp.year}{daystamp.month:02d}{daystamp.day:02d}.020.nc'
-                    combined_agg_t.to_netcdf(output_dir_agg_netcdf / filename, compute=True)
+            for t in combined_agg.time.values:
+                combined_agg_t = combined_agg.sel(time=t)
+                daystamp = pd.to_datetime(combined_agg_t.time.values)
+                filename = f'{netcdf_fileroot}A{daystamp.year}{daystamp.month:02d}{daystamp.day:02d}.020.nc'
+                
+                print(f"Writing {filename}")
+                
+                combined_agg_t.to_netcdf(output_dir_agg_netcdf / filename, compute=True)
             
             curr_date += time_processing_chunk
+
+        elapsed_time = time.time() - begin_time
+
+        print(f'Elapsed time: {elapsed_time} seconds')
 
 
             #####################################
@@ -301,8 +317,7 @@ def main(**kwargs):
 
     # print(f'{datetime.now()} - Done')
 
-
-if __name__ == '__main__':
+def cli_call():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--from_date', '-fd',
@@ -359,3 +374,6 @@ if __name__ == '__main__':
     kwargs = vars(args)
     
     main(**kwargs)
+
+if __name__ == '__main__':
+    cli_call()
