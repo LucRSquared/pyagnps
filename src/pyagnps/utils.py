@@ -7,6 +7,8 @@ import numpy as np
 
 from tqdm import tqdm
 
+import requests
+
 import pandas as pd
 import geopandas as gpd
 import shutil, os, glob, sys
@@ -293,6 +295,39 @@ def find_rows_containing_pattern(file, pattern, skiprows=0):
                 row_nums.append(i)
 
     return row_nums
+
+def download_simple_file(url, out_dir=None, max_attempts=10):
+    """Download a file and save to disk using the pathlib library"""
+
+    if out_dir is None:
+        out_dir = Path().cwd()
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    filename = Path(url).name
+
+    out_file = (out_dir / filename).resolve()
+    if out_file.exists():
+        return out_file
+
+    attempt = 0
+    while attempt < max_attempts:
+        try:
+            response = requests.get(url, stream=True)
+            response.raise_for_status()
+            with out_file.open('wb') as fd:
+                for chunk in response.iter_content(chunk_size=1024 * 1024):
+                    fd.write(chunk)
+            return out_file
+            # break
+        except requests.exceptions.HTTPError as e:
+            print(f'HTTP Error {e.response.status_code} for url {url}, Retrying {attempt}/{max_attempts}')
+            attempt += 1
+            time.sleep(5)
+        except:
+            print(f'\nHTTP Error for url {url}, Retrying {attempt}/{max_attempts}')
+            attempt += 1
+            time.sleep(5)
 
 def download_files_from_url(session, urls, out_dir):
     """

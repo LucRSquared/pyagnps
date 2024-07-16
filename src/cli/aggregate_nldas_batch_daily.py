@@ -1,4 +1,8 @@
-import os, sys, shutil
+import warnings
+
+# Suppress all warnings
+warnings.filterwarnings("ignore")
+
 import argparse
 from pathlib import Path
 import math
@@ -7,7 +11,6 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import xarray as xr
 import pandas as pd
-import numpy as np
 
 import geopandas as gpd
 
@@ -15,78 +18,31 @@ from dask.distributed import Client
 
 from pyagnps.utils import get_date_from_string, download_simple_file
 from pyagnps import climate
-# import gesdisc_get.prepare_nldas_annagnps as pna
 
 # This script is used to generate climate data from pre-aggregated netcdf files
 
-def main():
-    # Parse the command line arguments
+def main(**kwargs):
+   
+    # Extracting necessary parameters from kwargs
+    from_date = kwargs.get('from_date')
+    to_date = kwargs.get('to_date')
+    files_dir = kwargs.get('files_dir')
+    product = kwargs.get('product', 'NLDAS_FORA0125_H.2.0')
+    nldas_grid_gmt_file = kwargs.get('nldas_grid_gmt_file')
+    output_dir_agg_netcdf = kwargs.get('output_dir_agg_netcdf')
+    chunk_frac_tot = kwargs.get('chunk_frac_tot')
+    
 
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument('--from_date', '-fd',
-                        help="From Date/Time Format (lower boundary included) YYYY-MM-DDTHHMM in local time",
-                        type=str)
-
-    parser.add_argument('--to_date', '-td',
-                        help="To Date/Time (upper boundary excluded) Format YYYY-MM-DDTHHMM in local time",
-                        type=str)
-
-    # parser.add_argument('--lats', '-lt', nargs='+',
-    #                     help="List of latitudes to extract (to be paired with matching lons)")
-
-    # parser.add_argument('--lons', '-ln', nargs='+',
-    #                     help="List of longitudes to extract (to be paired with matching lats)")
-
-    parser.add_argument('--product', '-prd',
-                        help=("The NLDAS product to download, default is NLDAS_FORA0125_H.2.0"
-                              "see also: 'https://hydro1.gesdisc.eosdis.nasa.gov/data/NLDAS/'"))
-
-    parser.add_argument('--files_dir', '-f',
-                        help=("Source files directory)"),
-                        type=str)
-
-    parser.add_argument('--nldas_grid_gmt_file', '-grd',
-                        help=("NLDAS Grid GMT File (geopackage with lat, lon, GMT offset). If not provided, the file will be downloaded."),
-                        type=str)
-
-    # parser.add_argument('--output_dir', '-o',
-    #                     help=("Output Directory for climate files "
-    #                         "(default ./nldas-<from_date>.to.<to_date>"),
-    #                     type=str,
-    #                     required=False)
-
-    parser.add_argument('--output_dir_agg_netcdf', '-onetcdf',
-                        help=("Output Directory for output aggregated netcdf files "
-                            "(default ./nldas_netcdf-<from_date>.to.<to_date>"),
-                        type=str,
-                        required=False)
-
-    # parser.add_argument('--output_formats', '-of', nargs='+',
-    #                     help=("List of Output Formats"
-    #                         "(default parquet"),
-    #                     required=False)
-
-    parser.add_argument('--chunk_frac_tot', '-ch',
-                        help=("Chunk fraction of total data"),
-                        type=float,
-                        required=False)
-
-
-    args = parser.parse_args()
-
-    if args.product is None:
+    if product is None:
         product = 'NLDAS_FORA0125_H.2.0'
-    else:
-        product = args.product
 
     netcdf_fileroot = product.replace('H.2.0', 'D.')
-    product_daily = product.replace('H.2.0', 'D.2.0')
+    # product_daily = product.replace('H.2.0', 'D.2.0')
 
-    if args.files_dir is None:
+    if files_dir is None:
         raise ValueError('Missing source files directory')
     else:
-        files_dir = Path(args.files_dir)
+        files_dir = Path(files_dir)
 
     # if args.output_dir is None:
     #     default_output_dir = Path().cwd() / f'nldas-{start_date.year}{start_date.month:02d}{start_date.day:02d}-{end_date.year}{end_date.month:02d}{end_date.day:02d}'
@@ -94,10 +50,10 @@ def main():
     # else:
     #     output_dir = Path(args.output_dir)
 
-    if args.output_dir_agg_netcdf is None:
+    if output_dir_agg_netcdf is None:
         output_dir_agg_netcdf = files_dir / f'nldas-{start_date.year}{start_date.month:02d}{start_date.day:02d}-{end_date.year}{end_date.month:02d}{end_date.day:02d}_DAILY'
     else:
-        output_dir_agg_netcdf = Path(args.output_dir_agg_netcdf)
+        output_dir_agg_netcdf = Path(output_dir_agg_netcdf)
 
     if not output_dir_agg_netcdf.exists():
         output_dir_agg_netcdf.mkdir(parents=True, exist_ok=True)
@@ -120,10 +76,10 @@ def main():
     # else:
     #     output_formats = args.output_formats
 
-    if args.chunk_frac_tot is None:
+    if chunk_frac_tot is None:
         chunk_frac_tot = 1.0
     else:
-        chunk_frac_tot = args.chunk_frac_tot
+        chunk_frac_tot = chunk_frac_tot
 
     # lats = args.lats
     # lons = args.lons
@@ -153,8 +109,8 @@ def main():
     def get_gmt_offset(lon, lat):
         return gmt_offset_dict.get((lon, lat), None)  # Use None or a default value if no match is found
 
-    start_date = get_date_from_string(args.from_date, outputtype=datetime)
-    end_date = get_date_from_string(args.to_date, outputtype=datetime)
+    start_date = get_date_from_string(from_date, outputtype=datetime)
+    end_date = get_date_from_string(to_date, outputtype=datetime)
 
 
     # Processing chunk size (in days)
@@ -347,4 +303,59 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--from_date', '-fd',
+                        help="From Date/Time Format (lower boundary included) YYYY-MM-DDTHHMM in local time",
+                        type=str)
+
+    parser.add_argument('--to_date', '-td',
+                        help="To Date/Time (upper boundary excluded) Format YYYY-MM-DDTHHMM in local time",
+                        type=str)
+
+    # parser.add_argument('--lats', '-lt', nargs='+',
+    #                     help="List of latitudes to extract (to be paired with matching lons)")
+
+    # parser.add_argument('--lons', '-ln', nargs='+',
+    #                     help="List of longitudes to extract (to be paired with matching lats)")
+
+    parser.add_argument('--product', '-prd',
+                        help=("The NLDAS product to download, default is NLDAS_FORA0125_H.2.0"
+                              "see also: 'https://hydro1.gesdisc.eosdis.nasa.gov/data/NLDAS/'"))
+
+    parser.add_argument('--files_dir', '-f',
+                        help=("Source files directory)"),
+                        type=str)
+
+    parser.add_argument('--nldas_grid_gmt_file', '-grd',
+                        help=("NLDAS Grid GMT File (geopackage with lat, lon, GMT offset). If not provided, the file will be downloaded."),
+                        type=str)
+
+    # parser.add_argument('--output_dir', '-o',
+    #                     help=("Output Directory for climate files "
+    #                         "(default ./nldas-<from_date>.to.<to_date>"),
+    #                     type=str,
+    #                     required=False)
+
+    parser.add_argument('--output_dir_agg_netcdf', '-onetcdf',
+                        help=("Output Directory for output aggregated netcdf files "
+                            "(default ./nldas_netcdf-<from_date>.to.<to_date>"),
+                        type=str,
+                        required=False)
+
+    # parser.add_argument('--output_formats', '-of', nargs='+',
+    #                     help=("List of Output Formats"
+    #                         "(default parquet"),
+    #                     required=False)
+
+    parser.add_argument('--chunk_frac_tot', '-ch',
+                        help=("Chunk fraction of total data"),
+                        type=float,
+                        required=False)
+
+
+    args = parser.parse_args()
+
+    kwargs = vars(args)
+    
+    main(**kwargs)
