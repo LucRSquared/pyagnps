@@ -51,6 +51,7 @@ dependencies = [
     "psycopg2>=2.9.6 ; sys_platform == 'win32'",
     "geoalchemy2>=0.15.1",
     "bottleneck>=1.4.0",
+    "dask-jobqueue>=0.8.5",
 ]
 requires-python = ">=3.9"
 readme = "README.md"

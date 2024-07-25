@@ -1,11 +1,11 @@
 """
 TopAGNPS related functions
 """
-import warnings
+# import warnings
 try:
     from osgeo import gdal
 except: 
-    warnings.warn("Please install GDAL (see install_gdal.py). The topagnps module will not work without it")
+    print("Please install GDAL (see install_gdal.py). The topagnps module will not work without it")
 
 
 # from importlib.resources import path

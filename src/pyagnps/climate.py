@@ -1,5 +1,7 @@
 import warnings
 
+import itertools
+
 from pathlib import Path
 import pynldas2
 import py3dep
@@ -11,6 +13,7 @@ from timezonefinder import TimezoneFinder
 
 import numpy as np
 import pandas as pd
+import geopandas as gpd
 
 import xarray as xr
 
@@ -40,7 +43,8 @@ class ClimateAnnAGNPSCoords:
     ):
         """
         ## Positional arguments:
-        - coords: (longitude, latitude) in EPSG:4326 projection
+        - coords: (longitude, latitude) in EPSG:4326 projection or
+                  list of (longitude, latitude) [[lon1, lat1], [lon2, lat2], ...] in EPSG:4326 projection
         - start: Start date YYYY-MM-DD (assumes it starts at Midnight)
                  Can specify hour too: YYYY-MM-DDTHH
                  The data point returned will cover the time period YYYY-MM-DDTHH to YYYY-MM-DDT HH+1
@@ -71,7 +75,7 @@ class ClimateAnnAGNPSCoords:
         )
 
     def update_coords_start_end_dates(self,
-                               coords: tuple = None,
+                               coords = None,
                                start: str = None,
                                end: str = None,
                                date_mode: str = "local"):
@@ -90,6 +94,7 @@ class ClimateAnnAGNPSCoords:
                              in the coords local time zone
                      "utc" will assume that the start and end dates are provided in
                            UTC timezone
+                     "daily" will assume that the times given are daily in local 24hours days
         """
 
         if not coords:
@@ -97,6 +102,9 @@ class ClimateAnnAGNPSCoords:
             # If no coords were provided to begin with we just keep None for coords
             # and assume the dates are UTC
             if coords is None:
+                LON_ALL = np.arange(-124.9375, -67.0625+0.125, 0.125)
+                LAT_ALL = np.arange(25.0625,    52.9375+0.125, 0.125)
+                coords = list(itertools.product(LON_ALL, LAT_ALL))
                 date_mode = "utc"
 
         if not start:
@@ -114,9 +122,25 @@ class ClimateAnnAGNPSCoords:
 
             self.start_input = self.start.tz_localize(None)
             self.end_input = self.end.tz_localize(None)
+        
+        elif date_mode.lower() == "daily":
+            self.start = pd.Timestamp(start)
+            self.end = pd.Timestamp(end)
+            self.timezone = "local-24h-day"
+
+            self.start_input = self.start.tz_localize(None)
+            self.end_input = self.end.tz_localize(None)
 
         elif date_mode.lower() == "local":
             # Identify timezone:
+            if isinstance(self.coords, list):
+                if len(self.coords) > 1:
+                    raise Exception(
+                        "Date mode 'local' is only available for single point query"
+                    )
+                elif len(self.coords) == 1:
+                    coords = self.coords[0]
+
             lon, lat = coords
             tf = TimezoneFinder()
             tmz_name = tf.timezone_at(lng=lon, lat=lat)
@@ -347,6 +371,34 @@ class ClimateAnnAGNPSCoords:
 
         return df_daily
 
+    def read_nldas_daily_generate_climate_daily(self, path_to_daily_files, augment=True, **kwargs):
+        """
+        Read and generate AnnAGNPS ready climate daily files from NLDAS-2 data
+
+        # Arguments:
+        - path_to_daily_files: str, path to the folder containing the daily files
+        - augment: bool, whether to augment the data with the additional AnnAGNPS required variables
+        """
+
+        # ### Key-Value Arguments:
+        # - output_dir : str, path optional
+        #        Path to write the output file, by default current working directory
+        # - saveformat : str, optional
+        #     Format to save the output file, by default None, also accepts 'parquet' and 'csv'. 
+        #     If None it will not write a file
+        # - float_format : str, optional, default= '%.3f' for printing csv file
+        # - return_dataframes : bool, optional default False
+
+        # # Outputs
+        # - results_df : returns a dictionary with dataframes if return_dataframes = True. The keys are (x,y) tuples
+        #                default is False
+
+        self.read_nldas_daily_data(path_to_daily_files, augment=augment)
+        # self._select_nldas_file_coords_timeslice_data()
+        results_df = self.generate_annagnps_daily_climate_data_from_nldas_daily(**kwargs)
+
+        return results_df
+
     def read_cmip6_data(self, cmip_files):
         """
         Reads CMIP6 data files from the ScenarioMIP Activity and "day" table.
@@ -437,6 +489,35 @@ class ClimateAnnAGNPSCoords:
                     f"Variable {var} missing from input files, make sure all required input files are provided"
                 )
             
+    def read_nldas_daily_data(self, path_to_daily_files, augment=True):
+        """ Read NLDAS-2 daily data from files downloaded from GESDISC. 
+
+        These files have the same structure as the hourly files but were pre aggregated
+        at a daily scale (i.e. one file per day).
+
+        # Arguments:
+        - path_to_daily_files: str, path to the folder containing the daily files
+        - augment: bool, whether to augment the data with the additional AnnAGNPS required variables
+        """
+
+        def preprocess(ds):
+            try:
+                del ds['spatial_ref']
+            except:
+                pass
+            return ds
+
+        self.ds = xr.open_mfdataset(
+            path_to_daily_files.glob("*.nc"),
+            combine="nested",
+            concat_dim="time",
+            preprocess=preprocess,
+            chunks={"time": "auto"}, parallel=True
+        )
+
+        if augment:
+            self.ds = augment_forcing_data(self.ds)
+            
     def generate_annagnps_daily_climate_data_cmip5_maca(self, **kwargs):
         ### Key-Value Arguments:
         """
@@ -470,7 +551,184 @@ class ClimateAnnAGNPSCoords:
         df_daily = self._generate_climate_file_daily(use_resampled=False, **kwargs)
 
         return df_daily
+    
+    def _select_nldas_file_coords_timeslice_data(self):
+        """
+        Slices the NLDAS-2 xarray.DataSet for the coords
+        """
 
+        if not self.coords:
+            raise Exception("Coordinates are missing. Please provide coords!")
+
+        longitudes = [lon for lon, _ in self.coords]
+        latitudes  = [lat for _, lat in self.coords]
+
+        variables_to_keep_and_rename = {"PotEvap": "Potential_ET",
+                                        "Rainf": "Precip", 
+                                        "SWdown": "Solar_Radiation",
+                                        "Tdew": "Dew_Point", 
+                                        "wind_speed": "Wind_Speed", 
+                                        "wind_direction": "Wind_Direction", 
+                                        "Tmin": "Min_Air_Temperature", 
+                                        "Tmax": "Max_Air_Temperature"}
+        
+        # Throw an error if the self.start and self.end (included) are not in the dataset
+        if self.ds.time.values.min() > pd.to_datetime(self.start):
+            raise Exception(f"Start date {self.start} beyond dataset range")
+        if self.ds.time.values.max() < pd.to_datetime(self.end):
+            raise Exception(f"End date {self.end} beyond dataset range")
+
+        self.ds_select = self.ds.sel(lat=latitudes, lon=longitudes, method="nearest").sel(
+            time=slice(self.start, self.end)
+        )[variables_to_keep_and_rename.keys()]
+
+        # Rename columns to match AnnAGNPS
+        self.ds_select = self.ds_select.rename_vars(variables_to_keep_and_rename)
+        self.coords_actual = self.coords
+
+    def generate_annagnps_daily_climate_data_from_nldas_daily(self, **kwargs):
+        """
+        Generate climate_daily.csv AnnAGNPS file/DataFrame from NLDAS output files
+
+        ### Key-Value Arguments:
+        - output_dir : str, path optional
+               Path to write the output file, by default current working directory
+        - saveformat : str, optional
+            Format to save the output file, by default None, also accepts 'parquet' and 'csv'. 
+            If None it will not write a file
+        - float_format : str, optional, default= '%.3f' for printing csv file
+        - return_dataframes : bool, optional default False
+
+
+        # Outputs
+        - results_df : returns a dictionary with dataframes if return_dataframes = True. The keys are (x,y) tuples
+                       default is False
+        """
+
+        # Unpack kwargs
+        if "output_dir" in kwargs:
+            output_dir = kwargs["output_dir"]
+        else:
+            output_dir = Path.cwd()
+
+        if "saveformat" in kwargs:
+            saveformat = kwargs["saveformat"]
+        else:
+            saveformat = None
+
+        if "float_format" in kwargs:
+            float_format = kwargs["float_format"]
+        else:
+            float_format = "%.3f"
+
+        if "return_dataframes" in kwargs:
+            return_dataframes = kwargs["return_dataframes"]
+        else:
+            return_dataframes = False
+
+        self._select_nldas_file_coords_timeslice_data()
+
+
+        if not output_dir.exists() and (saveformat is not None):
+            output_dir.mkdir(parents=True, exist_ok=True)
+
+        results_df = {}
+
+        for lon, lat in itertools.product(self.ds_select.lon.values, self.ds_select.lat.values):
+            
+            ds_curr = self.ds_select.sel(lon=lon, lat=lat, method="nearest")
+
+            df = ds_curr.to_dataframe()
+
+            # Readjust index so that it matches the input
+            df.index = df.index - (df.index[0] - self.start_input)
+
+            # Get the time series for the nearest grid cell
+            df["Day"] = df.index.day
+            df["Month"] = df.index.month
+            df["Year"] = df.index.year
+
+            # Convert temperatures to Celsius
+            df["Max_Air_Temperature"] = df["Max_Air_Temperature"] - 273.15
+            df["Min_Air_Temperature"] = df["Min_Air_Temperature"] - 273.15            
+            df["Dew_Point"] = df["Dew_Point"] - 273.15
+
+            
+
+            # Add blank columns for the other variables
+            df["Sky_Cover"] = None
+            df["Storm_Type_ID"] = None
+            df["Actual_ET"] = None
+            df["Actual_EI"] = None
+
+            # We use SI units because we respect ourserlves
+            df["Input_Units_Code"] = 1
+
+
+            # Reorder columns
+            df = df[
+                [
+                    "Month",
+                    "Day",
+                    "Year",
+                    "Max_Air_Temperature",
+                    "Min_Air_Temperature",
+                    "Precip",
+                    "Dew_Point",
+                    "Sky_Cover",
+                    "Wind_Speed",
+                    "Wind_Direction",
+                    "Solar_Radiation",
+                    "Storm_Type_ID",
+                    "Potential_ET",
+                    "Actual_ET",
+                    "Actual_EI",
+                    "Input_Units_Code",
+                ]
+            ]
+
+            # Optimize memory usage
+            df = df.astype(
+                {
+                    "Month": "int8",
+                    "Day": "int8",
+                    "Year": "int16",
+                    "Max_Air_Temperature": "float32",
+                    "Min_Air_Temperature": "float32",
+                    "Precip": "float32",
+                    "Dew_Point": "float32",
+                    # 'Sky_Cover': 'float32',
+                    "Wind_Speed": "float32",
+                    "Wind_Direction": "float32",
+                    "Solar_Radiation": "float32",
+                    # 'Storm_Type_ID': 'int8',
+                    "Potential_ET": "float32",
+                    # 'Actual_ET': 'float32',
+                    # 'Actual_EI': 'float32',
+                    "Input_Units_Code": "int8",
+                }
+            )
+
+            _, _, unique_id = get_grid_position(lon, lat)
+
+            if return_dataframes:
+                results_df[unique_id] = {
+                                            'climate_data' : df.copy(deep=True),
+                                            'coords' : (lon, lat)
+                                        }
+
+
+            output_filepath = output_dir / f"climate_daily_{unique_id}.{saveformat}"
+            if saveformat == "csv":
+                df.to_csv(output_filepath, index=False, float_format=float_format)
+            elif saveformat == "parquet":
+                df.to_parquet(output_filepath, index=True)
+            elif saveformat is None:
+                pass
+            else:
+                raise ValueError(f"Invalid saveformat: {saveformat}")
+
+        return results_df
 
     def _select_cmip_coords_timeslice_data(self):
         """
@@ -1622,3 +1880,63 @@ def aggregate_forcing_data_daily(ds, start_date=None, end_date_or_timedelta=None
     agg_data.attrs['time_definition'] = 'aggregated_daily' 
 
     return agg_data
+
+def get_grid_position(lon, lat, 
+                      lon_min=-124.9375, lon_max=-67.0625, 
+                      lat_min=25.0625, lat_max=52.9375, 
+                      total_columns=464, total_rows=224):
+    """
+    Calculate the grid position of a given longitude and latitude within a specified range.
+    Defaults to NLDAS-2 grid
+
+    Args:
+        lon (float): The longitude value.
+        lat (float): The latitude value.
+        lon_min (float, optional): The minimum longitude value of the range. Defaults to -124.9375.
+        lon_max (float, optional): The maximum longitude value of the range. Defaults to -67.0625.
+        lat_min (float, optional): The minimum latitude value of the range. Defaults to 25.0625.
+        lat_max (float, optional): The maximum latitude value of the range. Defaults to 52.9375.
+        total_columns (int, optional): The total number of columns in the grid. Defaults to 464.
+        total_rows (int, optional): The total number of rows in the grid. Defaults to 224.
+
+    Returns:
+        tuple: A tuple containing the column, row, and unique ID of the grid position.
+            - column (int): The column index of the grid position.
+            - row (int): The row index of the grid position.
+            - unique_id (int): The unique ID of the grid position.
+    """
+    
+    # Calculate the step size for longitude and latitude
+    lon_step = (lon_max - lon_min) / total_columns
+    lat_step = (lat_max - lat_min) / total_rows
+    
+    # Calculate the column and row
+    column = int((lon - lon_min) / lon_step) + 1
+    row = int((lat - lat_min) / lat_step) + 1
+
+    # Calculate the unique ID
+    unique_id = (row - 1) * total_columns + column
+    
+    return column, row, unique_id
+
+def prepare_annagnps_climate_for_db(clm, station_id, xgrid, ygrid):
+    """
+    Prepare climate data for insertion into the climate_nldas2 table
+    * Inputs:
+    - clm: pandas.DataFrame in AnnAGNPS format
+    - station_id: str
+    - xgrid: float longitude in EPSG:4326
+    - ygrid: float latitude in EPSG:4326
+    * Output:
+    - gdf_clm: GeoDataFrame in EPSG:4326
+    """
+    clm.columns = clm.columns.str.lower()
+    clm['station_id'] = station_id
+
+    gdf_clm = gpd.GeoDataFrame(clm, geometry=[Point(xgrid, ygrid)] * len(clm), crs="EPSG:4326")
+    gdf_clm.rename(columns={'geometry': 'geom'}, inplace=True)
+    gdf_clm.index.name = "date"
+
+    gdf_clm = gdf_clm.set_geometry('geom')
+
+    return gdf_clm

@@ -1,8 +1,8 @@
-import warnings
+# import warnings
 try:
     from osgeo import gdal
 except: 
-    warnings.warn("Please install GDAL (see install_gdal.py). The subannagnps module will not work without it")
+    print("Please install GDAL (see install_gdal.py). The subannagnps module will not work without it")
 
 import pandas as pd
 import numpy as np
