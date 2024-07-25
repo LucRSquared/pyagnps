@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.2"
-content_hash = "sha256:fb373b75eef9abc3d50c37a2be695e426ee41d457e30e32702ee12fa0e58dc01"
+content_hash = "sha256:c3da8fa0dd454b0d1b9dda3d8fbbe1ddc86da5ae10ffa24517393c1bc33a5596"
 
 [[package]]
 name = "affine"
@@ -1091,6 +1091,21 @@ dependencies = [
 files = [
     {file = "dask_expr-1.1.7-py3-none-any.whl", hash = "sha256:6f45468499b50839e9d9a43f599f7f70a50f50048bce93557c2dea24bfcad3bb"},
     {file = "dask_expr-1.1.7.tar.gz", hash = "sha256:90a0afae1fcdc2071914daf8f32673d59ee027c12ae041941043bdede63c993c"},
+]
+
+[[package]]
+name = "dask-jobqueue"
+version = "0.8.5"
+requires_python = ">=3.8"
+summary = "Deploy Dask on job queuing systems like PBS, Slurm, SGE or LSF"
+groups = ["default"]
+dependencies = [
+    "dask>=2022.02.0",
+    "distributed>=2022.02.0",
+]
+files = [
+    {file = "dask-jobqueue-0.8.5.tar.gz", hash = "sha256:f6923f9d7ff894b96efbf706118b2cd37fd37751d567e91c22dfd3e2eaa93202"},
+    {file = "dask_jobqueue-0.8.5-py2.py3-none-any.whl", hash = "sha256:96a51083b93e5e66354bdb337840663202e45b20930071edeb41af07bbd5af26"},
 ]
 
 [[package]]
