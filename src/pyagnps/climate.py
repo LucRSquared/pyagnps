@@ -15,13 +15,18 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 
+from sqlalchemy import URL, create_engine, text as sql_text
+
+from shapely.geometry import Point
+
 import xarray as xr
 
+from tqdm import tqdm
 import time
 from datetime import datetime, timedelta, timezone
 from dateutil.relativedelta import relativedelta
 
-from .utils import get_date_from_string
+from .utils import get_date_from_string, month_difference
 
 from .constants import _NLDAS_PRODUCTS_20, _NLDAS_PRODUCTS_002
 # Do not create
@@ -44,7 +49,7 @@ class ClimateAnnAGNPSCoords:
         """
         ## Positional arguments:
         - coords: (longitude, latitude) in EPSG:4326 projection or
-                  list of (longitude, latitude) [[lon1, lat1], [lon2, lat2], ...] in EPSG:4326 projection
+                  list of (longitude, latitude) [(lon1, lat1), (lon2, lat2), ...] in EPSG:4326 projection
         - start: Start date YYYY-MM-DD (assumes it starts at Midnight)
                  Can specify hour too: YYYY-MM-DDTHH
                  The data point returned will cover the time period YYYY-MM-DDTHH to YYYY-MM-DDT HH+1
@@ -371,12 +376,12 @@ class ClimateAnnAGNPSCoords:
 
         return df_daily
 
-    def read_nldas_daily_generate_climate_daily(self, path_to_daily_files, augment=True, **kwargs):
+    def read_nldas_daily_generate_climate_daily(self, path_nldas_daily_files, augment=True, **kwargs):
         """
         Read and generate AnnAGNPS ready climate daily files from NLDAS-2 data
 
         # Arguments:
-        - path_to_daily_files: str, path to the folder containing the daily files
+        - path_nldas_daily_files: str, path to the folder containing the daily files
         - augment: bool, whether to augment the data with the additional AnnAGNPS required variables
         """
 
@@ -393,7 +398,7 @@ class ClimateAnnAGNPSCoords:
         # - results_df : returns a dictionary with dataframes if return_dataframes = True. The keys are (x,y) tuples
         #                default is False
 
-        self.read_nldas_daily_data(path_to_daily_files, augment=augment)
+        self.read_nldas_daily_data(path_nldas_daily_files, augment=augment)
         # self._select_nldas_file_coords_timeslice_data()
         results_df = self.generate_annagnps_daily_climate_data_from_nldas_daily(**kwargs)
 
@@ -489,14 +494,14 @@ class ClimateAnnAGNPSCoords:
                     f"Variable {var} missing from input files, make sure all required input files are provided"
                 )
             
-    def read_nldas_daily_data(self, path_to_daily_files, augment=True):
+    def read_nldas_daily_data(self, path_nldas_daily_files, augment=True):
         """ Read NLDAS-2 daily data from files downloaded from GESDISC. 
 
         These files have the same structure as the hourly files but were pre aggregated
         at a daily scale (i.e. one file per day).
 
         # Arguments:
-        - path_to_daily_files: str, path to the folder containing the daily files
+        - path_nldas_daily_files: str, path to the folder containing the daily files
         - augment: bool, whether to augment the data with the additional AnnAGNPS required variables
         """
 
@@ -507,8 +512,10 @@ class ClimateAnnAGNPSCoords:
                 pass
             return ds
 
+        path_nldas_daily_files = Path(path_nldas_daily_files)
+
         self.ds = xr.open_mfdataset(
-            path_to_daily_files.glob("*.nc"),
+            path_nldas_daily_files.glob("*.nc"),
             combine="nested",
             concat_dim="time",
             preprocess=preprocess,
@@ -560,8 +567,8 @@ class ClimateAnnAGNPSCoords:
         if not self.coords:
             raise Exception("Coordinates are missing. Please provide coords!")
 
-        longitudes = [lon for lon, _ in self.coords]
-        latitudes  = [lat for _, lat in self.coords]
+        longitudes = np.unique(np.sort([lon for lon, _ in self.coords]))
+        latitudes  = np.unique(np.sort([lat for _, lat in self.coords]))
 
         variables_to_keep_and_rename = {"PotEvap": "Potential_ET",
                                         "Rainf": "Precip", 
@@ -596,15 +603,19 @@ class ClimateAnnAGNPSCoords:
         - saveformat : str, optional
             Format to save the output file, by default None, also accepts 'parquet' and 'csv'. 
             If None it will not write a file
+        - engine : sqlalchemy.engine, optional
+            SQLAlchemy engine to connect to the database, by default None
+        - db_table_name : str, optional by default 'climate_nldas2'
+        - MAXITER_SINGLE_STATION : int, optional by default 10. Number of attempts to upload data to database for a single station
         - float_format : str, optional, default= '%.3f' for printing csv file
         - return_dataframes : bool, optional default False
 
 
         # Outputs
-        - results_df : returns a dictionary with dataframes if return_dataframes = True. The keys are (x,y) tuples
-                       default is False
-        """
+        - results_df : returns a dictionary with dataframes if return_dataframes = True. 
+                       The keys are the station_id of each NDLAS-2 cell
 
+        """
         # Unpack kwargs
         if "output_dir" in kwargs:
             output_dir = kwargs["output_dir"]
@@ -626,6 +637,21 @@ class ClimateAnnAGNPSCoords:
         else:
             return_dataframes = False
 
+        if "engine" in kwargs:
+            engine = kwargs["engine"]
+        else:
+            engine = None
+
+        if "db_table_name" in kwargs:
+            db_table_name = kwargs["db_table_name"]
+        else:
+            db_table_name = "climate_nldas2"
+
+        if "MAXITER_SINGLE_STATION" in kwargs:
+            MAXITER_SINGLE_STATION = kwargs["MAXITER_SINGLE_STATION"]
+        else:
+            MAXITER_SINGLE_STATION = 10
+
         self._select_nldas_file_coords_timeslice_data()
 
 
@@ -634,7 +660,7 @@ class ClimateAnnAGNPSCoords:
 
         results_df = {}
 
-        for lon, lat in itertools.product(self.ds_select.lon.values, self.ds_select.lat.values):
+        for lon, lat in tqdm(list(itertools.product(self.ds_select.lon.values, self.ds_select.lat.values))):
             
             ds_curr = self.ds_select.sel(lon=lon, lat=lat, method="nearest")
 
@@ -709,20 +735,65 @@ class ClimateAnnAGNPSCoords:
                 }
             )
 
-            _, _, unique_id = get_grid_position(lon, lat)
+            _, _, station_id = get_grid_position(lon, lat)
 
             if return_dataframes:
-                results_df[unique_id] = {
+                results_df[station_id] = {
                                             'climate_data' : df.copy(deep=True),
                                             'coords' : (lon, lat)
                                         }
 
 
-            output_filepath = output_dir / f"climate_daily_{unique_id}.{saveformat}"
+            output_filepath = output_dir / f"climate_daily_{station_id}.{saveformat}"
             if saveformat == "csv":
                 df.to_csv(output_filepath, index=False, float_format=float_format)
+
             elif saveformat == "parquet":
                 df.to_parquet(output_filepath, index=True)
+
+            elif saveformat == "database":
+                # Get available dates already in the database for this station
+                available_dates = get_available_dates_for_station(station_id, engine, table=db_table_name)
+
+                # Get missing dates that need to be added
+                missing_dates = get_missing_dates(available_dates, self.start_input, self.end_input)
+
+                for iter_station in range(MAXITER_SINGLE_STATION):
+                    try:
+                        # Select and concatenate climate data for each continuous period
+                        gdf_clm = None
+                        continuous_periods = find_continuous_periods(missing_dates)
+
+                        for period in continuous_periods:
+                            start, end = period[0], period[-1]
+
+                            # Filter df to the current period
+                            df_period = df[(df.index >= start) & (df.index <= end)]
+
+                            if len(df_period) == 0:
+                                continue
+
+                            gdf_clm_period = prepare_annagnps_climate_for_db(df_period, station_id, lon, lat)
+                            
+                            if gdf_clm is None:
+                                gdf_clm = gdf_clm_period
+                            else:
+                                gdf_clm = pd.concat([gdf_clm, gdf_clm_period])
+
+                        if gdf_clm is None:
+                            print(f"0 rows to insert for station {station_id}.")
+                        else:
+                            # print(f"Inserting {len(gdf_clm)} rows for station {station_id}.")
+                            insert_climate_nldas2(gdf_clm, engine, table=db_table_name)
+                        break
+
+                    except Exception as e:
+                        print(f"Station {station_id}, x = {lon}, y = {lat}: Failed with error: {e}: RETRYING ({iter_station+1}/{MAXITER_SINGLE_STATION})")
+                        time.sleep(1)
+
+
+                        break
+
             elif saveformat is None:
                 pass
             else:
@@ -1662,7 +1733,6 @@ def variable_agg_func_forNOAH(x):
     else:
         warnings.warn(f"Unexpected variable name, doesn't know what to do with {x.name}, sum, mean, something else?")
     
-
 def aggregate_forcing_data(ds, start_date=None, end_date_or_timedelta=None, agg_func=variable_agg_func_forA):
     """Aggregate forcing data for a given period.
 
@@ -1903,22 +1973,42 @@ def get_grid_position(lon, lat,
         tuple: A tuple containing the column, row, and unique ID of the grid position.
             - column (int): The column index of the grid position.
             - row (int): The row index of the grid position.
-            - unique_id (int): The unique ID of the grid position.
+            - station_id (int): The unique ID of the grid position.
     """
     
     # Calculate the step size for longitude and latitude
-    lon_step = (lon_max - lon_min) / total_columns
-    lat_step = (lat_max - lat_min) / total_rows
+    lon_step = (lon_max - lon_min) / (total_columns - 1)
+    lat_step = (lat_max - lat_min) / (total_rows - 1)
     
     # Calculate the column and row
     column = int((lon - lon_min) / lon_step) + 1
     row = int((lat - lat_min) / lat_step) + 1
 
     # Calculate the unique ID
-    unique_id = (row - 1) * total_columns + column
+    station_id = (row - 1) * total_columns + column
     
-    return column, row, unique_id
+    return column, row, station_id
 
+def lon_lat_from_station_id(station_id, 
+                            lon_min=-124.9375, lon_max=-67.0625, 
+                            lat_min=25.0625, lat_max=52.9375, 
+                            total_columns=464, total_rows=224):
+
+    # Calculate the step size for longitude and latitude
+    lon_step = (lon_max - lon_min) / (total_columns - 1)
+    lat_step = (lat_max - lat_min) / (total_rows - 1)
+
+    row = max((station_id // total_columns), 1)
+    column = total_columns if (station_id % total_columns) == 0 else (station_id % total_columns)
+
+    # Calculate the longitude and latitude
+    lon = lon_min + (column - 1) * lon_step
+    lat = lat_min + (row - 1) * lat_step
+
+    return lon, lat
+
+
+# METHODS TO INTERACT WITH THE DATABASE
 def prepare_annagnps_climate_for_db(clm, station_id, xgrid, ygrid):
     """
     Prepare climate data for insertion into the climate_nldas2 table
@@ -1940,3 +2030,97 @@ def prepare_annagnps_climate_for_db(clm, station_id, xgrid, ygrid):
     gdf_clm = gdf_clm.set_geometry('geom')
 
     return gdf_clm
+
+def insert_climate_nldas2(gdf_clm, engine, table="climate_nldas2", if_exists="append"):
+    gdf_clm.to_postgis(table, engine, if_exists=if_exists, index=True)
+
+def climate_table_has_station(station_name, engine, table="climate_nldas2"):
+    """This function checks if the table contains data for the given station. Also return the maximum and minimum date in the table
+    Inputs:
+    - station_name: str
+    - engine: sqlalchemy.engine
+    - table: str
+    Outputs:
+    - has_data: bool
+    - min_date: datetime.date
+    - max_date: datetime.date
+    """
+    query = f"""
+        SELECT MIN(date) AS min_date, MAX(date) AS max_date
+        FROM {table}
+        WHERE station_id = '{station_name}'
+        GROUP BY station_id
+    """
+    with engine.connect() as connection:
+        result = connection.execute(sql_text(query))
+        
+        # Check if the query returned any rows
+        if result.rowcount > 0:
+            row = result.fetchone()
+            min_date = row[0]
+            max_date = row[1]
+            return True, min_date, max_date
+        else:
+            return False, None, None
+
+def get_available_dates_for_station(station_name, engine, table="climate_nldas2"):
+    """This function returns a DataFrame with the available dates for the given station stored in the table
+    Inputs:
+    - station_name: str
+    - engine: sqlalchemy.engine
+    - table: str
+    Outputs:
+    - df: pandas.DataFrame
+    """
+    query = f"""
+        SELECT DISTINCT date
+        FROM {table}
+        WHERE station_id = '{station_name}'
+        ORDER BY date
+    """
+    with engine.connect() as connection:
+        df = pd.read_sql(sql_text(query), connection)
+        return df
+    
+def find_continuous_periods(missing_dates):
+# Find continuous periods of dates
+    continuous_periods = []
+    current_period = []
+    for date in missing_dates:
+        if not current_period or (date - current_period[-1]).astype('timedelta64[D]').astype(int) == 1:
+            current_period.append(date)
+        else:
+            continuous_periods.append(current_period)
+            current_period = [date]
+    if current_period:
+        continuous_periods.append(current_period)
+
+    return continuous_periods
+    
+def get_missing_dates(df, start_date, end_date):
+    """ Creates a start_date to end_date data range and returns the dates that are missing from the dataframe"""
+    
+    # Ensure the 'date' column is in datetime format
+    df['date'] = pd.to_datetime(df['date'])
+    
+    # Create a date range from start_date to end_date
+    date_range = pd.date_range(start=start_date, end=end_date)
+    
+    # Get the set of dates in the dataframe
+    df_dates = set(df['date'])
+    
+    # Find dates in the date_range that are not in df_dates
+    missing_dates = [np.datetime64(date) for date in date_range if date not in df_dates]
+    
+    return missing_dates
+
+def filter_climate_data(gdf_clm, missing_dates):
+    """Returns a subset of gdf_clm that is outside the min_date and max_date interval
+
+    gdf_clm: GeoDataFrame
+    missing_dates: list of np.datetime64
+    """    
+    # Filter out rows where the date is within the min_date and max_date interval
+    filtered_gdf = gdf_clm[gdf_clm.index.isin(missing_dates)].copy()
+
+    return filtered_gdf
