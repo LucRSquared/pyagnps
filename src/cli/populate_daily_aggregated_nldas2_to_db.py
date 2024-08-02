@@ -89,20 +89,20 @@ def main(START_DATE, END_DATE, coords, path_nldas_daily_files, path_to_creds, db
                                                             start=START_DATE,
                                                             end=END_DATE,
                                                             date_mode="daily")
-            
+
             nldas_clm_daily.read_nldas_daily_data(path_nldas_daily_files=path_nldas_daily_files)
-            
+
             nldas_clm_daily.generate_annagnps_daily_climate_data_from_nldas_daily(
                                                             saveformat="database",
                                                             engine=engine,
                                                             db_table_name=db_table_name,
                                                             return_dataframes=False,
             )
+            break
 
         except Exception as e:
             print(f"Failed to process {START_DATE} to {END_DATE}: Attempt {iter_global+1} of {MAXITER_GLOBAL}. Error: {e}")
 
-        break
     print(f"All done! for {START_DATE} to {END_DATE}")       
 
 def open_creds_dict(path_to_json_creds):
@@ -167,7 +167,6 @@ def cli_call():
             lats = np.arange(25.0625,    52.9375+0.125, 0.125)
 
         coords = [(float(lon), float(lat)) for lon, lat in itertools.product(lons, lats)]
-
 
     main(
         START_DATE=args.start_date,

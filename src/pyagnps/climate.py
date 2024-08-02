@@ -2,6 +2,8 @@ import warnings
 
 import itertools
 
+import psutil
+
 from pathlib import Path
 import pynldas2
 import py3dep
@@ -30,7 +32,7 @@ from .utils import get_date_from_string, month_difference
 
 from .constants import _NLDAS_PRODUCTS_20, _NLDAS_PRODUCTS_002
 # Do not create
-import os
+import os, shutil
 
 os.environ[
     "HYRIVER_CACHE_NAME"
@@ -514,17 +516,47 @@ class ClimateAnnAGNPSCoords:
 
         path_nldas_daily_files = Path(path_nldas_daily_files)
 
-        self.ds = xr.open_mfdataset(
-            path_nldas_daily_files.glob("*.nc"),
-            combine="nested",
-            concat_dim="time",
-            preprocess=preprocess,
-            chunks={"time": "auto"}, parallel=True
-        )
+        print("Opening daily files...")
 
-        if augment:
-            self.ds = augment_forcing_data(self.ds)
-            
+        # try:
+        #     print('trying open_mfdataset with parallel and auto chunking')
+        #     self.ds = xr.open_mfdataset(
+        #         path_nldas_daily_files.glob("*.nc"),
+        #         combine="nested",
+        #         concat_dim="time",
+        #         preprocess=preprocess,
+        #         chunks={"time": "auto"}, parallel=True
+        #     )
+        # except:
+
+        # self.ds = xr.open_mfdataset(
+        #     path_nldas_daily_files.glob("*.nc"),
+        #     combine="nested",
+        #     concat_dim="time",
+        #     preprocess=preprocess,
+        #     chunks={"time": 1}, parallel=False)
+
+        # self.ds = xr.open_mfdataset(
+        #     path_nldas_daily_files.glob("*.nc"),
+        #     combine="nested",
+        #     concat_dim="time",
+        #     preprocess=preprocess,
+        #     chunks={"time": 30}, parallel=True)
+
+        datasets = []
+        for file in tqdm(list(path_nldas_daily_files.glob("*.nc"))):
+            ds = xr.open_dataset(file, chunks={"time": 1})
+            ds = preprocess(ds)
+            datasets.append(ds)
+
+        print('Concatenating')
+
+        self.ds = xr.concat(datasets, dim="time")
+
+        self.ds = self.ds.chunk({'time': 365})
+
+        print('Finished Concatenating and rechunking')
+
     def generate_annagnps_daily_climate_data_cmip5_maca(self, **kwargs):
         ### Key-Value Arguments:
         """
@@ -570,14 +602,14 @@ class ClimateAnnAGNPSCoords:
         longitudes = np.unique(np.sort([lon for lon, _ in self.coords]))
         latitudes  = np.unique(np.sort([lat for _, lat in self.coords]))
 
-        variables_to_keep_and_rename = {"PotEvap": "Potential_ET",
-                                        "Rainf": "Precip", 
-                                        "SWdown": "Solar_Radiation",
-                                        "Tdew": "Dew_Point", 
-                                        "wind_speed": "Wind_Speed", 
-                                        "wind_direction": "Wind_Direction", 
-                                        "Tmin": "Min_Air_Temperature", 
-                                        "Tmax": "Max_Air_Temperature"}
+        # variables_to_keep_and_rename = {"PotEvap": "Potential_ET",
+        #                                 "Rainf": "Precip", 
+        #                                 "SWdown": "Solar_Radiation",
+        #                                 "Tdew": "Dew_Point", 
+        #                                 "wind_speed": "Wind_Speed", 
+        #                                 "wind_direction": "Wind_Direction", 
+        #                                 "Tmin": "Min_Air_Temperature", 
+        #                                 "Tmax": "Max_Air_Temperature"}
         
         # Throw an error if the self.start and self.end (included) are not in the dataset
         if self.ds.time.values.min() > pd.to_datetime(self.start):
@@ -585,12 +617,15 @@ class ClimateAnnAGNPSCoords:
         if self.ds.time.values.max() < pd.to_datetime(self.end):
             raise Exception(f"End date {self.end} beyond dataset range")
 
-        self.ds_select = self.ds.sel(lat=latitudes, lon=longitudes, method="nearest").sel(
-            time=slice(self.start, self.end)
-        )[variables_to_keep_and_rename.keys()]
+        time_mask = (self.ds.time >= self.start) & (self.ds.time <= self.end)
+        self.ds_select = self.ds.isel(time=time_mask).sel(lat=latitudes, lon=longitudes, method="nearest")
+
+        # self.ds_select = self.ds.sel(lat=latitudes, lon=longitudes, method="nearest").sel(
+        #     time=slice(self.start, self.end)
+        # )
 
         # Rename columns to match AnnAGNPS
-        self.ds_select = self.ds_select.rename_vars(variables_to_keep_and_rename)
+        # self.ds_select = self.ds_select.rename_vars(variables_to_keep_and_rename)
         self.coords_actual = self.coords
 
     def generate_annagnps_daily_climate_data_from_nldas_daily(self, **kwargs):
@@ -599,7 +634,7 @@ class ClimateAnnAGNPSCoords:
 
         ### Key-Value Arguments:
         - output_dir : str, path optional
-               Path to write the output file, by default current working directory
+            Path to write the output file, by default current working directory
         - saveformat : str, optional
             Format to save the output file, by default None, also accepts 'parquet' and 'csv'. 
             If None it will not write a file
@@ -610,196 +645,405 @@ class ClimateAnnAGNPSCoords:
         - float_format : str, optional, default= '%.3f' for printing csv file
         - return_dataframes : bool, optional default False
 
-
         # Outputs
         - results_df : returns a dictionary with dataframes if return_dataframes = True. 
-                       The keys are the station_id of each NDLAS-2 cell
-
+                    The keys are the station_id of each NDLAS-2 cell
         """
         # Unpack kwargs
-        if "output_dir" in kwargs:
-            output_dir = kwargs["output_dir"]
-        else:
-            output_dir = Path.cwd()
+        output_dir = kwargs.get("output_dir", Path.cwd())
+        saveformat = kwargs.get("saveformat", None)
+        float_format = kwargs.get("float_format", "%.3f")
+        return_dataframes = kwargs.get("return_dataframes", False)
+        engine = kwargs.get("engine", None)
+        db_table_name = kwargs.get("db_table_name", "climate_nldas2")
+        MAXITER_SINGLE_STATION = kwargs.get("MAXITER_SINGLE_STATION", 10)
 
-        if "saveformat" in kwargs:
-            saveformat = kwargs["saveformat"]
-        else:
-            saveformat = None
+        variables_to_keep_and_rename = {
+            "PotEvap": "Potential_ET", "Rainf": "Precip", 
+            "SWdown": "Solar_Radiation", "Tdew": "Dew_Point", 
+            "wind_speed": "Wind_Speed", "wind_direction": "Wind_Direction", 
+            "Tmin": "Min_Air_Temperature", "Tmax": "Max_Air_Temperature"
+        }
 
-        if "float_format" in kwargs:
-            float_format = kwargs["float_format"]
-        else:
-            float_format = "%.3f"
-
-        if "return_dataframes" in kwargs:
-            return_dataframes = kwargs["return_dataframes"]
-        else:
-            return_dataframes = False
-
-        if "engine" in kwargs:
-            engine = kwargs["engine"]
-        else:
-            engine = None
-
-        if "db_table_name" in kwargs:
-            db_table_name = kwargs["db_table_name"]
-        else:
-            db_table_name = "climate_nldas2"
-
-        if "MAXITER_SINGLE_STATION" in kwargs:
-            MAXITER_SINGLE_STATION = kwargs["MAXITER_SINGLE_STATION"]
-        else:
-            MAXITER_SINGLE_STATION = 10
-
-        self._select_nldas_file_coords_timeslice_data()
-
-
-        if not output_dir.exists() and (saveformat is not None):
+        if not output_dir.exists() and saveformat not in [None, "database"]:
+            print(f'Creating output directory {output_dir}')
             output_dir.mkdir(parents=True, exist_ok=True)
 
+        if saveformat in ['csv', 'parquet']:
+                # Create temp directory
+                output_dir_temp = output_dir / "temp"
+                output_dir_temp.mkdir(parents=True, exist_ok=True)
+
+                # Delete the contents of the temp directory
+                for f in output_dir_temp.iterdir():
+                    f.unlink()
+
+        # Select and process all data at once
+        self._select_nldas_file_coords_timeslice_data()
+        ds_all = self.ds_select
+
+        ds_all = augment_forcing_data(ds_all)
+        ds_all = ds_all[variables_to_keep_and_rename.keys()].rename(variables_to_keep_and_rename)
+
+        # Convert to Dask DataFrame
+        df_all = ds_all.to_dask_dataframe()
+
+        # Apply transformations
+        df_all = df_all.assign(
+            Day=df_all.time.dt.day,
+            Month=df_all.time.dt.month,
+            Year=df_all.time.dt.year,
+            Max_Air_Temperature=df_all.Max_Air_Temperature - 273.15,
+            Min_Air_Temperature=df_all.Min_Air_Temperature - 273.15,
+            Dew_Point=df_all.Dew_Point - 273.15,
+            Sky_Cover=None,
+            Storm_Type_ID=None,
+            Actual_ET=None,
+            Actual_EI=None,
+            Input_Units_Code=1
+        )
+
+        # Reorder columns
+        df_all = df_all[["lon","lat",
+            "Month", "Day", "Year", "Max_Air_Temperature", "Min_Air_Temperature",
+            "Precip", "Dew_Point", "Sky_Cover", "Wind_Speed", "Wind_Direction",
+            "Solar_Radiation", "Storm_Type_ID", "Potential_ET", "Actual_ET",
+            "Actual_EI", "Input_Units_Code"
+        ]]
+
+        # Optimize memory usage
+        df_all = df_all.astype({
+            "Month": "int8", "Day": "int8", "Year": "int16",
+            "Max_Air_Temperature": "float32", "Min_Air_Temperature": "float32",
+            "Precip": "float32", "Dew_Point": "float32",
+            "Wind_Speed": "float32", "Wind_Direction": "float32",
+            "Solar_Radiation": "float32", "Potential_ET": "float32",
+            "Input_Units_Code": "int8"
+        })
+
         results_df = {}
+        all_stations = set()
 
-        for lon, lat in tqdm(list(itertools.product(self.ds_select.lon.values, self.ds_select.lat.values))):
+        # Get total memory
+        total_memory = psutil.virtual_memory().total
+
+        # Process in chunks
+        df_all = df_all.repartition(partition_size=int(total_memory * 0.25)) # Using 25% of total memory
+        chunks = df_all.partitions
+        num_partitions = df_all.npartitions
+        chunk_id = 0
+        for chunk in tqdm(chunks, desc="Processing chunks", total=num_partitions):
+            chunk_id += 1
+            processed_chunk = chunk.compute()
             
-            ds_curr = self.ds_select.sel(lon=lon, lat=lat, method="nearest")
+            if saveformat == 'database':
+                for (lon, lat), group in processed_chunk.groupby(['lon', 'lat']):
+                    _, _, station_id = get_grid_position(lon, lat)
 
-            df = ds_curr.to_dataframe()
+                    
+                    # Get available dates already in the database for this station
+                    available_dates = get_available_dates_for_station(station_id, engine, table=db_table_name)
 
-            # Readjust index so that it matches the input
-            df.index = df.index - (df.index[0] - self.start_input)
+                    # Get missing dates that need to be added
+                    missing_dates = get_missing_dates(available_dates, self.start_input, self.end_input)
 
-            # Get the time series for the nearest grid cell
-            df["Day"] = df.index.day
-            df["Month"] = df.index.month
-            df["Year"] = df.index.year
+                    for iter_station in range(MAXITER_SINGLE_STATION):
+                        try:
+                            # Select and concatenate climate data for each continuous period
+                            gdf_clm = None
+                            continuous_periods = find_continuous_periods(missing_dates)
 
-            # Convert temperatures to Celsius
-            df["Max_Air_Temperature"] = df["Max_Air_Temperature"] - 273.15
-            df["Min_Air_Temperature"] = df["Min_Air_Temperature"] - 273.15            
-            df["Dew_Point"] = df["Dew_Point"] - 273.15
+                            for period in continuous_periods:
+                                start, end = period[0], period[-1]
+                                df_period = group[(group.index >= start) & (group.index <= end)]
+                                
+                                if len(df_period) == 0:
+                                    continue
 
-            
+                                gdf_clm_period = prepare_annagnps_climate_for_db(df_period, station_id, lon, lat)
+                                
+                                if gdf_clm is None:
+                                    gdf_clm = gdf_clm_period
+                                else:
+                                    gdf_clm = pd.concat([gdf_clm, gdf_clm_period])
 
-            # Add blank columns for the other variables
-            df["Sky_Cover"] = None
-            df["Storm_Type_ID"] = None
-            df["Actual_ET"] = None
-            df["Actual_EI"] = None
+                            if gdf_clm is not None:
+                                insert_climate_nldas2(gdf_clm, engine, table=db_table_name)
+                            break
 
-            # We use SI units because we respect ourserlves
-            df["Input_Units_Code"] = 1
+                        except Exception as e:
+                            print(f"Station {station_id}, x = {lon}, y = {lat}: Failed with error: {e}: RETRYING ({iter_station+1}/{MAXITER_SINGLE_STATION})")
+                            time.sleep(1)
 
+            elif saveformat in ['csv', 'parquet']:
+            # Write chunks to disk
+                for (lon, lat), group in processed_chunk.groupby(['lon', 'lat']):
+                    _, _, station_id = get_grid_position(lon, lat)
+                    all_stations.add(station_id)
 
-            # Reorder columns
-            df = df[
-                [
-                    "Month",
-                    "Day",
-                    "Year",
-                    "Max_Air_Temperature",
-                    "Min_Air_Temperature",
-                    "Precip",
-                    "Dew_Point",
-                    "Sky_Cover",
-                    "Wind_Speed",
-                    "Wind_Direction",
-                    "Solar_Radiation",
-                    "Storm_Type_ID",
-                    "Potential_ET",
-                    "Actual_ET",
-                    "Actual_EI",
-                    "Input_Units_Code",
-                ]
-            ]
-
-            # Optimize memory usage
-            df = df.astype(
-                {
-                    "Month": "int8",
-                    "Day": "int8",
-                    "Year": "int16",
-                    "Max_Air_Temperature": "float32",
-                    "Min_Air_Temperature": "float32",
-                    "Precip": "float32",
-                    "Dew_Point": "float32",
-                    # 'Sky_Cover': 'float32',
-                    "Wind_Speed": "float32",
-                    "Wind_Direction": "float32",
-                    "Solar_Radiation": "float32",
-                    # 'Storm_Type_ID': 'int8',
-                    "Potential_ET": "float32",
-                    # 'Actual_ET': 'float32',
-                    # 'Actual_EI': 'float32',
-                    "Input_Units_Code": "int8",
-                }
-            )
-
-            _, _, station_id = get_grid_position(lon, lat)
+                    output_filepath = output_dir_temp / f"climate_daily_{station_id}_chunk_{chunk_id}.{saveformat}"
+                    if saveformat == 'csv':
+                        group.to_csv(output_filepath, index=False, float_format=float_format)
+                    elif saveformat == 'parquet':
+                        group.to_parquet(output_filepath, index=True)
 
             if return_dataframes:
-                results_df[station_id] = {
-                                            'climate_data' : df.copy(deep=True),
-                                            'coords' : (lon, lat)
-                                        }
+                for (lon, lat), group in processed_chunk.groupby(['lon', 'lat']):
+                    _, _, station_id = get_grid_position(lon, lat)
+
+                    if 'climate_data' not in results_df[station_id]:
+                        results_df[station_id] = {
+                            'climate_data': group.copy(deep=True),
+                            'coords': (lon, lat)
+                        }
+                    else:
+                        results_df[station_id]['climate_data'] = pd.concat([results_df[station_id]['climate_data'], group.copy(deep=True)])#, ignore_index=True)
+
+        if saveformat in ['csv', 'parquet']:
+            # Loop through all stations and chunks in the temp directory and concatenate them and write them into a single file in the main directory
+            for station_id in all_stations:
+                output_filepath = output_dir / f"climate_daily_{station_id}.{saveformat}"
+                chunks = Path(output_dir_temp).glob(f"climate_daily_{station_id}_chunk_*.{saveformat}")
+
+                if saveformat == 'csv':
+                    df = pd.concat([pd.read_csv(chunk) for chunk in chunks])
+                    df.to_csv(output_filepath, index=False, float_format=float_format)
+                elif saveformat == 'parquet':
+                    df = pd.concat([pd.read_parquet(chunk) for chunk in chunks])
+                    df.to_parquet(output_filepath, index=True)
+
+            # Delete output_dir_temp and all its contents
+            shutil.rmtree(output_dir_temp)
 
 
-            output_filepath = output_dir / f"climate_daily_{station_id}.{saveformat}"
-            if saveformat == "csv":
-                df.to_csv(output_filepath, index=False, float_format=float_format)
+        return results_df if return_dataframes else None
 
-            elif saveformat == "parquet":
-                df.to_parquet(output_filepath, index=True)
+    # def generate_annagnps_daily_climate_data_from_nldas_daily(self, **kwargs):
+    #     """
+    #     Generate climate_daily.csv AnnAGNPS file/DataFrame from NLDAS output files
 
-            elif saveformat == "database":
-                # Get available dates already in the database for this station
-                available_dates = get_available_dates_for_station(station_id, engine, table=db_table_name)
+    #     ### Key-Value Arguments:
+    #     - output_dir : str, path optional
+    #            Path to write the output file, by default current working directory
+    #     - saveformat : str, optional
+    #         Format to save the output file, by default None, also accepts 'parquet' and 'csv'. 
+    #         If None it will not write a file
+    #     - engine : sqlalchemy.engine, optional
+    #         SQLAlchemy engine to connect to the database, by default None
+    #     - db_table_name : str, optional by default 'climate_nldas2'
+    #     - MAXITER_SINGLE_STATION : int, optional by default 10. Number of attempts to upload data to database for a single station
+    #     - float_format : str, optional, default= '%.3f' for printing csv file
+    #     - return_dataframes : bool, optional default False
 
-                # Get missing dates that need to be added
-                missing_dates = get_missing_dates(available_dates, self.start_input, self.end_input)
 
-                for iter_station in range(MAXITER_SINGLE_STATION):
-                    try:
-                        # Select and concatenate climate data for each continuous period
-                        gdf_clm = None
-                        continuous_periods = find_continuous_periods(missing_dates)
+    #     # Outputs
+    #     - results_df : returns a dictionary with dataframes if return_dataframes = True. 
+    #                    The keys are the station_id of each NDLAS-2 cell
 
-                        for period in continuous_periods:
-                            start, end = period[0], period[-1]
+    #     """
+    #     # Unpack kwargs
+    #     if "output_dir" in kwargs:
+    #         output_dir = kwargs["output_dir"]
+    #     else:
+    #         output_dir = Path.cwd()
 
-                            # Filter df to the current period
-                            df_period = df[(df.index >= start) & (df.index <= end)]
+    #     if "saveformat" in kwargs:
+    #         saveformat = kwargs["saveformat"]
+    #     else:
+    #         saveformat = None
 
-                            if len(df_period) == 0:
-                                continue
+    #     if "float_format" in kwargs:
+    #         float_format = kwargs["float_format"]
+    #     else:
+    #         float_format = "%.3f"
 
-                            gdf_clm_period = prepare_annagnps_climate_for_db(df_period, station_id, lon, lat)
+    #     if "return_dataframes" in kwargs:
+    #         return_dataframes = kwargs["return_dataframes"]
+    #     else:
+    #         return_dataframes = False
+
+    #     if "engine" in kwargs:
+    #         engine = kwargs["engine"]
+    #     else:
+    #         engine = None
+
+    #     if "db_table_name" in kwargs:
+    #         db_table_name = kwargs["db_table_name"]
+    #     else:
+    #         db_table_name = "climate_nldas2"
+
+    #     if "MAXITER_SINGLE_STATION" in kwargs:
+    #         MAXITER_SINGLE_STATION = kwargs["MAXITER_SINGLE_STATION"]
+    #     else:
+    #         MAXITER_SINGLE_STATION = 10
+
+    #     self._select_nldas_file_coords_timeslice_data()
+
+    #     variables_to_keep_and_rename = {"PotEvap": "Potential_ET",
+    #                                     "Rainf": "Precip", 
+    #                                     "SWdown": "Solar_Radiation",
+    #                                     "Tdew": "Dew_Point", 
+    #                                     "wind_speed": "Wind_Speed", 
+    #                                     "wind_direction": "Wind_Direction", 
+    #                                     "Tmin": "Min_Air_Temperature", 
+    #                                     "Tmax": "Max_Air_Temperature"}
+
+
+    #     if not output_dir.exists() and ((saveformat is not None) or (saveformat != "database")):
+    #         print(f'Creating output directory {output_dir}')
+    #         output_dir.mkdir(parents=True, exist_ok=True)
+
+    #     results_df = {}
+
+    #     for lon, lat in tqdm(list(itertools.product(self.ds_select.lon.values, self.ds_select.lat.values))):
+            
+    #         ds_curr = self.ds_select.sel(lon=lon, lat=lat, method="nearest")
+
+    #         ds_curr = augment_forcing_data(ds_curr)
+    #         ds_curr = ds_curr[variables_to_keep_and_rename.keys()]
+
+    #         ds_curr = ds_curr.rename_vars(variables_to_keep_and_rename)
+
+    #         ds_curr = ds_curr.sortby('time')
+
+    #         df = ds_curr.to_dataframe()
+
+    #         df = df.copy()
+
+    #         # Readjust index so that it matches the input
+    #         df.index = df.index - (df.index[0] - self.start_input)
+
+    #         # Get the time series for the nearest grid cell
+    #         df["Day"] = df.index.day
+    #         df["Month"] = df.index.month
+    #         df["Year"] = df.index.year
+
+    #         # Convert temperatures to Celsius
+    #         df["Max_Air_Temperature"] = df["Max_Air_Temperature"] - 273.15
+    #         df["Min_Air_Temperature"] = df["Min_Air_Temperature"] - 273.15            
+    #         df["Dew_Point"] = df["Dew_Point"] - 273.15
+
+            
+
+    #         # Add blank columns for the other variables
+    #         df["Sky_Cover"] = None
+    #         df["Storm_Type_ID"] = None
+    #         df["Actual_ET"] = None
+    #         df["Actual_EI"] = None
+
+    #         # We use SI units because we respect ourserlves
+    #         df["Input_Units_Code"] = 1
+
+
+    #         # Reorder columns
+    #         df = df[
+    #             [
+    #                 "Month",
+    #                 "Day",
+    #                 "Year",
+    #                 "Max_Air_Temperature",
+    #                 "Min_Air_Temperature",
+    #                 "Precip",
+    #                 "Dew_Point",
+    #                 "Sky_Cover",
+    #                 "Wind_Speed",
+    #                 "Wind_Direction",
+    #                 "Solar_Radiation",
+    #                 "Storm_Type_ID",
+    #                 "Potential_ET",
+    #                 "Actual_ET",
+    #                 "Actual_EI",
+    #                 "Input_Units_Code",
+    #             ]
+    #         ]
+
+    #         # Optimize memory usage
+    #         df = df.astype(
+    #             {
+    #                 "Month": "int8",
+    #                 "Day": "int8",
+    #                 "Year": "int16",
+    #                 "Max_Air_Temperature": "float32",
+    #                 "Min_Air_Temperature": "float32",
+    #                 "Precip": "float32",
+    #                 "Dew_Point": "float32",
+    #                 # 'Sky_Cover': 'float32',
+    #                 "Wind_Speed": "float32",
+    #                 "Wind_Direction": "float32",
+    #                 "Solar_Radiation": "float32",
+    #                 # 'Storm_Type_ID': 'int8',
+    #                 "Potential_ET": "float32",
+    #                 # 'Actual_ET': 'float32',
+    #                 # 'Actual_EI': 'float32',
+    #                 "Input_Units_Code": "int8",
+    #             }
+    #         )
+
+    #         _, _, station_id = get_grid_position(lon, lat)
+
+    #         if return_dataframes:
+    #             results_df[station_id] = {
+    #                                         'climate_data' : df.copy(deep=True),
+    #                                         'coords' : (lon, lat)
+    #                                     }
+
+
+    #         output_filepath = output_dir / f"climate_daily_{station_id}.{saveformat}"
+    #         if saveformat == "csv":
+    #             df.to_csv(output_filepath, index=False, float_format=float_format)
+
+    #         elif saveformat == "parquet":
+    #             df.to_parquet(output_filepath, index=True)
+
+    #         elif saveformat == "database":
+    #             # Get available dates already in the database for this station
+    #             available_dates = get_available_dates_for_station(station_id, engine, table=db_table_name)
+
+    #             # Get missing dates that need to be added
+    #             missing_dates = get_missing_dates(available_dates, self.start_input, self.end_input)
+
+    #             for iter_station in range(MAXITER_SINGLE_STATION):
+    #                 try:
+    #                     # Select and concatenate climate data for each continuous period
+    #                     gdf_clm = None
+    #                     continuous_periods = find_continuous_periods(missing_dates)
+
+    #                     for period in continuous_periods:
+    #                         start, end = period[0], period[-1]
+
+    #                         # Filter df to the current period
+    #                         df_period = df[(df.index >= start) & (df.index <= end)]
+
+    #                         if len(df_period) == 0:
+    #                             continue
+
+    #                         gdf_clm_period = prepare_annagnps_climate_for_db(df_period, station_id, lon, lat)
                             
-                            if gdf_clm is None:
-                                gdf_clm = gdf_clm_period
-                            else:
-                                gdf_clm = pd.concat([gdf_clm, gdf_clm_period])
+    #                         if gdf_clm is None:
+    #                             gdf_clm = gdf_clm_period
+    #                         else:
+    #                             gdf_clm = pd.concat([gdf_clm, gdf_clm_period])
 
-                        if gdf_clm is None:
-                            print(f"0 rows to insert for station {station_id}.")
-                        else:
-                            # print(f"Inserting {len(gdf_clm)} rows for station {station_id}.")
-                            insert_climate_nldas2(gdf_clm, engine, table=db_table_name)
-                        break
+    #                     if gdf_clm is None:
+    #                         print(f"0 rows to insert for station {station_id}.")
+    #                     else:
+    #                         # print(f"Inserting {len(gdf_clm)} rows for station {station_id}.")
+    #                         insert_climate_nldas2(gdf_clm, engine, table=db_table_name)
+    #                     break
 
-                    except Exception as e:
-                        print(f"Station {station_id}, x = {lon}, y = {lat}: Failed with error: {e}: RETRYING ({iter_station+1}/{MAXITER_SINGLE_STATION})")
-                        time.sleep(1)
+    #                 except Exception as e:
+    #                     print(f"Station {station_id}, x = {lon}, y = {lat}: Failed with error: {e}: RETRYING ({iter_station+1}/{MAXITER_SINGLE_STATION})")
+    #                     time.sleep(1)
 
 
-                        break
+    #                     break
 
-            elif saveformat is None:
-                pass
-            else:
-                raise ValueError(f"Invalid saveformat: {saveformat}")
+    #         elif saveformat is None:
+    #             pass
+    #         else:
+    #             raise ValueError(f"Invalid saveformat: {saveformat}")
 
-        return results_df
+    #     return results_df
 
     def _select_cmip_coords_timeslice_data(self):
         """
