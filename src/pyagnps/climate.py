@@ -712,6 +712,8 @@ class ClimateAnnAGNPSCoords:
             Input_Units_Code=1
         )
 
+        df_all = df_all.set_index("time")
+
         # Reorder columns
         df_all = df_all[["lon","lat",
             "Month", "Day", "Year", "Max_Air_Temperature", "Min_Air_Temperature",
