@@ -543,8 +543,14 @@ class ClimateAnnAGNPSCoords:
         #     preprocess=preprocess,
         #     chunks={"time": 30}, parallel=True)
 
+        # Get list of files
+        start_date = self.start
+        end_date = self.end
+        list_of_files_to_open = get_file_list(path_nldas_daily_files, start_date, end_date, product="NLDAS_FORA0125_D.2.0")
+
         datasets = []
-        for file in tqdm(list(path_nldas_daily_files.glob("*.nc"))):
+        # for file in tqdm(list(path_nldas_daily_files.glob("*.nc"))):
+        for file in tqdm(list_of_files_to_open):
             ds = xr.open_dataset(file, chunks={"time": 1})
             ds = preprocess(ds)
             datasets.append(ds)
@@ -552,6 +558,8 @@ class ClimateAnnAGNPSCoords:
         print('Concatenating')
 
         self.ds = xr.concat(datasets, dim="time")
+
+        self.ds = self.ds.sortby('time')
 
         self.ds = self.ds.chunk({'time': 365})
 
@@ -728,7 +736,7 @@ class ClimateAnnAGNPSCoords:
         total_memory = psutil.virtual_memory().total
 
         # Process in chunks
-        df_all = df_all.repartition(partition_size=int(total_memory * 0.25)) # Using 25% of total memory
+        df_all = df_all.repartition(partition_size=int(total_memory * 0.5)) # Using 50% of total memory
         chunks = df_all.partitions
         num_partitions = df_all.npartitions
         chunk_id = 0
