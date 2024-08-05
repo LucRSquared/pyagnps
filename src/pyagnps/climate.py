@@ -690,6 +690,7 @@ class ClimateAnnAGNPSCoords:
         self._select_nldas_file_coords_timeslice_data()
         ds_all = self.ds_select
 
+        print("Computing additional climate variables...")
         ds_all = augment_forcing_data(ds_all)
         ds_all = ds_all[variables_to_keep_and_rename.keys()].rename(variables_to_keep_and_rename)
 
@@ -736,6 +737,7 @@ class ClimateAnnAGNPSCoords:
         total_memory = psutil.virtual_memory().total
 
         # Process in chunks
+        print("Repartitioning and processing in chunks...")
         df_all = df_all.repartition(partition_size=int(total_memory * 0.5)) # Using 50% of total memory
         chunks = df_all.partitions
         num_partitions = df_all.npartitions
@@ -2273,7 +2275,25 @@ def prepare_annagnps_climate_for_db(clm, station_id, xgrid, ygrid):
     - gdf_clm: GeoDataFrame in EPSG:4326
     """
     clm.columns = clm.columns.str.lower()
-    clm['station_id'] = station_id
+
+    clm = clm[["month",
+               "Day",
+               "Year",
+               "max_air_temperature",
+               "min_air_temperature",
+               "precip",
+               "dew_point",
+               "sky_cover",
+               "wind_speed",
+               "wind_direction",
+               "solar_radiation",
+               "storm_type_id",
+               "potential_et",
+               "actual_et",
+               "actual_ei",
+               "input_units_code"]]
+
+    clm = clm.assign(station_id=station_id)
 
     gdf_clm = gpd.GeoDataFrame(clm, geometry=[Point(xgrid, ygrid)] * len(clm), crs="EPSG:4326")
     gdf_clm.rename(columns={'geometry': 'geom'}, inplace=True)
