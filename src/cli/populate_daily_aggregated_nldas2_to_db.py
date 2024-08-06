@@ -76,10 +76,6 @@ def main(START_DATE, END_DATE, coords, path_nldas_daily_files, path_to_creds, db
                     port=creds['port'],
                     database=creds['database']
                     )
-
-
-    engine = create_engine(db_url)
-
     # MAIN LOOP
     for iter_global in range(MAXITER_GLOBAL):
         
@@ -94,7 +90,7 @@ def main(START_DATE, END_DATE, coords, path_nldas_daily_files, path_to_creds, db
 
             nldas_clm_daily.generate_annagnps_daily_climate_data_from_nldas_daily(
                                                             saveformat="database",
-                                                            engine=engine,
+                                                            db_url=db_url,
                                                             db_table_name=db_table_name,
                                                             return_dataframes=False,
             )
