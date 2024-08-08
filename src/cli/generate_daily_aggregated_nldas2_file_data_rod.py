@@ -19,7 +19,7 @@ from pyagnps import climate
 # from pyagnps.utils import log_to_file, get_current_time
 
 
-def main(START_DATE, END_DATE, coords, path_nldas_daily_files, path_to_creds, db_table_name, MAXITER_GLOBAL):
+def main(START_DATE, END_DATE, coords, path_nldas_daily_files, saveformat, output_dir, MAXITER_GLOBAL):
     """
     Parameters
     ----------
@@ -31,42 +31,13 @@ def main(START_DATE, END_DATE, coords, path_nldas_daily_files, path_to_creds, db
         List of tuple of coordinates [(lon, lat), ...]
     path_nldas_daily_files : str, Path
         Path to NLDAS-2 daily files
-    path_to_creds : str
-        Path to credentials json file
-        * Must contain the entries:
-        - 'user'
-        - 'password'
-        - 'host'
-        - 'port'
-        - 'database'
+    saveformat: str
+        csv, or parquet
+    output_dir: str, Path
+        Path to output directory
     """
 
-    # DATABASE SETUP
-    path_to_creds = Path(path_to_creds)
 
-    # creds = {
-    #     'aims': open_creds_dict(path_to_creds),
-    #     # 'menderes': open_creds_dict(path_to_creds_menderes),
-    #     'docker': {
-    #             'user': 'postgres',
-    #             'password': 'postgres_pass',
-    #             'host': 'localhost',
-    #             'port': '5432',
-    #             'database': 'test_db'
-    #         }
-    # }
-
-    creds = open_creds_dict(path_to_creds)
-
-
-    db_url = URL.create(
-                    "postgresql",
-                    username=creds['user'],
-                    password=creds['password'],
-                    host=creds['host'],
-                    port=creds['port'],
-                    database=creds['database']
-                    )
     # MAIN LOOP
     for iter_global in range(MAXITER_GLOBAL):
         
@@ -80,9 +51,8 @@ def main(START_DATE, END_DATE, coords, path_nldas_daily_files, path_to_creds, db
             nldas_clm_daily.read_nldas_daily_data(path_nldas_daily_files=path_nldas_daily_files)
 
             nldas_clm_daily.generate_annagnps_daily_climate_data_from_nldas_daily(
-                                                            saveformat="database",
-                                                            db_url=db_url,
-                                                            db_table_name=db_table_name,
+                                                            saveformat=saveformat,
+                                                            output_dir=output_dir,
                                                             return_dataframes=False,
             )
             break
@@ -131,9 +101,9 @@ def cli_call():
     parser.add_argument('--start_date',             help='Start date in YYYY-MM-DD format',                   type=str, default="2000-01-01")
     parser.add_argument('--end_date',               help='End date in YYYY-MM-DD format',                     type=str, default="2022-12-31")
     parser.add_argument('--path_nldas_daily_files', help='Path to the directory with daily aggregated files', type=str)
-    parser.add_argument('--path_to_creds',          help='Path to the database credentials JSON file',        type=str)
+    parser.add_argument('--output_dir',             help='Path to the directory where rods are saved',        type=str)
+    parser.add_argument('--saveformat',             help='Format to save data rods as (csv or parquet)',      type=str, default="csv")
     parser.add_argument('--maxiter_global',         help='Maximum number of attempts',                        type=int, default=10)
-    parser.add_argument('--db_table_name',          help='Name of the DB table to update',                    type=str, default="climate_nldas2")
     parser.add_argument('--lats', '-lt', nargs='+',
                         help="List of latitudes to extract (to be paired with matching lons)")
     parser.add_argument('--lons', '-ln', nargs='+',
@@ -160,8 +130,8 @@ def cli_call():
         END_DATE=args.end_date,
         coords=coords,
         path_nldas_daily_files=args.path_nldas_daily_files,
-        path_to_creds=args.path_to_creds,
-        db_table_name=args.db_table_name,
+        saveformat=args.saveformat,
+        output_dir=args.output_dir,
         MAXITER_GLOBAL=args.maxiter_global,
     )
 

@@ -1,6 +1,7 @@
 import warnings
 
 import itertools
+import re
 
 import psutil
 
@@ -662,7 +663,7 @@ class ClimateAnnAGNPSCoords:
                     The keys are the station_id of each NDLAS-2 cell
         """
         # Unpack kwargs
-        output_dir = kwargs.get("output_dir", Path.cwd())
+        output_dir = Path(kwargs.get("output_dir", Path.cwd()))
         saveformat = kwargs.get("saveformat", None)
         float_format = kwargs.get("float_format", "%.3f")
         return_dataframes = kwargs.get("return_dataframes", False)
@@ -689,6 +690,7 @@ class ClimateAnnAGNPSCoords:
                 # Delete the contents of the temp directory
                 for f in output_dir_temp.iterdir():
                     f.unlink()
+
 
         # Select and process all data at once
         self._select_nldas_file_coords_timeslice_data()
@@ -742,10 +744,10 @@ class ClimateAnnAGNPSCoords:
 
             results = []
 
-            engine = engine_creator()
+            if saveformat == "database":
+                engine = engine_creator()
 
-            # with EngineContextManager(engine_creator) as engine:
-            for (lon, lat), group in df.groupby(['lon', 'lat']):
+            for (lon, lat), group in tqdm(df.groupby(['lon', 'lat']), position=1, leave=True, desc="Processing stations in current partition"):
                 _, _, station_id = get_grid_position(lon, lat)
                 
                 if saveformat == 'database':
@@ -771,17 +773,19 @@ class ClimateAnnAGNPSCoords:
                             gdf_clm = pd.concat([gdf_clm, gdf_clm_period])
 
                     if gdf_clm is not None:
-                        print(f'Insert climate data for station {station_id} into database')
                         insert_climate_nldas2(gdf_clm, engine, table=db_table_name)
-                        print(f'climate {station_id} done')
                 
                 elif saveformat in ['csv', 'parquet']:
                     # Write to temporary file
-                    output_filepath = output_dir_temp / f"climate_daily_{station_id}_chunk_{df.divisions[0]}.{saveformat}"
+                    output_filepath = output_dir_temp / f"climate_daily_{station_id}_chunk_{df.index[0].year:04}-{df.index[0].month:02}-{df.index[0].day:02}_{df.index[-1].year:04}-{df.index[-1].month:02}-{df.index[-1].day:02}.{saveformat}"
+                    
+                    if output_filepath.exists():
+                        continue
+                    
                     if saveformat == 'csv':
                         group.to_csv(output_filepath, index=False, float_format=float_format)
                     elif saveformat == 'parquet':
-                        group.to_parquet(output_filepath, index=True)
+                        group.to_parquet(output_filepath, index=True, compression="zstd")
 
                 if return_dataframes:
                     group = group.assign(station_id=station_id)
@@ -830,39 +834,33 @@ class ClimateAnnAGNPSCoords:
                                         "Input_Units_Code": "int8"} )
 
         print("Computing results...")
-        batch_size = 10  # Adjust based on your system's capabilities
+        # Simply loop over partitions
         all_results = []
-        with tqdm(total=df_all.npartitions) as pbar:
-            for start_idx in range(0, df_all.npartitions, batch_size):
-                end_idx = min(start_idx + batch_size, df_all.npartitions)
-
-                batch = results.partitions[start_idx:end_idx]
-                batch_results = batch.compute()
-                all_results.extend(batch_results)
-                pbar.update(len(batch))
+        for partition_idx in tqdm(range(df_all.npartitions), desc="Writing chunks by partition", position=0, leave=True):
+            partition = results.partitions[partition_idx].compute()
+            all_results.extend(partition)
 
         # Handle results
         if saveformat in ['csv', 'parquet']:
             print("Assembling final output files...")
-            all_stations = set()
-            for partition_result in results:
-                for item in partition_result:
-                    all_stations.add(item['station_id'])
 
-            for station_id in all_stations:
+            all_chunks = Path(output_dir_temp).glob(f"climate_daily_*_chunk_*.{saveformat}")
+            unique_stations = list(set(re.findall(r'climate_daily_(.*?)_', str(chunk))[0] for chunk in all_chunks))
+
+            for station_id in tqdm(unique_stations, desc="Writing final station files"):
                 output_filepath = output_dir / f"climate_daily_{station_id}.{saveformat}"
-                chunks = list(Path(output_dir_temp).glob(f"climate_daily_{station_id}_chunk_*.{saveformat}"))
+                station_chunks = list(Path(output_dir_temp).glob(f"climate_daily_{station_id}_chunk_*.{saveformat}"))
 
                 if saveformat == 'csv':
                     with open(output_filepath, 'w') as outfile:
-                        for i, chunk in enumerate(chunks):
+                        for i, chunk in enumerate(station_chunks):
                             with open(chunk, 'r') as infile:
                                 if i != 0:
                                     next(infile)  # Skip header for all but first chunk
                                 outfile.write(infile.read())
                 elif saveformat == 'parquet':
-                    df = pd.concat([pd.read_parquet(chunk) for chunk in chunks])
-                    df.to_parquet(output_filepath, index=True)
+                    df = pd.concat([pd.read_parquet(chunk) for chunk in station_chunks])
+                    df.to_parquet(output_filepath, index=True, compression="zstd")
 
             # Clean up temporary directory
             shutil.rmtree(output_dir_temp)
@@ -872,7 +870,7 @@ class ClimateAnnAGNPSCoords:
 
             results_df = {}
 
-            for (lon, lat, station_id), group in df.groupby(['lon', 'lat', 'station_id']):
+            for (lon, lat, station_id), group in df_master.groupby(['lon', 'lat', 'station_id']):
                 results_df[station_id]['climate_data'] = group.copy()
                 results_df[station_id]['coords'] = (lon,lat)
 

@@ -61,6 +61,7 @@ license = {text = "MIT"}
 download-nldas2 = "cli.get_nldas_batch:main"
 aggregate-nldas2 = "cli.aggregate_nldas_batch_daily:cli_call"
 populate-nldas2-daily-db = "cli.populate_daily_aggregated_nldas2_to_db:cli_call"
+generate-nldas2-rod" = "cli.generate_daily_aggregated_nldas2_file_data_rod:cli_call"
 
 [build-system]
 requires = ["pdm-backend"]
