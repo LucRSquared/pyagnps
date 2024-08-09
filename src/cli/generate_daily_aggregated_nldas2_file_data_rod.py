@@ -19,7 +19,7 @@ from pyagnps import climate
 # from pyagnps.utils import log_to_file, get_current_time
 
 
-def main(START_DATE, END_DATE, coords, path_nldas_daily_files, saveformat, output_dir, MAXITER_GLOBAL):
+def main(START_DATE, END_DATE, coords, path_nldas_daily_files, saveformat, partition_size, output_dir, MAXITER_GLOBAL):
     """
     Parameters
     ----------
@@ -33,6 +33,8 @@ def main(START_DATE, END_DATE, coords, path_nldas_daily_files, saveformat, outpu
         Path to NLDAS-2 daily files
     saveformat: str
         csv, or parquet
+    partition_size: str
+        Size of manageable partitions, default "500MB"
     output_dir: str, Path
         Path to output directory
     """
@@ -52,6 +54,7 @@ def main(START_DATE, END_DATE, coords, path_nldas_daily_files, saveformat, outpu
 
             nldas_clm_daily.generate_annagnps_daily_climate_data_from_nldas_daily(
                                                             saveformat=saveformat,
+                                                            partition_size=partition_size,
                                                             output_dir=output_dir,
                                                             return_dataframes=False,
             )
@@ -103,6 +106,7 @@ def cli_call():
     parser.add_argument('--path_nldas_daily_files', help='Path to the directory with daily aggregated files', type=str)
     parser.add_argument('--output_dir',             help='Path to the directory where rods are saved',        type=str)
     parser.add_argument('--saveformat',             help='Format to save data rods as (csv or parquet)',      type=str, default="csv")
+    parser.add_argument('--partition_size',         help='Size of manageable partitions',                     type=str, default="500MB")
     parser.add_argument('--maxiter_global',         help='Maximum number of attempts',                        type=int, default=10)
     parser.add_argument('--lats', '-lt', nargs='+',
                         help="List of latitudes to extract (to be paired with matching lons)")
@@ -131,6 +135,7 @@ def cli_call():
         coords=coords,
         path_nldas_daily_files=args.path_nldas_daily_files,
         saveformat=args.saveformat,
+        partition_size=args.partition_size,
         output_dir=args.output_dir,
         MAXITER_GLOBAL=args.maxiter_global,
     )

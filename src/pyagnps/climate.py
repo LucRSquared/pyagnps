@@ -669,6 +669,7 @@ class ClimateAnnAGNPSCoords:
         return_dataframes = kwargs.get("return_dataframes", False)
         db_url = kwargs.get("db_url", None)
         db_table_name = kwargs.get("db_table_name", "climate_nldas2")
+        partition_size= kwargs.get("partition_size", "500MB")
         MAXITER_SINGLE_STATION = kwargs.get("MAXITER_SINGLE_STATION", 10)
 
         variables_to_keep_and_rename = {
@@ -814,7 +815,7 @@ class ClimateAnnAGNPSCoords:
         print("Repartitioning and processing in chunks...")
         # df_all = df_all.repartition(partition_size=int(total_memory * 0.01)) # Using 50% of total memory
         # df_all = df_all.repartition(partition_size=8 * 1024 * 1024) # Using 50% of total memory
-        df_all = df_all.repartition(partition_size="1GB")  # Adjust based on your system's capabilities
+        df_all = df_all.repartition(partition_size=partition_size)  # Adjust based on your system's capabilities
 
         print("Processing data...")
         results = df_all.map_partitions(process_partition, 
