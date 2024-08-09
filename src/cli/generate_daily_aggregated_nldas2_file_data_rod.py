@@ -19,7 +19,7 @@ from pyagnps import climate
 # from pyagnps.utils import log_to_file, get_current_time
 
 
-def main(START_DATE, END_DATE, coords, path_nldas_daily_files, saveformat, partition_size, delete_existing_chunks, output_dir, MAXITER_GLOBAL):
+def main(START_DATE, END_DATE, coords, path_nldas_daily_files, saveformat, partition_size, delete_existing_chunks, delete_existing_rods, output_dir, MAXITER_GLOBAL):
     """
     Parameters
     ----------
@@ -37,6 +37,8 @@ def main(START_DATE, END_DATE, coords, path_nldas_daily_files, saveformat, parti
         Size of manageable partitions, default "500MB"
     delete_existing_chunks: bool
         Delete existing temporary chunks if they exist
+    delete_existing_rods: bool
+        Delete existing data rods if they exist
     output_dir: str, Path
         Path to output directory
     """
@@ -58,6 +60,7 @@ def main(START_DATE, END_DATE, coords, path_nldas_daily_files, saveformat, parti
                                                             saveformat=saveformat,
                                                             partition_size=partition_size,
                                                             delete_existing_chunks=delete_existing_chunks,
+                                                            delete_existing_rods=delete_existing_rods,
                                                             output_dir=output_dir,
                                                             return_dataframes=False,
             )
@@ -111,7 +114,8 @@ def cli_call():
     parser.add_argument('--saveformat',             help='Format to save data rods as (csv or parquet)',      type=str, default="csv")
     parser.add_argument('--partition_size',         help='Size of manageable partitions',                     type=str, default="500MB")
     parser.add_argument('--maxiter_global',         help='Maximum number of attempts',                        type=int, default=10)
-    parser.add_argument('--delete_existing_chunks', help='Delete existing temporary chunks if they exist',    type=str, default=False)
+    parser.add_argument('--delete_existing_chunks', help='Delete existing temporary chunks if they exist',    default=False, action=argparse.BooleanOptionalAction)
+    parser.add_argument('--delete_existing_rods',   help='Delete existing data rods if they exist',           default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument('--lats', '-lt', nargs='+',
                         help="List of latitudes to extract (to be paired with matching lons)")
     parser.add_argument('--lons', '-ln', nargs='+',
@@ -141,6 +145,7 @@ def cli_call():
         saveformat=args.saveformat,
         partition_size=args.partition_size,
         delete_existing_chunks=args.delete_existing_chunks,
+        delete_existing_rods=args.delete_existing_rods,
         output_dir=args.output_dir,
         MAXITER_GLOBAL=args.maxiter_global,
     )

@@ -663,14 +663,15 @@ class ClimateAnnAGNPSCoords:
                     The keys are the station_id of each NDLAS-2 cell
         """
         # Unpack kwargs
-        output_dir = Path(kwargs.get("output_dir", Path.cwd()))
-        saveformat = kwargs.get("saveformat", None)
-        float_format = kwargs.get("float_format", "%.3f")
-        return_dataframes = kwargs.get("return_dataframes", False)
-        db_url = kwargs.get("db_url", None)
-        db_table_name = kwargs.get("db_table_name", "climate_nldas2")
-        partition_size= kwargs.get("partition_size", "500MB")
-        delete_existing_chunks = kwargs.get("delete_existing_chunks", True)
+        output_dir             = Path(kwargs.get("output_dir", Path.cwd()))
+        saveformat             = kwargs.get("saveformat", None)
+        float_format           = kwargs.get("float_format", "%.3f")
+        return_dataframes      = kwargs.get("return_dataframes", False)
+        db_url                 = kwargs.get("db_url", None)
+        db_table_name          = kwargs.get("db_table_name", "climate_nldas2")
+        partition_size         = kwargs.get("partition_size", "500MB")
+        delete_existing_chunks = kwargs.get("delete_existing_chunks", False)
+        delete_existing_rods   = kwargs.get("delete_existing_rods", False)
         MAXITER_SINGLE_STATION = kwargs.get("MAXITER_SINGLE_STATION", 10)
 
         variables_to_keep_and_rename = {
@@ -854,6 +855,10 @@ class ClimateAnnAGNPSCoords:
 
             for station_id in tqdm(unique_stations, desc="Writing final station files"):
                 output_filepath = output_dir / f"climate_daily_{station_id}.{saveformat}"
+                
+                if output_filepath.exists() and not(delete_existing_rods):
+                    continue
+                
                 station_chunks = list(Path(output_dir_temp).glob(f"climate_daily_{station_id}_chunk_*.{saveformat}"))
 
                 if saveformat == 'csv':
