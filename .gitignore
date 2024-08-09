@@ -6,11 +6,16 @@ inputs/TNM_DEM/*.7z
 inputs/TNM_DEM/*.tif
 inputs/soil/gSSURGO/*
 inputs/soil/gNATSGO/*
-inputs/climate/FORA/*
+inputs/climate/FORA*/*
 inputs/management/*.tif
+inputs/soil/NITA/NITA_User_Manual.pdf
+inputs/annagnps/test_1_reach_annagnps_outputs/*
 outputs/topagnps/*
 outputs/soil_data_market/shapefile/*
 outputs/soil_data_market/soil/*
+outputs/soil_data_market/db_population/thuc_cells_no_soil.json
+outputs/climate/*
+ancillary_files/*.gpkg
 aiohttp_cache.sqlite
 */__pycache__/*
 nohup.out
@@ -25,6 +30,5 @@ inputs/soil/ALL_US_v3_SSURGO_STATSGO2_RSS/*
 .pdm-python
 build
 tmp/
-outputs/soil_data_market/db_population/thuc_cells_no_soil.json
-inputs/soil/NITA/NITA_User_Manual.pdf
-inputs/annagnps/test_1_reach_annagnps_outputs/*
+
+
