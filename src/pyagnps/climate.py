@@ -670,6 +670,7 @@ class ClimateAnnAGNPSCoords:
         db_url = kwargs.get("db_url", None)
         db_table_name = kwargs.get("db_table_name", "climate_nldas2")
         partition_size= kwargs.get("partition_size", "500MB")
+        delete_existing_chunks = kwargs.get("delete_existing_chunks", True)
         MAXITER_SINGLE_STATION = kwargs.get("MAXITER_SINGLE_STATION", 10)
 
         variables_to_keep_and_rename = {
@@ -688,9 +689,10 @@ class ClimateAnnAGNPSCoords:
                 # Create temp directory
                 output_dir_temp.mkdir(parents=True, exist_ok=True)
 
-                # Delete the contents of the temp directory
-                for f in output_dir_temp.iterdir():
-                    f.unlink()
+                if delete_existing_chunks:
+                    # Delete the contents of the temp directory
+                    for f in output_dir_temp.iterdir():
+                        f.unlink()
 
 
         # Select and process all data at once
