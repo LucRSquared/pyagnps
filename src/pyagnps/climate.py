@@ -839,7 +839,9 @@ class ClimateAnnAGNPSCoords:
         all_results = []
         for partition_idx in tqdm(range(df_all.npartitions), desc="Writing chunks by partition", position=0, leave=True):
             partition = results.partitions[partition_idx].compute()
-            all_results.extend(partition)
+
+            if return_dataframes:
+                all_results.extend(partition)
 
         # Handle results
         if saveformat in ['csv', 'parquet']:
