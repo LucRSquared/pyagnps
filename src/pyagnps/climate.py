@@ -18,6 +18,8 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 
+import pyarrow as pa
+
 from sqlalchemy import URL, create_engine, text as sql_text
 
 from shapely.geometry import Point
@@ -785,7 +787,8 @@ class ClimateAnnAGNPSCoords:
                     
                     if output_filepath.exists():
                         continue
-                    
+
+                    group = group.sort_index()
                     if saveformat == 'csv':
                         group.to_csv(output_filepath, index=False, float_format=float_format)
                     elif saveformat == 'parquet':
@@ -869,7 +872,13 @@ class ClimateAnnAGNPSCoords:
                                     next(infile)  # Skip header for all but first chunk
                                 outfile.write(infile.read())
                 elif saveformat == 'parquet':
-                    df = pd.concat([pd.read_parquet(chunk) for chunk in station_chunks])
+                    # Use pyarrow library directly to optimize the process of reading the files
+                    station_chunks_tables = [pa.parquet.read_table(chunk) for chunk in station_chunks]
+                    station_concatenated = pa.concat_tables(station_chunks_tables)
+
+                    df = station_concatenated.to_pandas()
+
+                    # df = pd.concat([pd.read_parquet(chunk, engine="pyarrow") for chunk in station_chunks])
                     df = df.sort_index()
                     df.to_parquet(output_filepath, index=True, compression="zstd")
 
