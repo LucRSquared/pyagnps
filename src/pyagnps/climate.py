@@ -870,6 +870,7 @@ class ClimateAnnAGNPSCoords:
                                 outfile.write(infile.read())
                 elif saveformat == 'parquet':
                     df = pd.concat([pd.read_parquet(chunk) for chunk in station_chunks])
+                    df = df.sort_index()
                     df.to_parquet(output_filepath, index=True, compression="zstd")
 
             # Clean up temporary directory
