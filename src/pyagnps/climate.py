@@ -665,16 +665,17 @@ class ClimateAnnAGNPSCoords:
                     The keys are the station_id of each NDLAS-2 cell
         """
         # Unpack kwargs
-        output_dir             = Path(kwargs.get("output_dir", Path.cwd()))
-        saveformat             = kwargs.get("saveformat", None)
-        float_format           = kwargs.get("float_format", "%.3f")
-        return_dataframes      = kwargs.get("return_dataframes", False)
-        db_url                 = kwargs.get("db_url", None)
-        db_table_name          = kwargs.get("db_table_name", "climate_nldas2")
-        partition_size         = kwargs.get("partition_size", "500MB")
-        delete_existing_chunks = kwargs.get("delete_existing_chunks", False)
-        delete_existing_rods   = kwargs.get("delete_existing_rods", False)
-        MAXITER_SINGLE_STATION = kwargs.get("MAXITER_SINGLE_STATION", 10)
+        output_dir                     = Path(kwargs.get("output_dir", Path.cwd()))
+        saveformat                     = kwargs.get("saveformat", None)
+        float_format                   = kwargs.get("float_format", "%.3f")
+        return_dataframes              = kwargs.get("return_dataframes", False)
+        db_url                         = kwargs.get("db_url", None)
+        db_table_name                  = kwargs.get("db_table_name", "climate_nldas2")
+        partition_size                 = kwargs.get("partition_size", "500MB")
+        assemble_chunks_in_single_rods = kwargs.get("assemble_chunks_in_rods", True)
+        delete_existing_chunks         = kwargs.get("delete_existing_chunks", False)
+        delete_existing_rods           = kwargs.get("delete_existing_rods", False)
+        # MAXITER_SINGLE_STATION = kwargs.get("MAXITER_SINGLE_STATION", 10)
 
         variables_to_keep_and_rename = {
             "PotEvap": "Potential_ET", "Rainf": "Precip", 
@@ -850,7 +851,7 @@ class ClimateAnnAGNPSCoords:
                 all_results.extend(partition)
 
         # Handle results
-        if saveformat in ['csv', 'parquet']:
+        if saveformat in ['csv', 'parquet'] and assemble_chunks_in_single_rods:
             print("Assembling final output files...")
 
             all_chunks = Path(output_dir_temp).glob(f"climate_daily_*_chunk_*.{saveformat}")
@@ -873,12 +874,12 @@ class ClimateAnnAGNPSCoords:
                                 outfile.write(infile.read())
                 elif saveformat == 'parquet':
                     # Use pyarrow library directly to optimize the process of reading the files
-                    station_chunks_tables = [pa.parquet.read_table(chunk) for chunk in station_chunks]
-                    station_concatenated = pa.concat_tables(station_chunks_tables)
+                    # station_chunks_tables = [pa.parquet.read_table(chunk) for chunk in station_chunks]
+                    # station_concatenated = pa.concat_tables(station_chunks_tables)
 
-                    df = station_concatenated.to_pandas()
+                    # df = station_concatenated.to_pandas()
 
-                    # df = pd.concat([pd.read_parquet(chunk, engine="pyarrow") for chunk in station_chunks])
+                    df = pd.concat([pd.read_parquet(chunk, engine="pyarrow") for chunk in station_chunks])
                     df = df.sort_index()
                     df.to_parquet(output_filepath, index=True, compression="zstd")
 

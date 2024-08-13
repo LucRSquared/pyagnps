@@ -19,7 +19,7 @@ from pyagnps import climate
 # from pyagnps.utils import log_to_file, get_current_time
 
 
-def main(START_DATE, END_DATE, coords, path_nldas_daily_files, saveformat, partition_size, delete_existing_chunks, delete_existing_rods, output_dir, MAXITER_GLOBAL):
+def main(START_DATE, END_DATE, coords, path_nldas_daily_files, saveformat, partition_size, delete_existing_chunks, delete_existing_rods, assemble_chunks_in_single_rods, output_dir, MAXITER_GLOBAL):
     """
     Parameters
     ----------
@@ -39,6 +39,9 @@ def main(START_DATE, END_DATE, coords, path_nldas_daily_files, saveformat, parti
         Delete existing temporary chunks if they exist
     delete_existing_rods: bool
         Delete existing data rods if they exist
+    assemble_chunks_in_single_rods: bool
+        Default True. Assemble chunks in single data rods. 
+        Sometimes you don't want to do that but mostly you do.
     output_dir: str, Path
         Path to output directory
     """
@@ -61,6 +64,7 @@ def main(START_DATE, END_DATE, coords, path_nldas_daily_files, saveformat, parti
                                                             partition_size=partition_size,
                                                             delete_existing_chunks=delete_existing_chunks,
                                                             delete_existing_rods=delete_existing_rods,
+                                                            assemble_chunks_in_single_rods=assemble_chunks_in_single_rods,
                                                             output_dir=output_dir,
                                                             return_dataframes=False,
             )
@@ -107,15 +111,17 @@ def cli_call():
     parser = argparse.ArgumentParser(description="Query climate data from NLDAS2 and populate it to the AIMS database")
 
     # THUCS can be provided directly in the command line or if it's a path to a file with a .csv extension (without headers) it will read it
-    parser.add_argument('--start_date',             help='Start date in YYYY-MM-DD format',                   type=str, default="2000-01-01")
-    parser.add_argument('--end_date',               help='End date in YYYY-MM-DD format',                     type=str, default="2022-12-31")
-    parser.add_argument('--path_nldas_daily_files', help='Path to the directory with daily aggregated files', type=str)
-    parser.add_argument('--output_dir',             help='Path to the directory where rods are saved',        type=str)
-    parser.add_argument('--saveformat',             help='Format to save data rods as (csv or parquet)',      type=str, default="csv")
-    parser.add_argument('--partition_size',         help='Size of manageable partitions',                     type=str, default="500MB")
-    parser.add_argument('--maxiter_global',         help='Maximum number of attempts',                        type=int, default=10)
-    parser.add_argument('--delete_existing_chunks', help='Delete existing temporary chunks if they exist',    default=False, action=argparse.BooleanOptionalAction)
-    parser.add_argument('--delete_existing_rods',   help='Delete existing data rods if they exist',           default=False, action=argparse.BooleanOptionalAction)
+    parser.add_argument('--start_date',                     help='Start date in YYYY-MM-DD format',                                         type=str, default="2000-01-01")
+    parser.add_argument('--end_date',                       help='End date in YYYY-MM-DD format',                                           type=str, default="2022-12-31")
+    parser.add_argument('--path_nldas_daily_files',         help='Path to the directory with daily aggregated files',                       type=str)
+    parser.add_argument('--output_dir',                     help='Path to the directory where rods are saved',                              type=str)
+    parser.add_argument('--saveformat',                     help='Format to save data rods as (csv or parquet)',                            type=str, default="csv")
+    parser.add_argument('--partition_size',                 help='Size of manageable partitions',                                           type=str, default="500MB")
+    parser.add_argument('--maxiter_global',                 help='Maximum number of attempts',                                              type=int, default=10)
+    parser.add_argument('--delete_existing_chunks',         help='Delete existing temporary chunks if they exist',                          default=False, action=argparse.BooleanOptionalAction)
+    parser.add_argument('--delete_existing_rods',           help='Delete existing data rods if they exist',                                 default=False, action=argparse.BooleanOptionalAction)
+    parser.add_argument('--assemble_chunks_in_single_rods', help='Perform the final step of assembling the chunks into unified data rods.', default=True, action=argparse.BooleanOptionalAction)
+    
     parser.add_argument('--lats', '-lt', nargs='+',
                         help="List of latitudes to extract (to be paired with matching lons)")
     parser.add_argument('--lons', '-ln', nargs='+',
@@ -146,6 +152,7 @@ def cli_call():
         partition_size=args.partition_size,
         delete_existing_chunks=args.delete_existing_chunks,
         delete_existing_rods=args.delete_existing_rods,
+        assemble_chunks_in_single_rods=args.assemble_chunks_in_single_rods,
         output_dir=args.output_dir,
         MAXITER_GLOBAL=args.maxiter_global,
     )
