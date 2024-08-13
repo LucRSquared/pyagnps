@@ -672,7 +672,7 @@ class ClimateAnnAGNPSCoords:
         db_url                         = kwargs.get("db_url", None)
         db_table_name                  = kwargs.get("db_table_name", "climate_nldas2")
         partition_size                 = kwargs.get("partition_size", "500MB")
-        assemble_chunks_in_single_rods = kwargs.get("assemble_chunks_in_rods", True)
+        assemble_chunks_in_single_rods = kwargs.get("assemble_chunks_in_single_rods", True)
         delete_existing_chunks         = kwargs.get("delete_existing_chunks", False)
         delete_existing_rods           = kwargs.get("delete_existing_rods", False)
         # MAXITER_SINGLE_STATION = kwargs.get("MAXITER_SINGLE_STATION", 10)
