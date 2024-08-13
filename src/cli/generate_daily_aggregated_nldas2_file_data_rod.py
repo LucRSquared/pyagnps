@@ -120,7 +120,7 @@ def cli_call():
     parser.add_argument('--maxiter_global',                 help='Maximum number of attempts',                                              type=int, default=10)
     parser.add_argument('--delete_existing_chunks',         help='Delete existing temporary chunks if they exist',                          default=False, action=argparse.BooleanOptionalAction)
     parser.add_argument('--delete_existing_rods',           help='Delete existing data rods if they exist',                                 default=False, action=argparse.BooleanOptionalAction)
-    parser.add_argument('--assemble_chunks_in_single_rods', help='Perform the final step of assembling the chunks into unified data rods.', default=True, action=argparse.BooleanOptionalAction)
+    parser.add_argument('--assemble_chunks_in_single_rods', help='Perform the final step of assembling the chunks into unified data rods.', default=False, action=argparse.BooleanOptionalAction)
     
     parser.add_argument('--lats', '-lt', nargs='+',
                         help="List of latitudes to extract (to be paired with matching lons)")
