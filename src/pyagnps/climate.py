@@ -672,7 +672,7 @@ class ClimateAnnAGNPSCoords:
         db_url                         = kwargs.get("db_url", None)
         db_table_name                  = kwargs.get("db_table_name", "climate_nldas2")
         partition_size                 = kwargs.get("partition_size", "500MB")
-        assemble_chunks_in_single_rods = kwargs.get("assemble_chunks_in_single_rods", True)
+        assemble_chunks_in_single_rods = kwargs.get("assemble_chunks_in_single_rods", False)
         delete_existing_chunks         = kwargs.get("delete_existing_chunks", False)
         delete_existing_rods           = kwargs.get("delete_existing_rods", False)
         # MAXITER_SINGLE_STATION = kwargs.get("MAXITER_SINGLE_STATION", 10)
@@ -754,7 +754,7 @@ class ClimateAnnAGNPSCoords:
             if saveformat == "database":
                 engine = engine_creator()
 
-            for (lon, lat), group in tqdm(df.groupby(['lon', 'lat']), position=1, leave=True, desc="Processing stations in current partition"):
+            for (lon, lat), group in tqdm(df.groupby(['lon', 'lat']), position=1, leave=True, desc="Processing stations in current partition", ascii=True):
                 _, _, station_id = get_grid_position(lon, lat)
                 
                 if saveformat == 'database':
@@ -784,6 +784,8 @@ class ClimateAnnAGNPSCoords:
                 
                 elif saveformat in ['csv', 'parquet']:
                     # Write to temporary file
+                    # start_date_stamp = df.index.min().strftime("%Y-%m-%d")
+                    # end_date_stamp = df.index.max().strftime("%Y-%m-%d")
                     output_filepath = output_dir_temp / f"climate_daily_{station_id}_chunk_{df.index[0].year:04}-{df.index[0].month:02}-{df.index[0].day:02}_{df.index[-1].year:04}-{df.index[-1].month:02}-{df.index[-1].day:02}.{saveformat}"
                     
                     if output_filepath.exists():
@@ -2288,6 +2290,8 @@ def lon_lat_from_station_id(station_id,
                             lon_min=-124.9375, lon_max=-67.0625, 
                             lat_min=25.0625, lat_max=52.9375, 
                             total_columns=464, total_rows=224):
+    
+    station_id = int(station_id)
 
     # Calculate the step size for longitude and latitude
     lon_step = (lon_max - lon_min) / (total_columns - 1)
