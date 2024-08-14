@@ -132,11 +132,12 @@ def populate_parquet_to_db(**kwargs):
                     port=creds['port'],
                     database=creds['database']
                     )
-    
+
+    print("Scanning for all available parquet files...") 
     all_chunks = list(rods_dir.glob(pattern))
 
+    print("Gathering station information...")
     stations = {}
-
     for chunk in all_chunks:
         station_id = re.findall(r'climate_daily_(.*?)_', str(chunk))[0]
         if station_id in stations:
@@ -147,7 +148,8 @@ def populate_parquet_to_db(**kwargs):
     engine_creator = lambda : climate.create_engine_with_pool(db_url, max_connections=100)
 
     engine = engine_creator()
-
+    
+    print("Writing files to database...")
     for station_id, chunk_files in tqdm(stations.items(), desc="Writing chunks to database", ascii=True):
     
         df_station = pd.concat([pd.read_parquet(file, engine='pyarrow') for file in chunk_files])
@@ -182,6 +184,8 @@ def populate_parquet_to_db(**kwargs):
                         chunk.unlink()
             except Exception as e:
                 print(f"Couldn't insert {station_id}: {e} \nContinuing")
+
+    print("All done!")
 
 def open_creds_dict(path_to_json_creds):
     with open(path_to_json_creds, "r") as f:
