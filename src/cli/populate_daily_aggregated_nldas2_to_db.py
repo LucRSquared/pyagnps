@@ -283,6 +283,7 @@ def cli_call_pop_parquet():
 if __name__ == "__main__":
     import sys
     if len(sys.argv) > 1 and sys.argv[1] == "pop_parquet":
+        sys.argv.pop(1)  # Remove the 'pop_parquet' argument
         cli_call_pop_parquet()
     else:
         cli_call()
