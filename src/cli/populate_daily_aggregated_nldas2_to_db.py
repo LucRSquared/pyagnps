@@ -133,7 +133,7 @@ def populate_parquet_to_db(**kwargs):
                     database=creds['database']
                     )
 
-    print("Scanning for all available parquet files...") 
+    print(f"Scanning for all available parquet files with pattern {pattern}...") 
     all_chunks = list(rods_dir.glob(pattern))
 
     print("Gathering station information...")
@@ -271,6 +271,7 @@ def cli_call_pop_parquet():
     parser.add_argument('--delete_chunks_on_sucess', help='If True, the chunks will be deleted after being successfully processed.', type=bool, default=False)
     args = parser.parse_args()
 
+    print("Starting...")
     populate_parquet_to_db(
         rods_dir=args.rods_dir,
         path_to_creds=args.path_to_creds,
@@ -280,4 +281,8 @@ def cli_call_pop_parquet():
     )
 
 if __name__ == "__main__":
-    cli_call()
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "pop_parquet":
+        cli_call_pop_parquet()
+    else:
+        cli_call()
