@@ -784,9 +784,9 @@ class ClimateAnnAGNPSCoords:
                 
                 elif saveformat in ['csv', 'parquet']:
                     # Write to temporary file
-                    # start_date_stamp = df.index.min().strftime("%Y-%m-%d")
-                    # end_date_stamp = df.index.max().strftime("%Y-%m-%d")
-                    output_filepath = output_dir_temp / f"climate_daily_{station_id}_chunk_{df.index[0].year:04}-{df.index[0].month:02}-{df.index[0].day:02}_{df.index[-1].year:04}-{df.index[-1].month:02}-{df.index[-1].day:02}.{saveformat}"
+                    start_date_stamp = df.index.min().strftime("%Y-%m-%d")
+                    end_date_stamp = df.index.max().strftime("%Y-%m-%d")
+                    output_filepath = output_dir_temp / f"climate_daily_{station_id}_chunk_{start_date_stamp}-{end_date_stamp}.{saveformat}"
                     
                     if output_filepath.exists():
                         continue
