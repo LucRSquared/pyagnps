@@ -106,13 +106,16 @@ cells_geometry = cells_geometry.dissolve(by='cell_id')
 reaches_geometry = reaches_geometry.dissolve(by='reach_id')
 
 cells_list = cells_geometry['cell_id'].unique() # List of cell_ids
+cells_string = ", ".join(map(str, cells_list.tolist()))
+
 reaches_list = reaches_geometry['reach_id'].unique()
+reaches_string = ", ".join(map(str, reaches_list.tolist()))
 
-cells_geo_query = f"SELECT * FROM thuc_{thuc_id}_annagnps_cell_data_section WHERE cell_id in {*cells_list,}"
-reaches_geo_query = f"SELECT * FROM thuc_{thuc_id}_annagnps_reach_data_section WHERE reach_id in {*reaches_list,}"
+cells_data_section = f"SELECT * FROM thuc_{thuc_id}_annagnps_cell_data_section WHERE cell_id in ({cells_string})"
+reaches_data_section = f"SELECT * FROM thuc_{thuc_id}_annagnps_reach_data_section WHERE reach_id in ({reaches_string})"
 
-df_cells = pd.read_sql_query(sql=sql_text(cells_geo_query), con=engine.connect())
-df_reaches = pd.read_sql_query(sql=sql_text(reaches_geo_query), con=engine.connect())
+df_cells = pd.read_sql_query(sql=sql_text(cells_data_section), con=engine.connect())
+df_reaches = pd.read_sql_query(sql=sql_text(reaches_data_section), con=engine.connect())
 
 df_reaches_valid = pyagnps.annagnps.make_df_reaches_valid(df_reaches)
 
@@ -122,10 +125,11 @@ reaches_geometry = reaches_geometry.merge(df_reaches, on='reach_id')
 #------------------- SOIL -------------------------
 
 soil_ids_list = df_cells['soil_id'].unique()
+soil_ids_string = ", ".join(map(str, soil_ids_list.tolist()))
 
-query_soil = f"""SELECT * FROM usa_valid_soil_data WHERE "Soil_ID" in {*soil_ids_list,}"""
-query_soil_layers = f"""SELECT * FROM usa_valid_soil_layers_data WHERE "Soil_ID" in {*soil_ids_list,}"""
-query_raw = f"""SELECT * FROM raw_nrcs_soil_data WHERE "mukey" in {*soil_ids_list,}"""
+query_soil = f"""SELECT * FROM usa_valid_soil_data WHERE "Soil_ID" in ({soil_ids_string})"""
+query_soil_layers = f"""SELECT * FROM usa_valid_soil_layers_data WHERE "Soil_ID" in ({soil_ids_string})"""
+query_raw = f"""SELECT * FROM raw_nrcs_soil_data WHERE "mukey" in ({soil_ids_string})"""
 
 df_soil_data = pd.read_sql_query(sql=sql_text(query_soil), con=engine.connect())
 df_soil_layers_data = pd.read_sql_query(sql=sql_text(query_soil_layers), con=engine.connect())\
@@ -136,12 +140,15 @@ df_raw = pd.read_sql_query(sql=sql_text(query_raw), con=engine.connect())
 #--------------------- MANAGEMENT ----------------------
 
 mgmt_field_ids_list = df_cells['mgmt_field_id'].unique()
+mgmt_field_ids_string = ", ".join(f"'{m}'" for m in mgmt_field_ids_list)
 
-query_mgmt_field_data = f"""SELECT * FROM annagnps_mgmt_field WHERE "Field_ID" in {*mgmt_field_ids_list,}"""
+query_mgmt_field_data = f"""SELECT * FROM annagnps_mgmt_field WHERE "Field_ID" in ({mgmt_field_ids_string})"""
 df_mgmt_field = pd.read_sql_query(sql=sql_text(query_mgmt_field_data), con=engine.connect())
 
 mgmt_schedule_ids_list = df_mgmt_field['Mgmt_Schd_ID'].unique()
-query_mgmt_field_data = f"""SELECT * FROM annagnps_mgmt_schd WHERE "Mgmt_Schd_ID" in {*mgmt_schedule_ids_list,}"""
+mgmt_schedule_ids_string = ", ".join(f"'{m}'" for m in mgmt_schedule_ids_list)
+
+query_mgmt_field_data = f"""SELECT * FROM annagnps_mgmt_schd WHERE "Mgmt_Schd_ID" in ({mgmt_schedule_ids_string})"""
 df_mgmt_schd = pd.read_sql_query(sql=sql_text(query_mgmt_field_data), con=engine.connect())
 
 mgmt_crop_ids_list     = df_mgmt_schd['New_Crop_ID'].dropna().unique()
@@ -149,13 +156,18 @@ mgmt_non_crop_ids_list = df_mgmt_schd['New_Non-Crop_ID'].dropna().unique()
 mgmt_oper_ids_list     = df_mgmt_schd['Mgmt_Operation_ID'].dropna().unique()
 roc_ids_list           = df_mgmt_schd['Curve_Number_ID'].dropna().unique()
 
-query_mgmt_crop_data        = f"""SELECT * FROM annagnps_crop WHERE "Crop_ID" in {*mgmt_crop_ids_list,}"""
-query_mgmt_crop_growth_data = f"""SELECT * FROM annagnps_crop_growth WHERE "Crop_Growth_ID" in {*mgmt_crop_ids_list,}"""
+mgmt_crop_ids_string = ", ".join(f"'{m}'" for m in mgmt_crop_ids_list)
+mgmt_non_crop_ids_string = ", ".join(f"'{m}'" for m in mgmt_non_crop_ids_list)
+mgmt_oper_ids_string = ", ".join(f"'{m}'" for m in mgmt_oper_ids_list)
+roc_ids_string = ", ".join(f"'{m}'" for m in roc_ids_list)
 
-query_mgmt_non_crop_data    = f"""SELECT * FROM annagnps_non_crop WHERE "Non-Crop_ID" in {*mgmt_non_crop_ids_list,}"""
-query_mgmt_oper_data        = f"""SELECT * FROM annagnps_mgmt_oper WHERE "Mgmt_Operation_ID" in {*mgmt_oper_ids_list,}"""
+query_mgmt_crop_data        = f"""SELECT * FROM annagnps_crop WHERE "Crop_ID" in ({mgmt_crop_ids_string})"""
+query_mgmt_crop_growth_data = f"""SELECT * FROM annagnps_crop_growth WHERE "Crop_Growth_ID" in ({mgmt_crop_ids_string})"""
 
-query_roc_data              = f"""SELECT * FROM annagnps_runoff_curve WHERE "Curve_Number_ID" in {*roc_ids_list,}"""
+query_mgmt_non_crop_data    = f"""SELECT * FROM annagnps_non_crop WHERE "Non-Crop_ID" in ({mgmt_non_crop_ids_string})"""
+query_mgmt_oper_data        = f"""SELECT * FROM annagnps_mgmt_oper WHERE "Mgmt_Operation_ID" in ({mgmt_oper_ids_string})"""
+
+query_roc_data              = f"""SELECT * FROM annagnps_runoff_curve WHERE "Curve_Number_ID" in ({roc_ids_string})"""
 
 df_mgmt_crop        = pd.read_sql_query(sql=sql_text(query_mgmt_crop_data), con=engine.connect())
 df_mgmt_crop_growth = pd.read_sql_query(sql=sql_text(query_mgmt_crop_growth_data), con=engine.connect())
