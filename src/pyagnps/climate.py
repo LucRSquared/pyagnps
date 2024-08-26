@@ -2290,6 +2290,8 @@ def lon_lat_from_station_id(station_id,
                             lon_min=-124.9375, lon_max=-67.0625, 
                             lat_min=25.0625, lat_max=52.9375, 
                             total_columns=464, total_rows=224):
+    """
+    Calculate the longitude and latitude of a given NLDAS-2 station ID  within a specified range."""
     
     station_id = int(station_id)
 

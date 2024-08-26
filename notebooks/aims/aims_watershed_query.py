@@ -148,8 +148,8 @@ df_mgmt_field = pd.read_sql_query(sql=sql_text(query_mgmt_field_data), con=engin
 mgmt_schedule_ids_list = df_mgmt_field['Mgmt_Schd_ID'].unique()
 mgmt_schedule_ids_string = ", ".join(f"'{m}'" for m in mgmt_schedule_ids_list)
 
-query_mgmt_field_data = f"""SELECT * FROM annagnps_mgmt_schd WHERE "Mgmt_Schd_ID" in ({mgmt_schedule_ids_string})"""
-df_mgmt_schd = pd.read_sql_query(sql=sql_text(query_mgmt_field_data), con=engine.connect())
+query_mgmt_schd_data = f"""SELECT * FROM annagnps_mgmt_schd WHERE "Mgmt_Schd_ID" in ({mgmt_schedule_ids_string})"""
+df_mgmt_schd = pd.read_sql_query(sql=sql_text(query_mgmt_schd_data), con=engine.connect())
 
 mgmt_crop_ids_list     = df_mgmt_schd['New_Crop_ID'].dropna().unique()
 mgmt_non_crop_ids_list = df_mgmt_schd['New_Non-Crop_ID'].dropna().unique()
