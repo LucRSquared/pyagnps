@@ -1097,6 +1097,71 @@ class ClimateAnnAGNPSCoords:
 
         return results_df if return_dataframes else None
 
+    def generate_annagnps_daily_climate_data_from_db(self, engine, table="climate_nldas2", station_id=None):
+        """
+        This function queries a database with a table (default name climate_nldas2) that has 
+        columns already in the AnnAGNPS climate daily format.
+
+        engine is a SQLAlchemy engine connection object to connect to the database
+
+        If the NLDAS-2 station_id is provided it will be used instead of the x, y coordinates in the class
+        """
+
+        start_date = self.start_input
+        end_date   = self.end_input
+
+        if station_id is None:
+            lon, lat = self.coords
+
+            query =f"""
+                SELECT
+                    month, day, year,
+                    max_air_temperature, min_air_temperature,
+                    precip,
+                    dew_point,
+                    sky_cover,
+                    wind_speed,
+                    wind_direction,
+                    solar_radiation,
+                    storm_type_id,
+                    potential_et,
+                    actual_et,
+                    input_units_code
+                FROM {table}
+                WHERE 
+                    station_id = (SELECT station_id FROM find_nearest_nldas2_station({lon}, {lat}))
+                AND date >= '{start_date}' AND date <= '{end_date}';
+                """
+        else:
+
+            query =f"""
+                SELECT
+                    month, day, year,
+                    max_air_temperature, min_air_temperature,
+                    precip,
+                    dew_point,
+                    sky_cover,
+                    wind_speed,
+                    wind_direction,
+                    solar_radiation,
+                    storm_type_id,
+                    potential_et,
+                    actual_et,
+                    input_units_code
+                FROM {table}
+                WHERE 
+                    station_id = '{station_id}'
+                AND 
+                    date >= '{start_date}' AND date <= '{end_date}';
+                """
+
+        df_daily = pd.read_sql(
+            sql=sql_text(query),
+            con=engine.connect()
+        )
+
+        return df_daily
+
 
     def _select_cmip_coords_timeslice_data(self):
         """
