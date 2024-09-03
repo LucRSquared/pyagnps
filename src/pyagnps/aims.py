@@ -507,6 +507,8 @@ class AIMSWatershed:
                                 .drop_duplicates(subset='cell_id')#.set_index('cell_id')
         
         secondary_climate_ids = gdf_station_points.merge(secondary_climate_ids, left_on=column_station_id_name, right_on='secondary_climate_file_id')
+        secondary_climate_ids.drop(columns=[column_station_id_name], inplace=True)
+
         secondary_climate_ids = secondary_climate_ids.set_index('cell_id')
         secondary_climate_ids = secondary_climate_ids.to_crs('epsg:4326')
 
@@ -531,26 +533,45 @@ class AIMSWatershed:
 
         date_mode = kwargs.get("date_mode", "local")
         overwrite = kwargs.get("overwrite", True)
+        table     = kwargs.get("table", "climate_nldas2")
         
         self.reset_watershed_secondary_climate_ids()
+
+        # Create a placeholder climate object
+        clm = climate.ClimateAnnAGNPSCoords(coords=None,
+                                            start=self.start_date,
+                                            end=self.end_date)
+        
+
+        if 'cmip5' in self.climate_method: # CHECK THE LOGIC HERE FOR WHEN cmip_pts is loaded. ADD kwargs to identify function
+            path_to_cmip_dir = kwargs.get("path_to_cmip_dir", None)
+            path_to_cmip_raster_points_clim_id = kwargs.get("path_to_cmip_station_points_id", None)
+
+            if path_to_cmip_raster_points_clim_id is None:
+                path_to_cmip_raster_points_clim_id = path_to_cmip_dir / "cmip5_maca_v2_metdata_pts_clim_ids.gpkg"
+
+            self.load_cmip5_maca_station_points_clim_id(path_to_cmip_raster_points_clim_id, 
+                                                        path_to_cmip5_data_dir=path_to_cmip_dir)            
+
+            clm.read_cmip5_maca_data(path_to_cmip_dir.glob("*/*.nc"))
+
         self.identify_secondary_climate_ids()
         self.update_cell_data_section_with_secondary_climate_ids()
 
-        if 'cmip' in self.climate_method:
-            path_to_cmip_dir = kwargs.get("path_to_cmip_dir", None)
-            path_to_cmip_raster_points_clim_id = kwargs.get("path_to_cmip_points_id", None)
-
         climate_station_points = self.secondary_climate_ids
+
+        # Unique rows
+        climate_station_points = climate_station_points.drop_duplicates(subset=['secondary_climate_file_id'])
         
         climate_dir = self.input_folders['climate']
 
         for feature in tqdm(climate_station_points.iterfeatures(), total=len(climate_station_points)):
 
-            x, y = feature['geometry']['coordinates']
+            x, y    = feature['geometry']['coordinates']
+            clim_id = feature['properties']['secondary_climate_file_id']
 
             if self.climate_method == 'nldas2_data_rods':
                 
-                clim_id = feature['properties']['nldas2_grid_ID']
                 climate_station_name = f"NLDAS-2 Grid ID {clim_id}. Queried with Hydrology Data Rods."
 
                 clm = climate.ClimateAnnAGNPSCoords(coords=(x,y), 
@@ -560,16 +581,20 @@ class AIMSWatershed:
                 # implement with data rods query
             elif self.climate_method == 'nldas2_database':
 
-                clim_id = feature['properties']['nldas2_grid_ID']
+                
                 climate_station_name = f"NLDAS-2 Grid ID {clim_id}. From AIMS Database."
 
-                pass
-                # implement with in-house database query
+                df = climate.query_annagnps_climate_timeseries_db(station_id=clim_id,
+                                                                  engine=self.engine,
+                                                                  table=table,
+                                                                  start_date=self.start_date,
+                                                                  end_date=self.end_date)
+
             elif self.climate_method == 'cmip5':
 
-                clim_id = feature['properties']['clim_id']
                 climate_station_name = f"CMIP5 MACAv2METDATA raster ID {clim_id}"
                 
+                # THIS clm NEEDS TO COME FROM SOMEWHERE!
                 clm.update_coords_start_end_dates(coords=(x,y), 
                                                   start=self.start_date, end=self.end_date, 
                                                   date_mode=date_mode)
@@ -602,12 +627,18 @@ class AIMSWatershed:
         # After the loop copy the last climate station to have one global station for AnnAGNPS to run
         # Even if it won't be used
 
+        # Write climate_daily file
+        global_climate_path = climate_dir / f"climate_daily.csv"
+
+        if not(global_climate_path.exists()) or overwrite:
+            df.to_csv(global_climate_path, index=False, float_format="%.3f")
+
         global_station_path = climate_dir / f'climate_station.csv'
 
         if not(global_station_path.exists()) or overwrite:
             global_station = copy.deepcopy(climate_station['climate_station'])
-            global_station['climate_station']['output_filepath'] = global_station_path
-            climate.generate_climate_station_file(**global_station['climate_station'])
+            global_station['output_filepath'] = global_station_path
+            climate.generate_climate_station_file(**global_station)
         
 
 def open_creds_dict(path_to_json_creds):

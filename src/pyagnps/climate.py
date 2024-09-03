@@ -2509,6 +2509,70 @@ def filter_climate_data(gdf_clm, missing_dates):
 
     return filtered_gdf
 
+def query_annagnps_climate_timeseries_db(**kwargs):
+
+    engine = kwargs.get("engine", None)
+    table = kwargs.get("table", "climate_nldas2")
+    station_id = kwargs.get("station_id", None)
+    lon = kwargs.get("lon", None)
+    lat = kwargs.get("lat", None)
+    start_date = kwargs.get("start_date", None)
+    end_date = kwargs.get("end_date", None)
+
+    if (start_date is None) or (end_date is None):
+        raise ValueError("Provide a start and end date")
+
+    if (lon is None or lat is None) and (station_id is None):
+        raise ValueError("Provide a (lon,lat) pair or a station_id")
+
+    if not engine:
+        raise ValueError("Engine not provided")
+
+    if station_id is None:
+        query =f"""
+            SELECT
+                month, day, year,
+                max_air_temperature, min_air_temperature,
+                precip,
+                dew_point,
+                sky_cover,
+                wind_speed,
+                wind_direction,
+                solar_radiation,
+                storm_type_id,
+                potential_et,
+                actual_et,
+                input_units_code
+            FROM {table}
+            WHERE 
+                station_id = (SELECT station_id FROM find_nearest_nldas2_station({lon}, {lat}))
+            AND date >= '{start_date}' AND date <= '{end_date}';
+            """
+    else:
+        query =f"""
+            SELECT
+                month, day, year,
+                max_air_temperature, min_air_temperature,
+                precip,
+                dew_point,
+                sky_cover,
+                wind_speed,
+                wind_direction,
+                solar_radiation,
+                storm_type_id,
+                potential_et,
+                actual_et,
+                input_units_code
+            FROM {table}
+            WHERE 
+                station_id = '{station_id}'
+            AND date >= '{start_date}' AND date <= '{end_date}';
+            """
+    
+    df = pd.read_sql(sql=sql_text(query), con=engine.connect())
+
+    return df
+
 def create_engine_with_pool(db_url, max_connections=5):
     return create_engine(db_url, poolclass=QueuePool, pool_size=max_connections, max_overflow=0)
 
