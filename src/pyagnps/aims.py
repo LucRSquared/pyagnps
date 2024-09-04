@@ -31,9 +31,12 @@ class AIMSWatershed:
         self.path_to_json_creds = Path(path_to_json_creds)
 
         self.thuc_id        = kwargs.get("thuc_id", None)
+        self.reach_id       = kwargs.get("reach_id", None)
 
         self.outlet_x       = kwargs.get("outlet_x", None) # In EPSG 4326
         self.outlet_y       = kwargs.get("outlet_y", None)
+
+        self._check_outlet_coords()
 
         self.start_date     = kwargs.get("start_date", None)
         self.end_date       = kwargs.get("end_date", None)
@@ -46,10 +49,18 @@ class AIMSWatershed:
 
         self.climate_method = kwargs.get("climate_method", "nldas2_database")
 
+        # Paths for CMIP data
+        self.path_to_cmip_dir = kwargs.get("path_to_cmip_dir", None)
+        self.path_to_cmip_station_points_id = kwargs.get("path_to_cmip_station_points_id", None)
+
         self.secondary_climate_ids = None
         self.climate_station_points = None
 
         # Placeholder for static files
+        self.path_to_nldas2_centroids = kwargs.get("path_to_nldas2_centroids", None)
+        self.path_to_scs_storm_types = kwargs.get("path_to_scs_storm_types", None)
+        self.path_to_precip_zones = kwargs.get("path_to_precip_zones", None)
+
         self.nldas2_centroids = None
         self.scs_storm_types  = None
         self.precip_zones     = None
@@ -82,6 +93,9 @@ class AIMSWatershed:
         self.outlet_x = kwargs.get("outlet_x", self.outlet_x)
         self.outlet_y = kwargs.get("outlet_y", self.outlet_y)
 
+        self.thuc_id  = kwargs.get("thuc_id", self.thuc_id)
+        self.reach_id = kwargs.get("reach_id", self.reach_id)
+
         self.start_date = kwargs.get("start_date", self.start_date)
         self.end_date   = kwargs.get("end_date", self.end_date)
 
@@ -89,9 +103,18 @@ class AIMSWatershed:
         self.watershed_description = kwargs.get("watershed_description", self.watershed_description)
         self.watershed_location    = kwargs.get("watershed_location", self.watershed_location)
 
-        self.output_folder = Path(kwargs.get("output_folder", self.output_folder))
-        self.export_gis    = kwargs.get("export_gis", self.export_gis)
-        self.MAXITER_CLIMATE_QUERY = kwargs.get("MAXITER_CLIMATE_QUERY", self.MAXITER_CLIMATE_QUERY)     
+        self.path_to_cmip_dir = kwargs.get("path_to_cmip_dir", self.path_to_cmip_dir)
+        self.path_to_cmip_station_points_id = kwargs.get("path_to_cmip_station_points_id", self.path_to_cmip_station_points_id)
+
+        self.path_to_nldas2_centroids = kwargs.get("path_to_nldas2_centroids", self.path_to_nldas2_centroids)
+        self.path_to_scs_storm_types  = kwargs.get("path_to_scs_storm_types", self.path_to_scs_storm_types)
+        self.path_to_precip_zones     = kwargs.get("path_to_precip_zones", self.path_to_precip_zones)
+
+        self.output_folder    = Path(kwargs.get("output_folder", self.output_folder))
+        self.export_gis            = kwargs.get("export_gis", self.export_gis)
+        self.MAXITER_CLIMATE_QUERY = kwargs.get("MAXITER_CLIMATE_QUERY", self.MAXITER_CLIMATE_QUERY)
+
+        self._check_outlet_coords()   
 
 
     def get_thuc_id_by_xy(self, x=None, y=None):
@@ -108,6 +131,17 @@ class AIMSWatershed:
         thuc_id = thuc.iloc[0].values[0]
 
         self.thuc_id = thuc_id
+
+    def _check_outlet_coords(self):
+        """
+        This function makes sure that outlet_x and outlet_y are set.
+        If thuc_id and reach_id are provided they take priority"
+        """
+        if self.outlet_x is None or self.outlet_y is None:
+            if self.thuc_id and self.reach_id:
+                self.get_outlet_xy_from_thuc_id_and_reach_id(self.thuc_id, self.reach_id)
+            else:
+                raise Exception("You must set outlet_x and outlet_y or thuc_id and reach_id.")
     
     def get_outlet_xy_from_thuc_id_and_reach_id(self, thuc_id, reach_id=2):
         """ If not specified the reach_id defaults to 2, the most downstream reach.
@@ -194,9 +228,9 @@ class AIMSWatershed:
 
     def load_static_files(self, **kwargs):
 
-        path_to_nldas2_centroids = kwargs.get("path_to_nldas2_centroids", None)
-        path_to_scs_storm_types = kwargs.get("path_to_scs_storm_types", None)
-        path_to_precip_zones = kwargs.get("path_to_precip_zones", None)
+        path_to_nldas2_centroids = kwargs.get("path_to_nldas2_centroids", self.path_to_nldas2_centroids)
+        path_to_scs_storm_types = kwargs.get("path_to_scs_storm_types", self.path_to_scs_storm_types)
+        path_to_precip_zones = kwargs.get("path_to_precip_zones", self.path_to_precip_zones)
 
         self.load_nldas2_centroids(path_to_nldas2_centroids=path_to_nldas2_centroids)
         self.load_scs_storm_types(path_to_scs_storm_types=path_to_scs_storm_types)
@@ -544,10 +578,12 @@ class AIMSWatershed:
         
 
         if 'cmip5' in self.climate_method: # CHECK THE LOGIC HERE FOR WHEN cmip_pts is loaded. ADD kwargs to identify function
-            path_to_cmip_dir = kwargs.get("path_to_cmip_dir", None)
-            path_to_cmip_raster_points_clim_id = kwargs.get("path_to_cmip_station_points_id", None)
+            path_to_cmip_dir = kwargs.get("path_to_cmip_dir", self.path_to_cmip_dir)
+            path_to_cmip_raster_points_clim_id = kwargs.get("path_to_cmip_station_points_id", self.path_to_cmip_station_points_id)
 
             if path_to_cmip_raster_points_clim_id is None:
+                if path_to_cmip_dir is None:
+                    raise ValueError("Missing directory")
                 path_to_cmip_raster_points_clim_id = path_to_cmip_dir / "cmip5_maca_v2_metdata_pts_clim_ids.gpkg"
 
             self.load_cmip5_maca_station_points_clim_id(path_to_cmip_raster_points_clim_id, 
@@ -599,8 +635,7 @@ class AIMSWatershed:
                                                   start=self.start_date, end=self.end_date, 
                                                   date_mode=date_mode)
                 df = clm.generate_annagnps_daily_climate_data_cmip5_maca()
-                pass
-                # implement with CMIP5 static files
+
 
             # Store climate station data
             climate_station = {
@@ -640,6 +675,14 @@ class AIMSWatershed:
             global_station['output_filepath'] = global_station_path
             climate.generate_climate_station_file(**global_station)
         
+    def generate_annagnps_watershed_input_files(self, **kwargs):
+        """
+        This function generates the input files for the AnnAGNPS watershed.
+        It queries everything from the database and stores the
+        """
+        # self.get_thuc_id_by_xy
+        pass
+
 
 def open_creds_dict(path_to_json_creds):
     with open(path_to_json_creds, "r") as f:
