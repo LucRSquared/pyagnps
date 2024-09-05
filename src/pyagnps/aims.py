@@ -4,6 +4,8 @@
 
 from pathlib import Path
 
+from datetime import datetime
+
 import itertools
 
 import copy
@@ -19,6 +21,7 @@ from sqlalchemy import create_engine, text as sql_text
 from sqlalchemy import URL
 
 from pyagnps import annagnps, utils, constants, climate
+from pyagnps.utils import relative_input_file_path, write_csv_control_file_from_dict
 
 from tqdm import tqdm
 
@@ -48,18 +51,22 @@ class AIMSWatershed:
         self.bounds = None # GeoDataFrame with geom column representing the outline of the group of cells
 
         self.climate_method = kwargs.get("climate_method", "nldas2_database")
+        self.date_mode      = kwargs.get("date_mode", "local")
+
+        # Database climate table name
+        self.climate_table = kwargs.get("climate_table", "climate_nldas2")
 
         # Paths for CMIP data
-        self.path_to_cmip_dir = kwargs.get("path_to_cmip_dir", None)
+        self.path_to_cmip_dir               = kwargs.get("path_to_cmip_dir", None)
         self.path_to_cmip_station_points_id = kwargs.get("path_to_cmip_station_points_id", None)
 
-        self.secondary_climate_ids = None
+        self.secondary_climate_ids  = None
         self.climate_station_points = None
 
         # Placeholder for static files
         self.path_to_nldas2_centroids = kwargs.get("path_to_nldas2_centroids", None)
-        self.path_to_scs_storm_types = kwargs.get("path_to_scs_storm_types", None)
-        self.path_to_precip_zones = kwargs.get("path_to_precip_zones", None)
+        self.path_to_scs_storm_types  = kwargs.get("path_to_scs_storm_types", None)
+        self.path_to_precip_zones     = kwargs.get("path_to_precip_zones", None)
 
         self.nldas2_centroids = None
         self.scs_storm_types  = None
@@ -67,9 +74,13 @@ class AIMSWatershed:
 
         # CMIP files
 
-        self.output_folder = Path(kwargs.get("output_folder", "/tmp/"))
+        self.output_folder = Path(kwargs.get("output_folder", f"/tmp/watershed_x_{self.outlet_x}_y_{self.outlet_y}_{get_now_string()}"))
         self.export_gis    = kwargs.get("export_gis", True)
+        self.overwrite     = kwargs.get("overwrite", True)
         self.MAXITER_CLIMATE_QUERY = kwargs.get("MAXITER_CLIMATE_QUERY", 10)
+
+        self.selected_reaches_for_output = kwargs.get("selected_reaches_for_output", None)
+        self.set_reaches_for_output(output_reaches=self.selected_reaches_for_output)
 
         # Geometries
         # self.cells_geometry = None
@@ -106,13 +117,20 @@ class AIMSWatershed:
         self.path_to_cmip_dir = kwargs.get("path_to_cmip_dir", self.path_to_cmip_dir)
         self.path_to_cmip_station_points_id = kwargs.get("path_to_cmip_station_points_id", self.path_to_cmip_station_points_id)
 
+        self.climate_table = kwargs.get("climate_table", self.climate_table)
+        self.date_mode     = kwargs.get("date_mode", self.date_mode)
+
         self.path_to_nldas2_centroids = kwargs.get("path_to_nldas2_centroids", self.path_to_nldas2_centroids)
         self.path_to_scs_storm_types  = kwargs.get("path_to_scs_storm_types", self.path_to_scs_storm_types)
         self.path_to_precip_zones     = kwargs.get("path_to_precip_zones", self.path_to_precip_zones)
 
         self.output_folder    = Path(kwargs.get("output_folder", self.output_folder))
         self.export_gis            = kwargs.get("export_gis", self.export_gis)
+        self.overwrite              = kwargs.get("overwrite", self.overwrite)
         self.MAXITER_CLIMATE_QUERY = kwargs.get("MAXITER_CLIMATE_QUERY", self.MAXITER_CLIMATE_QUERY)
+
+        self.selected_reaches_for_output = kwargs.get("selected_reaches_for_output", self.selected_reaches_for_output)
+        self.set_reaches_for_output(output_reaches=self.selected_reaches_for_output)
 
         self._check_outlet_coords()   
 
@@ -434,24 +452,26 @@ class AIMSWatershed:
 
         return bounds
     
-    def get_dominant_storm_type(self, cells_geometry=None):
+    def get_dominant_storm_type(self, cells_geometry=None, bounds=None):
 
         if self.scs_storm_types is None:
             self.load_scs_storm_types()
 
         scs_storm_types = self.scs_storm_types
 
-        # Whole watershed
-        if cells_geometry is None:
-            cells_geometry = self.cells_geometry
+        if bounds is None:
 
-            if self.bounds is None:
-                self.get_watershed_bounds(save=True)
-                bounds = self.bounds
+            # Whole watershed
+            if cells_geometry is None:
+                cells_geometry = self.cells_geometry
 
-        # Watershed bounds specified by cells_geometry
-        else:
-            bounds = self.get_watershed_bounds(cells_geometry=cells_geometry, save=False)
+                if self.bounds is None:
+                    self.get_watershed_bounds(save=True)
+                    bounds = self.bounds
+
+            # Watershed bounds specified by cells_geometry
+            else:
+                bounds = self.get_watershed_bounds(cells_geometry=cells_geometry, save=False)
 
         bounds_scs = bounds.overlay(scs_storm_types)
         bounds_scs['area'] = bounds_scs.geometry.area
@@ -460,7 +480,7 @@ class AIMSWatershed:
 
         return main_storm_type
     
-    def get_weighted_precip_zones_parameters(self, cells_geometry=None):
+    def get_weighted_precip_zones_parameters(self, cells_geometry=None, bounds=None):
         """
         Uses the static file representing the precip zone parameters R_factor and 10_year_EI and dominant EI. 
         The values are weighted by the area of the cells.
@@ -469,15 +489,17 @@ class AIMSWatershed:
         if self.precip_zones is None:
             self.load_precip_zones()
 
-        if cells_geometry is None:
-            cells_geometry = self.cells_geometry
+        if bounds is None:
 
-            if self.bounds is None:
-                self.get_watershed_bounds(save=True)
-                bounds = self.bounds
-        # Watershed bounds specified by cells_geometry
-        else:
-            bounds = self.get_watershed_bounds(cells_geometry=cells_geometry, save=False)
+            if cells_geometry is None:
+                cells_geometry = self.cells_geometry
+
+                if self.bounds is None:
+                    self.get_watershed_bounds(save=True)
+                    bounds = self.bounds
+            # Watershed bounds specified by cells_geometry
+            else:
+                bounds = self.get_watershed_bounds(cells_geometry=cells_geometry, save=False)
 
         bounds_precip = bounds.overlay(self.precip_zones)
         bounds_precip['area'] = bounds_precip.geometry.area
@@ -494,13 +516,16 @@ class AIMSWatershed:
 
         return weighted_R_fctr, weighted_10_year_EI, dominant_EI
     
-    def get_watershed_centroid_xy(self):
+    def get_watershed_centroid_xy(self, bounds=None):
 
-        if self.bounds is None:
-                self.get_watershed_bounds(save=True)
-                bounds = self.bounds
-        else:
+        if bounds is None:
             bounds = self.bounds
+        else:
+            if self.bounds is None:
+                    self.get_watershed_bounds(save=True)
+                    bounds = self.bounds
+            else:
+                bounds = self.bounds
 
         watershed_centroid = bounds.centroid
         x0, y0 = watershed_centroid.x[0], watershed_centroid.centroid.y[0] 
@@ -565,9 +590,9 @@ class AIMSWatershed:
 
     def generate_climate_daily_files(self, **kwargs):
 
-        date_mode = kwargs.get("date_mode", "local")
-        overwrite = kwargs.get("overwrite", True)
-        table     = kwargs.get("table", "climate_nldas2")
+        date_mode     = kwargs.get("date_mode", "local")
+        overwrite     = kwargs.get("overwrite", True)
+        climate_table = kwargs.get("climate_table", "climate_nldas2")
         
         self.reset_watershed_secondary_climate_ids()
 
@@ -622,7 +647,7 @@ class AIMSWatershed:
 
                 df = climate.query_annagnps_climate_timeseries_db(station_id=clim_id,
                                                                   engine=self.engine,
-                                                                  table=table,
+                                                                  climate_table=climate_table,
                                                                   start_date=self.start_date,
                                                                   end_date=self.end_date)
 
@@ -680,8 +705,228 @@ class AIMSWatershed:
         This function generates the input files for the AnnAGNPS watershed.
         It queries everything from the database and stores the
         """
-        # self.get_thuc_id_by_xy
-        pass
+        
+        self.get_thuc_id_by_xy()
+        self.load_static_files()
+
+        # Generate directory structure
+        input_folders = self.make_watershed_input_dirs()
+
+        # Query database
+        self.query_cells()
+        self.query_reaches()
+        self.query_soil()
+        self.query_management_field()
+        self.query_management_schedule()
+        self.query_management_crop()
+        self.query_management_crop_growth()
+        self.query_management_non_crop()
+        self.query_management_operation()
+        self.query_runoff_curve()
+
+        # Write climate files
+        self.generate_climate_daily_files(date_mode=self.date_mode,
+                                          overwrite=self.overwrite,
+                                          climate_table=self.climate_table)
+        
+        
+        # Write cells and reaches
+        watershed_dir = input_folders['watershed']
+
+        cells_path = watershed_dir / 'cell_data_section.csv'
+        if not(cells_path.exists()) or self.overwrite:
+            self.df_cells.to_csv(cells_path, index=False, float_format='%1.5f')
+
+        reaches_path = watershed_dir / 'reach_data_section.csv'
+        if not(reaches_path.exists()) or self.overwrite:
+            self.df_reaches.to_csv(reaches_path, index=False, float_format='%1.5f')
+
+        # Write GIS layers
+        if self.export_gis:
+            gis_dir = input_folders['GIS']
+            if (not(gis_dir.exists()) or self.overwrite):
+                self.cells_geometry.to_file(gis_dir / 'cells_geometry.gpkg', driver='GPKG', index=False)
+                self.reaches_geometry.to_file(gis_dir / 'reaches_geometry.gpkg', driver='GPKG', index=False)
+        
+        general_dir = input_folders['general']
+
+        # Export soil data
+        soil_data_path = general_dir / 'soil_data.csv'
+        if not(soil_data_path.exists()) or self.overwrite:
+            self.df_soil_data.to_csv(soil_data_path, index=False)
+
+        soil_layers_data_path = general_dir / 'soil_layers_data.csv'
+        if not(soil_layers_data_path.exists()) or self.overwrite:
+            self.df_soil_layers_data.to_csv(soil_layers_data_path, index=False)
+
+        raw_soil_data_path = general_dir / 'raw_soil_data_gNATSGO.csv'
+        if not(raw_soil_data_path.exists()) or self.overwrite:
+            self.df_raw.to_csv(raw_soil_data_path, index=False)
+
+        # Export management data
+        management_operation_path = general_dir / 'management_oper.csv'
+        if not(management_operation_path.exists()) or self.overwrite:
+            self.df_mgmt_oper = annagnps.format_mgmt_operation_for_output(self.df_mgmt_oper)
+            self.df_mgmt_oper.to_csv(management_operation_path, index=False)
+
+        management_schedule_path = general_dir / 'management_schedule.csv'
+        if not(management_schedule_path.exists()) or self.overwrite:
+            self.df_mgmt_schd = annagnps.format_mgmt_schedule_for_output(self.df_mgmt_schd)
+            self.df_mgmt_schd.to_csv(management_schedule_path, index=False)
+
+        crop_data_path = general_dir / 'crop_data.csv'
+        if not(crop_data_path.exists()) or self.overwrite:
+            self.df_mgmt_crop.to_csv(crop_data_path, index=False)
+
+        crop_growth_path = general_dir / 'crop_growth.csv'
+        if not(crop_growth_path.exists()) or self.overwrite:
+            self.df_mgmt_crop_growth.to_csv(crop_growth_path, index=False)
+
+        non_crop_path = general_dir / 'non_crop.csv'
+        if not(non_crop_path.exists()) or self.overwrite:
+            self.df_mgmt_non_crop.to_csv(non_crop_path, index=False)
+
+        management_field_path = general_dir / 'management_field.csv'
+        if not(management_field_path.exists()) or self.overwrite:
+            self.df_mgmt_field.to_csv(management_field_path, index=False)
+
+        # Export Runoff Curve
+        roc_path = general_dir / 'runoffcurve.csv'
+        if not(roc_path.exists()) or self.overwrite:
+            self.df_roc.to_csv(roc_path, index=False)
+
+        
+        bounds = self.get_watershed_bounds(save=True)
+
+        lon, lat = self.get_watershed_centroid_xy(bounds=bounds)
+
+        # Compute watershed scale data
+        main_storm_type = self.get_dominant_storm_type(bounds=bounds)
+        weighted_R_fctr, weighted_10_year_EI, dominant_EI = self.get_weighted_precip_zones_parameters(bounds=bounds)
+
+        WATERSHED_DATA = {
+            'Wshd_Name': self.watershed_name,
+            'Wshd_Description': self.watershed_description,
+            'Wshd_Location': self.watershed_location,
+            'Latitude': lat,
+            'Longitude': lon
+        }
+
+        watershed_path = watershed_dir / 'watershed_data.csv'
+        if not(watershed_path.exists()) or self.overwrite:
+            write_csv_control_file_from_dict(WATERSHED_DATA, output_path=watershed_path)
+
+        simulation_dir = input_folders['simulation']
+
+        # GLOBAL IDs Factors and Flag Data
+        globfac_path = simulation_dir / 'globfac.csv'
+        DEFAULT_GLOBAL_FACTORS_FLAGS = constants.DEFAULT_GLOBAL_FACTORS_FLAGS
+        
+        DEFAULT_GLOBAL_FACTORS_FLAGS['Wshd_Storm_Type_ID'] = main_storm_type
+
+        if not(globfac_path.exists()) or self.overwrite:
+            write_csv_control_file_from_dict(DEFAULT_GLOBAL_FACTORS_FLAGS, globfac_path)
+
+        # Output Options - GLOBAL
+        outopts_global_path = simulation_dir / 'outopts_global.csv'
+        DEFAULT_OUTPUT_OPTIONS_GLOBAL = constants.DEFAULT_OUTPUT_OPTIONS_GLOBAL
+
+        if not(outopts_global_path.exists()) or self.overwrite:
+            write_csv_control_file_from_dict(DEFAULT_OUTPUT_OPTIONS_GLOBAL, outopts_global_path)
+
+        # Output Options - Annual Average
+        outopts_aa_path = simulation_dir / 'outopts_aa.csv'
+        DEFAULT_OUTPUT_OPTIONS_AA = constants.DEFAULT_OUTPUT_OPTIONS_AA
+
+        if not(outopts_aa_path.exists()) or self.overwrite:
+            write_csv_control_file_from_dict(DEFAULT_OUTPUT_OPTIONS_AA, outopts_aa_path)
+        
+        # Output Options - TABLE
+        outopts_tbl_path = simulation_dir / 'outopts_tbl.csv'
+        DEFAULT_OUTPUT_OPTIONS_TBL = constants.DEFAULT_OUTPUT_OPTIONS_TBL
+
+        if not(outopts_tbl_path.exists()) or self.overwrite:
+            write_csv_control_file_from_dict(DEFAULT_OUTPUT_OPTIONS_TBL, outopts_tbl_path)
+
+        # Output Options - Reach
+        outopts_reach_path = simulation_dir / 'outopts_rch.csv'
+
+        if self.selected_reaches_for_output is None or not self.selected_reaches_for_output:
+            df_outopts_rch = pd.DataFrame(columns=['Reach_ID'])
+        else:
+            df_outopts_rch = pd.DataFrame({'Reach_ID': self.selected_reaches_for_output})
+        
+        if not(outopts_reach_path.exists()) or self.overwrite:
+            df_outopts_rch.to_csv(outopts_reach_path, index=False)
+
+        # AnnAGNPS ID file
+        annaid_path = simulation_dir / 'annaid.csv'
+        DEFAULT_ANNAGNPS_ID = constants.DEFAULT_ANNAGNPS_ID
+
+        if not(annaid_path.exists()) or self.overwrite:
+            write_csv_control_file_from_dict(DEFAULT_ANNAGNPS_ID, annaid_path)
+
+        # Simulation Period Data
+        sim_period_path = simulation_dir / 'sim_period.csv'
+        DEFAULT_SIM_PERIOD_DATA = constants.DEFAULT_SIM_PERIOD_DATA
+
+        clm = climate.ClimateAnnAGNPSCoords(coords=None, start=self.start_date, end=self.end_date)
+
+        DEFAULT_SIM_PERIOD_DATA['Simulation_Begin_Year'] = clm.start.year
+        DEFAULT_SIM_PERIOD_DATA['Simulation_Begin_Month'] = clm.start.month
+        DEFAULT_SIM_PERIOD_DATA['Simulation_Begin_Day'] = clm.start.day
+
+        DEFAULT_SIM_PERIOD_DATA['Simulation_End_Year'] = clm.end.year
+        DEFAULT_SIM_PERIOD_DATA['Simulation_End_Month'] = clm.end.month
+        DEFAULT_SIM_PERIOD_DATA['Simulation_End_Day'] = clm.end.day
+
+        DEFAULT_SIM_PERIOD_DATA['Rainfall_Fctr'] = weighted_R_fctr
+        DEFAULT_SIM_PERIOD_DATA['10-Year_EI'] = weighted_10_year_EI
+        DEFAULT_SIM_PERIOD_DATA['EI_Number'] = dominant_EI
+
+        if not(sim_period_path.exists()) or self.overwrite:
+            write_csv_control_file_from_dict(DEFAULT_SIM_PERIOD_DATA, sim_period_path)
+            
+        # AnnAGNPS Master File
+        output_folder = self.output_folder
+        climate_dir = input_folders['climate']
+        master_path = output_folder / 'annagnps_master.csv'
+
+        master_file = {
+            'AnnAGNPS ID': relative_input_file_path(output_folder, annaid_path),
+            'Cell Data': relative_input_file_path(output_folder, cells_path),
+            'Crop Data': relative_input_file_path(output_folder, crop_data_path),
+            'Crop Growth Data': relative_input_file_path(output_folder, crop_growth_path),
+            'Global IDs Factors and Flags Data': relative_input_file_path(output_folder, globfac_path),
+            'Management Field Data': relative_input_file_path(output_folder, management_field_path),
+            'Management Operation Data': relative_input_file_path(output_folder, management_operation_path),
+            'Management Schedule Data': relative_input_file_path(output_folder, management_schedule_path),
+            'Non-Crop Data': relative_input_file_path(output_folder, non_crop_path),
+            'Reach Data': relative_input_file_path(output_folder, reaches_path),
+            'Runoff Curve Number Data': relative_input_file_path(output_folder, roc_path),
+            'Simulation Period Data': relative_input_file_path(output_folder, sim_period_path),
+            'Soil Data': relative_input_file_path(output_folder, soil_data_path),
+            'Soil Layer Data': relative_input_file_path(output_folder, soil_layers_data_path),
+            'Watershed Data': relative_input_file_path(output_folder, watershed_path),
+            'Output Options - Global': relative_input_file_path(output_folder, outopts_global_path),
+            'Output Options - AA': relative_input_file_path(output_folder, outopts_aa_path),
+            'Output Options - TBL': relative_input_file_path(output_folder, outopts_tbl_path),
+            'Output Options - Reach': relative_input_file_path(output_folder, outopts_reach_path),
+            'CLIMATE DATA - DAILY': relative_input_file_path(output_folder, climate_dir / 'climate_daily.csv'),
+            'CLIMATE DATA - STATION': relative_input_file_path(output_folder, climate_dir / 'climate_station.csv')
+        }
+
+        df_master = pd.DataFrame({
+            'Data Section ID': master_file.keys(),
+            'File Name': master_file.values()})
+        
+        if not(master_path.exists()) or self.overwrite:
+            df_master.to_csv(master_path, index=False)
+
+
+        # AnnAGNPS.fil file
+        annagnps_fil = output_folder / 'AnnAGNPS.fil'
+        annagnps_fil.write_text('annagnps_master.csv');        
 
 
 def open_creds_dict(path_to_json_creds):
@@ -699,3 +944,6 @@ def create_db_url_object(credentials):
         database=credentials["database"],
     )
     return url_object
+
+def get_now_string(format="%Y-%m-%d-%H-%M-%S"):
+    return datetime.now().strftime(format)

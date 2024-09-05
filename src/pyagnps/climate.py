@@ -2512,7 +2512,7 @@ def filter_climate_data(gdf_clm, missing_dates):
 def query_annagnps_climate_timeseries_db(**kwargs):
 
     engine = kwargs.get("engine", None)
-    table = kwargs.get("table", "climate_nldas2")
+    table = kwargs.get("climate_table", "climate_nldas2")
     station_id = kwargs.get("station_id", None)
     lon = kwargs.get("lon", None)
     lat = kwargs.get("lat", None)
