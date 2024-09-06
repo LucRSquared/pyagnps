@@ -54,8 +54,11 @@ def polygonize_cell_reach_IDs_asc(
     else:
         return
     
-def get_bounds_from_cells(gdf, buffer=0.00001):
+def get_bounds_from_cells(gdf, buffer=0.001):
     bounds = gdf[[gdf.geometry.name]].copy(deep=True)
+
+    bounds = bounds.to_crs('epsg:3857')
+    
     bounds.geometry = bounds.geometry.buffer(buffer)
     bounds = bounds.dissolve()
     bounds = bounds.to_crs('epsg:4326')

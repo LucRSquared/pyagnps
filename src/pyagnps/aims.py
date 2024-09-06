@@ -2,6 +2,10 @@
 # This assumes that a connection to a database with properly configured
 # tables for thucs is available
 
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+
 from pathlib import Path
 
 from datetime import datetime
@@ -159,7 +163,7 @@ class AIMSWatershed:
             if self.thuc_id and self.reach_id:
                 self.get_outlet_xy_from_thuc_id_and_reach_id(self.thuc_id, self.reach_id)
             else:
-                raise Exception("You must set outlet_x and outlet_y or thuc_id and reach_id.")
+                raise UserWarning("""This watershed has no outlet. It's fine if you're trying to load a watershed from an existing directory. Otherwise you must set outlet_x and outlet_y or thuc_id and reach_id and query the database.""")
     
     def get_outlet_xy_from_thuc_id_and_reach_id(self, thuc_id, reach_id=2):
         """ If not specified the reach_id defaults to 2, the most downstream reach.
@@ -474,7 +478,7 @@ class AIMSWatershed:
                 bounds = self.get_watershed_bounds(cells_geometry=cells_geometry, save=False)
 
         bounds_scs = bounds.overlay(scs_storm_types)
-        bounds_scs['area'] = bounds_scs.geometry.area
+        bounds_scs['area'] = bounds_scs.to_crs('epsg:3857').geometry.area
 
         main_storm_type = bounds_scs.loc[bounds_scs['area'].argmax(), 'SCS Zone Type']
 
@@ -502,7 +506,7 @@ class AIMSWatershed:
                 bounds = self.get_watershed_bounds(cells_geometry=cells_geometry, save=False)
 
         bounds_precip = bounds.overlay(self.precip_zones)
-        bounds_precip['area'] = bounds_precip.geometry.area
+        bounds_precip['area'] = bounds_precip.to_crs('epsg:3857').geometry.area
 
         weighted_R_fctr = (bounds_precip['area'] * bounds_precip['R_factor']).sum() / bounds_precip['area'].sum()
         weighted_10_year_EI = (bounds_precip['area'] * bounds_precip['10_year_EI']).sum() / bounds_precip['area'].sum()
@@ -527,8 +531,8 @@ class AIMSWatershed:
             else:
                 bounds = self.bounds
 
-        watershed_centroid = bounds.centroid
-        x0, y0 = watershed_centroid.x[0], watershed_centroid.centroid.y[0] 
+        watershed_centroid = bounds.to_crs('epsg:3857').centroid.to_crs('epsg:4326')
+        x0, y0 = watershed_centroid.x.to_list()[0], watershed_centroid.y.to_list()[0] 
 
         return x0, y0
     
@@ -557,6 +561,7 @@ class AIMSWatershed:
 
 
         cells_geometry = self.cells_geometry
+
         cells_geometry = cells_geometry.sjoin_nearest(gdf_station_points)
         # Clean-up the spatial join
         cells_geometry['secondary_climate_file_id'] = cells_geometry[column_station_id_name]
@@ -812,6 +817,8 @@ class AIMSWatershed:
             'Longitude': lon
         }
 
+        self.watershed_data_dict = WATERSHED_DATA
+
         watershed_path = watershed_dir / 'watershed_data.csv'
         if not(watershed_path.exists()) or self.overwrite:
             write_csv_control_file_from_dict(WATERSHED_DATA, output_path=watershed_path)
@@ -824,12 +831,16 @@ class AIMSWatershed:
         
         DEFAULT_GLOBAL_FACTORS_FLAGS['Wshd_Storm_Type_ID'] = main_storm_type
 
+        self.global_factors_flags_dict = DEFAULT_GLOBAL_FACTORS_FLAGS
+
         if not(globfac_path.exists()) or self.overwrite:
             write_csv_control_file_from_dict(DEFAULT_GLOBAL_FACTORS_FLAGS, globfac_path)
 
         # Output Options - GLOBAL
         outopts_global_path = simulation_dir / 'outopts_global.csv'
         DEFAULT_OUTPUT_OPTIONS_GLOBAL = constants.DEFAULT_OUTPUT_OPTIONS_GLOBAL
+
+        self.output_options_global_dict = DEFAULT_OUTPUT_OPTIONS_GLOBAL
 
         if not(outopts_global_path.exists()) or self.overwrite:
             write_csv_control_file_from_dict(DEFAULT_OUTPUT_OPTIONS_GLOBAL, outopts_global_path)
@@ -838,12 +849,16 @@ class AIMSWatershed:
         outopts_aa_path = simulation_dir / 'outopts_aa.csv'
         DEFAULT_OUTPUT_OPTIONS_AA = constants.DEFAULT_OUTPUT_OPTIONS_AA
 
+        self.output_options_aa_dict = DEFAULT_OUTPUT_OPTIONS_AA
+
         if not(outopts_aa_path.exists()) or self.overwrite:
             write_csv_control_file_from_dict(DEFAULT_OUTPUT_OPTIONS_AA, outopts_aa_path)
         
         # Output Options - TABLE
         outopts_tbl_path = simulation_dir / 'outopts_tbl.csv'
         DEFAULT_OUTPUT_OPTIONS_TBL = constants.DEFAULT_OUTPUT_OPTIONS_TBL
+
+        self.output_options_tbl_dict = DEFAULT_OUTPUT_OPTIONS_TBL
 
         if not(outopts_tbl_path.exists()) or self.overwrite:
             write_csv_control_file_from_dict(DEFAULT_OUTPUT_OPTIONS_TBL, outopts_tbl_path)
@@ -855,7 +870,7 @@ class AIMSWatershed:
             df_outopts_rch = pd.DataFrame(columns=['Reach_ID'])
         else:
             df_outopts_rch = pd.DataFrame({'Reach_ID': self.selected_reaches_for_output})
-        
+
         if not(outopts_reach_path.exists()) or self.overwrite:
             df_outopts_rch.to_csv(outopts_reach_path, index=False)
 
@@ -883,6 +898,8 @@ class AIMSWatershed:
         DEFAULT_SIM_PERIOD_DATA['Rainfall_Fctr'] = weighted_R_fctr
         DEFAULT_SIM_PERIOD_DATA['10-Year_EI'] = weighted_10_year_EI
         DEFAULT_SIM_PERIOD_DATA['EI_Number'] = dominant_EI
+
+        self.simulation_period_data_dict = DEFAULT_SIM_PERIOD_DATA
 
         if not(sim_period_path.exists()) or self.overwrite:
             write_csv_control_file_from_dict(DEFAULT_SIM_PERIOD_DATA, sim_period_path)
@@ -916,6 +933,8 @@ class AIMSWatershed:
             'CLIMATE DATA - STATION': relative_input_file_path(output_folder, climate_dir / 'climate_station.csv')
         }
 
+        self.master_file_dict = master_file
+
         df_master = pd.DataFrame({
             'Data Section ID': master_file.keys(),
             'File Name': master_file.values()})
@@ -926,8 +945,30 @@ class AIMSWatershed:
 
         # AnnAGNPS.fil file
         annagnps_fil = output_folder / 'AnnAGNPS.fil'
-        annagnps_fil.write_text('annagnps_master.csv');        
+        annagnps_fil.write_text('annagnps_master.csv');
 
+    def fragment_watershed(self, **kwargs):
+        """
+        This function fragments a regular AnnAGNPS watershed input directory and splits it
+        into multiple mini-watersheds.
+
+        If the different data sections are not loaded as attributes, the function will check
+        if the output folder exists with a master file in it and use that
+        """
+
+        share_global_watershed_climate_params = kwargs.get('share_global_watershed_climate_params', True)
+        mini_watersheds_dir = self.output_folder / 'mini_watersheds'
+
+        # Test if df_cells and df_reaches are loaded
+        # If not, check output_folder for a master file
+        # Write a function that loads the master file and the different csv files into the class attributes
+            # May need to write a bunch of helper "get functions"
+            # Make sure that the paths are handled correctly but it should be ok if I read straight
+            #   from the master file
+        # Handle the different data sections that are shared and not shared
+        # Loop through the reaches and build the mini_watersheds
+            # Optionally recompute some parameters there EI etc.
+        # Write all the files for the mini watersheds.
 
 def open_creds_dict(path_to_json_creds):
     with open(path_to_json_creds, "r") as f:
