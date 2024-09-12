@@ -271,6 +271,13 @@ def month_difference(from_date, to_date):
     """
     return (to_date.year - from_date.year) * 12 + (to_date.month - from_date.month)
 
+def convert_dict_to_df(data_dict):
+    # Converts a dictionary to a pandas DataFrame
+    if not(isinstance(data_dict, dict)):
+        return None
+    else:
+        return pd.DataFrame.from_dict(data_dict, orient='index').T
+
 
 def write_csv_control_file_from_dict(data_dict, output_path='control.csv'):
     # Writes the contents of kwargs with the key as a column and the value as the value

@@ -25,7 +25,7 @@ from sqlalchemy import create_engine, text as sql_text
 from sqlalchemy import URL
 
 from pyagnps import annagnps, utils, constants, climate
-from pyagnps.utils import relative_input_file_path, write_csv_control_file_from_dict
+from pyagnps.utils import relative_input_file_path, write_csv_control_file_from_dict, convert_dict_to_df
 
 from tqdm import tqdm
 
@@ -477,10 +477,7 @@ class AIMSWatershed:
             else:
                 bounds = self.get_watershed_bounds(cells_geometry=cells_geometry, save=False)
 
-        bounds_scs = bounds.overlay(scs_storm_types)
-        bounds_scs['area'] = bounds_scs.to_crs('epsg:3857').geometry.area
-
-        main_storm_type = bounds_scs.loc[bounds_scs['area'].argmax(), 'SCS Zone Type']
+        main_storm_type = annagnps.compute_dominant_storm_type(scs_storm_types, bounds)
 
         return main_storm_type
     
@@ -492,6 +489,8 @@ class AIMSWatershed:
 
         if self.precip_zones is None:
             self.load_precip_zones()
+
+        precip_zones = self.precip_zones
 
         if bounds is None:
 
@@ -505,18 +504,7 @@ class AIMSWatershed:
             else:
                 bounds = self.get_watershed_bounds(cells_geometry=cells_geometry, save=False)
 
-        bounds_precip = bounds.overlay(self.precip_zones)
-        bounds_precip['area'] = bounds_precip.to_crs('epsg:3857').geometry.area
-
-        weighted_R_fctr = (bounds_precip['area'] * bounds_precip['R_factor']).sum() / bounds_precip['area'].sum()
-        weighted_10_year_EI = (bounds_precip['area'] * bounds_precip['10_year_EI']).sum() / bounds_precip['area'].sum()
-
-        dominant_EI = bounds_precip.loc[bounds_precip['area'].argmax(), 'EI_Zone']
-
-        if dominant_EI == 'default':
-            dominant_EI = constants.DEFAULT_EI_NUMBER # 100 
-        else:
-            dominant_EI = int(dominant_EI.replace('US_',''))
+        weighted_R_fctr, weighted_10_year_EI, dominant_EI = annagnps.compute_weighted_precip_zones_parameters(precip_zones, bounds)
 
         return weighted_R_fctr, weighted_10_year_EI, dominant_EI
     
@@ -878,6 +866,8 @@ class AIMSWatershed:
         annaid_path = simulation_dir / 'annaid.csv'
         DEFAULT_ANNAGNPS_ID = constants.DEFAULT_ANNAGNPS_ID
 
+        self.annagnps_id_dict = DEFAULT_ANNAGNPS_ID
+
         if not(annaid_path.exists()) or self.overwrite:
             write_csv_control_file_from_dict(DEFAULT_ANNAGNPS_ID, annaid_path)
 
@@ -954,21 +944,45 @@ class AIMSWatershed:
 
         If the different data sections are not loaded as attributes, the function will check
         if the output folder exists with a master file in it and use that
+
+        Args:
+            **kwargs:
+                share_global_watershed_climate_params: bool
+                    Whether to share global climate parameters across the mini-watersheds. 
+                    If False, the EI, R_fctr, and 10_year_EI parameters will be recalculated
+                num_processes: int Default 8. Number of processes to use.
         """
 
         share_global_watershed_climate_params = kwargs.get('share_global_watershed_climate_params', True)
+        num_processes = kwargs.get('num_processes', 8)
         mini_watersheds_dir = self.output_folder / 'mini_watersheds'
 
-        # Test if df_cells and df_reaches are loaded
-        # If not, check output_folder for a master file
-        # Write a function that loads the master file and the different csv files into the class attributes
-            # May need to write a bunch of helper "get functions"
-            # Make sure that the paths are handled correctly but it should be ok if I read straight
-            #   from the master file
-        # Handle the different data sections that are shared and not shared
-        # Loop through the reaches and build the mini_watersheds
-            # Optionally recompute some parameters there EI etc.
-        # Write all the files for the mini watersheds.
+        annagnps.fragment_watershed(self.output_folder, 
+                                    mini_watersheds_dir, 
+                                    shared_climate_dir=self.input_folders['climate'],
+                                    num_processes=num_processes,
+                                    precip_zones=self.precip_zones,
+                                    scs_storm_types=self.scs_storm_types,
+                                    cells_geometry=self.cells_geometry,
+                                    share_global_watershed_climate_params=share_global_watershed_climate_params,
+                                    df_og_reaches=self.df_reaches,
+                                    df_og_cells=self.df_cells,
+                                    df_soil=self.df_soil_data,
+                                    df_soil_layers=self.df_soil_layers_data,
+                                    df_mgmt_field=self.df_mgmt_field,
+                                    df_mgmt_oper=self.df_mgmt_oper,
+                                    df_mgmt_sched=self.df_mgmt_sched,
+                                    df_crop=self.df_mgmt_crop,
+                                    df_crop_growth=self.df_crop_growth,
+                                    df_non_crop=self.df_mgmt_non_crop,
+                                    df_roc=self.df_roc,
+                                    df_sim_period=convert_dict_to_df(self.simulation_period_data_dict),
+                                    df_watershed_data=convert_dict_to_df(self.watershed_data_dict),
+                                    df_globalfac=convert_dict_to_df(self.global_factors_flags_dict),
+                                    df_out_opts_global=convert_dict_to_df(self.output_options_global_dict),
+                                    df_out_opts_aa=convert_dict_to_df(self.output_options_aa_dict),
+                                    df_out_opts_tbl=convert_dict_to_df(self.output_options_tbl_dict),
+                                    df_annaid=convert_dict_to_df(self.annagnps_id_dict))
 
 def open_creds_dict(path_to_json_creds):
     with open(path_to_json_creds, "r") as f:
