@@ -86,6 +86,13 @@ class AIMSWatershed:
         self.selected_reaches_for_output = kwargs.get("selected_reaches_for_output", None)
         self.set_reaches_for_output(output_reaches=self.selected_reaches_for_output)
 
+        # DICTIONARIES AND OPTIONS
+        self.global_factors_flags_dict   = kwargs.get('global_factors_flags_dict', constants.DEFAULT_GLOBAL_FACTORS_FLAGS)
+        self.output_options_global_dict  = kwargs.get('output_options_global_dict', constants.DEFAULT_OUTPUT_OPTIONS_GLOBAL)
+        self.output_options_aa_dict      = kwargs.get('output_options_aa_dict', constants.DEFAULT_OUTPUT_OPTIONS_AA)
+        self.output_options_tbl_dict     = kwargs.get('output_options_tbl_dict', constants.DEFAULT_OUTPUT_OPTIONS_TBL)
+        self.annagnps_id_dict            = kwargs.get('annagnps_id_dict', constants.DEFAULT_ANNAGNPS_ID)
+        self.simulation_period_data_dict = kwargs.get('simulation_period_data_dict', constants.DEFAULT_SIM_PERIOD_DATA)
         # Geometries
         # self.cells_geometry = None
 
@@ -555,6 +562,8 @@ class AIMSWatershed:
         cells_geometry['secondary_climate_file_id'] = cells_geometry[column_station_id_name]
         cells_geometry.drop(columns=[column_station_id_name, 'index_right'], inplace=True)
 
+        self.cells_geometry = cells_geometry
+
         secondary_climate_ids = cells_geometry.loc[:,['cell_id', 'secondary_climate_file_id']]\
                                 .drop_duplicates(subset='cell_id')#.set_index('cell_id')
         
@@ -815,41 +824,29 @@ class AIMSWatershed:
 
         # GLOBAL IDs Factors and Flag Data
         globfac_path = simulation_dir / 'globfac.csv'
-        DEFAULT_GLOBAL_FACTORS_FLAGS = constants.DEFAULT_GLOBAL_FACTORS_FLAGS
         
-        DEFAULT_GLOBAL_FACTORS_FLAGS['Wshd_Storm_Type_ID'] = main_storm_type
-
-        self.global_factors_flags_dict = DEFAULT_GLOBAL_FACTORS_FLAGS
+        self.global_factors_flags_dict['Wshd_Storm_Type_ID'] = main_storm_type
 
         if not(globfac_path.exists()) or self.overwrite:
-            write_csv_control_file_from_dict(DEFAULT_GLOBAL_FACTORS_FLAGS, globfac_path)
+            write_csv_control_file_from_dict(self.global_factors_flags_dict, globfac_path)
 
         # Output Options - GLOBAL
         outopts_global_path = simulation_dir / 'outopts_global.csv'
-        DEFAULT_OUTPUT_OPTIONS_GLOBAL = constants.DEFAULT_OUTPUT_OPTIONS_GLOBAL
-
-        self.output_options_global_dict = DEFAULT_OUTPUT_OPTIONS_GLOBAL
 
         if not(outopts_global_path.exists()) or self.overwrite:
-            write_csv_control_file_from_dict(DEFAULT_OUTPUT_OPTIONS_GLOBAL, outopts_global_path)
+            write_csv_control_file_from_dict(self.output_options_global_dict, outopts_global_path)
 
         # Output Options - Annual Average
         outopts_aa_path = simulation_dir / 'outopts_aa.csv'
-        DEFAULT_OUTPUT_OPTIONS_AA = constants.DEFAULT_OUTPUT_OPTIONS_AA
-
-        self.output_options_aa_dict = DEFAULT_OUTPUT_OPTIONS_AA
 
         if not(outopts_aa_path.exists()) or self.overwrite:
-            write_csv_control_file_from_dict(DEFAULT_OUTPUT_OPTIONS_AA, outopts_aa_path)
+            write_csv_control_file_from_dict(self.output_options_aa_dict, outopts_aa_path)
         
         # Output Options - TABLE
         outopts_tbl_path = simulation_dir / 'outopts_tbl.csv'
-        DEFAULT_OUTPUT_OPTIONS_TBL = constants.DEFAULT_OUTPUT_OPTIONS_TBL
-
-        self.output_options_tbl_dict = DEFAULT_OUTPUT_OPTIONS_TBL
 
         if not(outopts_tbl_path.exists()) or self.overwrite:
-            write_csv_control_file_from_dict(DEFAULT_OUTPUT_OPTIONS_TBL, outopts_tbl_path)
+            write_csv_control_file_from_dict(self.output_options_tbl_dict, outopts_tbl_path)
 
         # Output Options - Reach
         outopts_reach_path = simulation_dir / 'outopts_rch.csv'
@@ -864,35 +861,29 @@ class AIMSWatershed:
 
         # AnnAGNPS ID file
         annaid_path = simulation_dir / 'annaid.csv'
-        DEFAULT_ANNAGNPS_ID = constants.DEFAULT_ANNAGNPS_ID
-
-        self.annagnps_id_dict = DEFAULT_ANNAGNPS_ID
 
         if not(annaid_path.exists()) or self.overwrite:
-            write_csv_control_file_from_dict(DEFAULT_ANNAGNPS_ID, annaid_path)
+            write_csv_control_file_from_dict(self.annagnps_id_dict, annaid_path)
 
         # Simulation Period Data
         sim_period_path = simulation_dir / 'sim_period.csv'
-        DEFAULT_SIM_PERIOD_DATA = constants.DEFAULT_SIM_PERIOD_DATA
 
         clm = climate.ClimateAnnAGNPSCoords(coords=None, start=self.start_date, end=self.end_date)
 
-        DEFAULT_SIM_PERIOD_DATA['Simulation_Begin_Year'] = clm.start.year
-        DEFAULT_SIM_PERIOD_DATA['Simulation_Begin_Month'] = clm.start.month
-        DEFAULT_SIM_PERIOD_DATA['Simulation_Begin_Day'] = clm.start.day
+        self.simulation_period_data_dict['Simulation_Begin_Year']  = clm.start.year
+        self.simulation_period_data_dict['Simulation_Begin_Month'] = clm.start.month
+        self.simulation_period_data_dict['Simulation_Begin_Day']   = clm.start.day
 
-        DEFAULT_SIM_PERIOD_DATA['Simulation_End_Year'] = clm.end.year
-        DEFAULT_SIM_PERIOD_DATA['Simulation_End_Month'] = clm.end.month
-        DEFAULT_SIM_PERIOD_DATA['Simulation_End_Day'] = clm.end.day
+        self.simulation_period_data_dict['Simulation_End_Year']  = clm.end.year
+        self.simulation_period_data_dict['Simulation_End_Month'] = clm.end.month
+        self.simulation_period_data_dict['Simulation_End_Day']   = clm.end.day
 
-        DEFAULT_SIM_PERIOD_DATA['Rainfall_Fctr'] = weighted_R_fctr
-        DEFAULT_SIM_PERIOD_DATA['10-Year_EI'] = weighted_10_year_EI
-        DEFAULT_SIM_PERIOD_DATA['EI_Number'] = dominant_EI
-
-        self.simulation_period_data_dict = DEFAULT_SIM_PERIOD_DATA
+        self.simulation_period_data_dict['Rainfall_Fctr'] = weighted_R_fctr
+        self.simulation_period_data_dict['10-Year_EI']    = weighted_10_year_EI
+        self.simulation_period_data_dict['EI_Number']     = dominant_EI
 
         if not(sim_period_path.exists()) or self.overwrite:
-            write_csv_control_file_from_dict(DEFAULT_SIM_PERIOD_DATA, sim_period_path)
+            write_csv_control_file_from_dict(self.simulation_period_data_dict, sim_period_path)
             
         # AnnAGNPS Master File
         output_folder = self.output_folder
@@ -971,9 +962,9 @@ class AIMSWatershed:
                                     df_soil_layers=self.df_soil_layers_data,
                                     df_mgmt_field=self.df_mgmt_field,
                                     df_mgmt_oper=self.df_mgmt_oper,
-                                    df_mgmt_sched=self.df_mgmt_sched,
+                                    df_mgmt_sched=self.df_mgmt_schd,
                                     df_crop=self.df_mgmt_crop,
-                                    df_crop_growth=self.df_crop_growth,
+                                    df_crop_growth=self.df_mgmt_crop_growth,
                                     df_non_crop=self.df_mgmt_non_crop,
                                     df_roc=self.df_roc,
                                     df_sim_period=convert_dict_to_df(self.simulation_period_data_dict),

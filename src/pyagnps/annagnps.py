@@ -6,6 +6,8 @@ from pyagnps import constants
 from multiprocessing.pool import ThreadPool
 from functools import partial
 
+from tqdm.auto import tqdm
+
 import pandas as pd
 
 def make_df_reaches_valid(df_reaches):
@@ -181,6 +183,18 @@ def compute_dominant_storm_type(scs_storm_types, bounds):
 
     main_storm_type = bounds_scs.loc[bounds_scs['area'].argmax(), 'SCS Zone Type']
 
+    if main_storm_type == 'I':
+        main_storm_type = 'Std. SCS Type I'
+    elif main_storm_type == 'IA':
+        main_storm_type = 'Std. SCS Type Ia'
+    elif main_storm_type == 'II':
+        main_storm_type = 'Std. SCS Type II'
+    elif main_storm_type == 'III':
+        main_storm_type = 'Std. SCS Type III'
+    else:
+        # default
+        main_storm_type = 'Std. SCS Type II'
+
     return main_storm_type
 
 def compute_weighted_precip_zones_parameters(precip_zones, bounds):
@@ -215,8 +229,8 @@ def fragment_watershed(annagnps_dir, mini_watersheds_dir, **kwargs):
 
         num_processes (int): Number of processes to use. Defaults to 8. 
         cells_geometry (GeoDataFrame) : GeoDataFrame containing the cell geometries.
-        recompute_watershed_climate_parameters (bool): Whether to recompute the climate parameters. 
-            - Defaults to False. If True will recompute R_fctr, EI, 10_year_EI and storm type.
+        share_global_watershed_climate_params (bool): Whether to recompute the climate parameters. 
+            - Defaults to True. If True will recompute R_fctr, EI, 10_year_EI and storm type.
         precip_zones (GeoDataFrame) : GeoDataFrame containing the precip zone geometries.
         scs_storm_types (GeoDataFrame) : GeoDataFrame containing the SCS storm type geometries.
         
@@ -227,10 +241,12 @@ def fragment_watershed(annagnps_dir, mini_watersheds_dir, **kwargs):
     cells_geometry = kwargs.get('cells_geometry', None)
     precip_zones = kwargs.get('precip_zones', None)
     scs_storm_types = kwargs.get('scs_storm_types', None)
-    recompute_watershed_climate_parameters = kwargs.get('recompute_watershed_climate_parameters', False)
+    share_global_watershed_climate_params = kwargs.get('share_global_watershed_climate_params', True)
 
     if (scs_storm_types is None) or (precip_zones is None):
-        recompute_watershed_climate_parameters = False
+        share_global_watershed_climate_params = True
+
+    recompute_watershed_climate_parameters = not(share_global_watershed_climate_params)
 
     p_og_climate_dir = annagnps_dir / 'climate' # Path to original climate files
     shared_climate_dir = kwargs.get('shared_climate_dir', p_og_climate_dir)
@@ -313,7 +329,8 @@ def fragment_watershed(annagnps_dir, mini_watersheds_dir, **kwargs):
 
     df_annaid = kwargs.get('df_annaid')
     if df_annaid is None:
-        df_annaid = pd.read_csv(og_files['AnnAGNPS ID'])
+        # Enforce column Output_Units and Input_Units column are read as integers
+        df_annaid = pd.read_csv(og_files['AnnAGNPS ID'], dtype={'Output_Units': int, 'Input_Units': int})
 
     # Do some reformatting
     df_mgmt_oper = format_mgmt_operation_for_output(df_mgmt_oper)
@@ -337,8 +354,8 @@ def fragment_watershed(annagnps_dir, mini_watersheds_dir, **kwargs):
     # Iterable containing DataFrame names and corresponding filenames
     dataframes_and_filenames = [
         ("AnnAGNPS ID",                       df_annaid,          "annaid.csv",              False),
-        ("Soil Data",                         df_soil,            "soil_data.csv",           False),
-        ("Soil Layer Data",                   df_soil_layers,     "soil_layers_data.csv",    False),
+        ("Soil Data",                         df_soil,            "soil_data.csv",           True),
+        ("Soil Layer Data",                   df_soil_layers,     "soil_layers_data.csv",    True),
         ("Management Field Data",             df_mgmt_field,      "management_field.csv",    False),
         ("Management Operation Data",         df_mgmt_oper,       "management_oper.csv",     False),
         ("Management Schedule Data",          df_mgmt_schedule,   "management_schedule.csv", False),
@@ -371,7 +388,7 @@ def fragment_watershed(annagnps_dir, mini_watersheds_dir, **kwargs):
 
     # CLIMATE
 
-    print('Copying climate files...')
+    
     # Copy climate files
 
     if shared_climate_dir == 'shared':
@@ -385,10 +402,11 @@ def fragment_watershed(annagnps_dir, mini_watersheds_dir, **kwargs):
     shared_climate_dir.mkdir(exist_ok=True)
 
     if p_og_climate_dir != shared_climate_dir:
+        print('Copying climate files...')
         copy_files_from_dir_to_dir(p_og_climate_dir, shared_climate_dir);
     
-        new_master_file_template['CLIMATE DATA - DAILY'] = "./" + str(get_relative_path(dummy_sim_dir,shared_climate_dir / 'climate_daily.csv')).replace("\\","/")
-        new_master_file_template['CLIMATE DATA - STATION'] = "./" + str(get_relative_path(dummy_sim_dir,shared_climate_dir / 'climate_station.csv')).replace("\\","/")
+    new_master_file_template['CLIMATE DATA - DAILY'] = "./" + str(get_relative_path(dummy_sim_dir,shared_climate_dir / 'climate_daily.csv')).replace("\\","/")
+    new_master_file_template['CLIMATE DATA - STATION'] = "./" + str(get_relative_path(dummy_sim_dir,shared_climate_dir / 'climate_station.csv')).replace("\\","/")
 
     # Filter the reaches
     df_og_reaches = df_og_reaches[df_og_reaches['length'] != 0]
@@ -412,10 +430,10 @@ def fragment_watershed(annagnps_dir, mini_watersheds_dir, **kwargs):
     # Call the parallel processing function
 
     # df_og_reaches = df_og_reaches[df_og_reaches['length']!=0]
-
+    total_tasks = len(reach_ids)
     # with Pool() as pool:
     with ThreadPool(processes=num_processes) as pool:
-        for result in pool.imap_unordered(func, reach_ids):
+        for _ in tqdm(pool.imap_unordered(func, reach_ids), total=total_tasks, desc="Processing reaches"):
             pass
 
 def make_mini_watershed_reach_cell_data_section(reach_id, df_og_reaches, df_og_cells, df_soil, df_soil_layers, 
@@ -432,11 +450,11 @@ def make_mini_watershed_reach_cell_data_section(reach_id, df_og_reaches, df_og_c
         recompute_watershed_climate_parameters = False
 
     
-    print(f'Processing reach {reach_id}')
+    # print(f'Processing reach {reach_id}')
     mini_watershed = mini_watersheds_dir / f"reach_{reach_id:010.0f}"
 
     if mini_watershed.exists():
-        print(f'Skipping reach {reach_id}')
+        # print(f'Skipping reach {reach_id}')
         return
     else:
         mini_watershed.mkdir(exist_ok=True)
@@ -472,7 +490,7 @@ def make_mini_watershed_reach_cell_data_section(reach_id, df_og_reaches, df_og_c
         
         df_globalfac.loc[0,'Wshd_Storm_Type_ID'] = main_storm_type
 
-        df_globalfac.to_csv(mini_watershed / 'globalfac.csv', index=False)
+        df_globalfac.to_csv(mini_watershed / 'globfac.csv', index=False)
         
         weighted_R_fctr, \
         weighted_10_year_EI, \
@@ -501,8 +519,8 @@ def make_mini_watershed_reach_cell_data_section(reach_id, df_og_reaches, df_og_c
     else:
         raise Exception(f"Invalid number of cells ({num_cells}) for reach {reach_id}")
     
-    dfr_valid = dfr_valid.apply(pd.to_numeric, errors='ignore')
-    df_contributing_cells = df_contributing_cells.apply(pd.to_numeric, errors='ignore')
+    dfr_valid = dfr_valid.apply(safe_to_numeric)
+    df_contributing_cells = df_contributing_cells.apply(safe_to_numeric)
 
     # Make specific soil data sections
     specific_soils = df_contributing_cells['soil_id'].to_list()
@@ -523,3 +541,9 @@ def make_mini_watershed_reach_cell_data_section(reach_id, df_og_reaches, df_og_c
 
     annagnps_fil = mini_watershed / 'AnnAGNPS.fil'
     annagnps_fil.write_text('annagnps_master.csv');
+
+def safe_to_numeric(x):
+    try:
+        return pd.to_numeric(x)
+    except (ValueError, TypeError):
+        return x

@@ -276,7 +276,7 @@ def convert_dict_to_df(data_dict):
     if not(isinstance(data_dict, dict)):
         return None
     else:
-        return pd.DataFrame.from_dict(data_dict, orient='index').T
+        return pd.DataFrame([list(data_dict.values())], columns=data_dict.keys()) # pd.DataFrame.from_dict(data_dict, orient='index').T
 
 
 def write_csv_control_file_from_dict(data_dict, output_path='control.csv'):
