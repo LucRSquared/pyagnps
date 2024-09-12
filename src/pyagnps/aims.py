@@ -9,6 +9,7 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 from pathlib import Path
 
 from datetime import datetime
+import time
 
 import itertools
 
@@ -232,26 +233,44 @@ class AIMSWatershed:
             self.cmip_pts = cmip_pts
 
     def load_nldas2_centroids(self, path_to_nldas2_centroids=None):
+        url_nldas2_centroids = "https://amazon.ncche.olemiss.edu:8443/Luc/pyagnps/-/raw/main/inputs/climate/NLDAS2_GRID_CENTROIDS_epsg4326.gpkg"
         if path_to_nldas2_centroids is None:
-            path_to_nldas2_centroids = "https://amazon.ncche.olemiss.edu:8443/Luc/pyagnps/-/raw/main/inputs/climate/NLDAS2_GRID_CENTROIDS_epsg4326.gpkg"
+            path_to_nldas2_centroids = url_nldas2_centroids
         else:
             path_to_nldas2_centroids = Path(path_to_nldas2_centroids)
+
+        if not(path_to_nldas2_centroids.exists()):
+            # Download the file
+            out_folder = Path(path_to_nldas2_centroids).parent
+            utils.download_simple_file(url_nldas2_centroids, out_folder=out_folder)            
 
         self.nldas2_centroids = gpd.read_file(path_to_nldas2_centroids)
 
     def load_scs_storm_types(self, path_to_scs_storm_types=None):
+        url_scs_storm_types = "https://amazon.ncche.olemiss.edu:8443/Luc/rusle2-climate-shapefile/-/raw/main/data/scs_storm_types.gpkg"
         if path_to_scs_storm_types is None:
-            path_to_scs_storm_types = "https://amazon.ncche.olemiss.edu:8443/Luc/rusle2-climate-shapefile/-/raw/main/data/scs_storm_types.gpkg"
+            path_to_scs_storm_types = url_scs_storm_types
         else:
             path_to_scs_storm_types = Path(path_to_scs_storm_types)
+
+        if not(path_to_scs_storm_types.exists()):
+            # Download the file
+            out_folder = Path(path_to_scs_storm_types).parent
+            utils.download_simple_file(url_scs_storm_types, out_folder=out_folder)            
 
         self.scs_storm_types = gpd.read_file(path_to_scs_storm_types).to_crs("epsg:4326")
 
     def load_precip_zones(self, path_to_precip_zones=None):
+        url_precip_zones = "https://amazon.ncche.olemiss.edu:8443/Luc/rusle2-climate-shapefile/-/raw/main/outputs/precip_zones_RUSLE2_cleaned_manually_extrapolated_pchip_linear_US_units.gpkg"
         if path_to_precip_zones is None:
-            path_to_precip_zones = "https://amazon.ncche.olemiss.edu:8443/Luc/rusle2-climate-shapefile/-/raw/main/outputs/precip_zones_RUSLE2_cleaned_manually_extrapolated_pchip_linear_US_units.gpkg"
+            path_to_precip_zones = url_precip_zones
         else:
             path_to_precip_zones = Path(path_to_precip_zones)
+
+        if not(path_to_precip_zones.exists()):
+            # Download the file
+            out_folder = Path(path_to_precip_zones).parent
+            utils.download_simple_file(url_precip_zones, out_folder=out_folder)            
 
         self.precip_zones = gpd.read_file(path_to_precip_zones)
 
@@ -707,14 +726,19 @@ class AIMSWatershed:
         This function generates the input files for the AnnAGNPS watershed.
         It queries everything from the database and stores the
         """
+
+        start_time = time.time()
         
         self.get_thuc_id_by_xy()
+
+        print('Loading static layers...')
         self.load_static_files()
 
         # Generate directory structure
         input_folders = self.make_watershed_input_dirs()
 
         # Query database
+        print('Querying database...')
         self.query_cells()
         self.query_reaches()
         self.query_soil()
@@ -726,12 +750,14 @@ class AIMSWatershed:
         self.query_management_operation()
         self.query_runoff_curve()
 
+        print('Writing Climate Data...')
         # Write climate files
         self.generate_climate_daily_files(date_mode=self.date_mode,
                                           overwrite=self.overwrite,
                                           climate_table=self.climate_table)
         
         
+        print('Writing input files...')
         # Write cells and reaches
         watershed_dir = input_folders['watershed']
 
@@ -797,7 +823,7 @@ class AIMSWatershed:
         if not(roc_path.exists()) or self.overwrite:
             self.df_roc.to_csv(roc_path, index=False)
 
-        
+        print('Computing watershed global parameters...')
         bounds = self.get_watershed_bounds(save=True)
 
         lon, lat = self.get_watershed_centroid_xy(bounds=bounds)
@@ -815,6 +841,8 @@ class AIMSWatershed:
         }
 
         self.watershed_data_dict = WATERSHED_DATA
+
+        print('Writing control files...')
 
         watershed_path = watershed_dir / 'watershed_data.csv'
         if not(watershed_path.exists()) or self.overwrite:
@@ -927,6 +955,10 @@ class AIMSWatershed:
         # AnnAGNPS.fil file
         annagnps_fil = output_folder / 'AnnAGNPS.fil'
         annagnps_fil.write_text('annagnps_master.csv');
+    
+        end_time = time.time()
+        print(f'Finished in {round(end_time - start_time, 2)} seconds')
+        print(f'Output folder: {self.output_folder}')
 
     def fragment_watershed(self, **kwargs):
         """
@@ -943,6 +975,8 @@ class AIMSWatershed:
                     If False, the EI, R_fctr, and 10_year_EI parameters will be recalculated
                 num_processes: int Default 8. Number of processes to use.
         """
+
+        start_time = time.time()
 
         share_global_watershed_climate_params = kwargs.get('share_global_watershed_climate_params', True)
         num_processes = kwargs.get('num_processes', 8)
@@ -974,6 +1008,11 @@ class AIMSWatershed:
                                     df_out_opts_aa=convert_dict_to_df(self.output_options_aa_dict),
                                     df_out_opts_tbl=convert_dict_to_df(self.output_options_tbl_dict),
                                     df_annaid=convert_dict_to_df(self.annagnps_id_dict))
+        
+        end_time = time.time()
+
+        print(f'Fragmentation of watershed took {round(end_time - start_time, 2)} seconds')
+        print(f'Fragmented watersheds saved in {mini_watersheds_dir}')
 
 def open_creds_dict(path_to_json_creds):
     with open(path_to_json_creds, "r") as f:

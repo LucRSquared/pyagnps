@@ -337,7 +337,6 @@ def fragment_watershed(annagnps_dir, mini_watersheds_dir, **kwargs):
     df_mgmt_schedule = format_mgmt_schedule_for_output(df_mgmt_schedule)
 
     
-    print('Creating shared files')
     master_output_dir = annagnps_dir
     master_output_dir.mkdir(exist_ok=True, parents=True)
 
