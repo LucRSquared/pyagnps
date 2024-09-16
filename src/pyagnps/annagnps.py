@@ -431,9 +431,13 @@ def fragment_watershed(annagnps_dir, mini_watersheds_dir, **kwargs):
     # df_og_reaches = df_og_reaches[df_og_reaches['length']!=0]
     total_tasks = len(reach_ids)
     # with Pool() as pool:
+    mini_watersheds = []
     with ThreadPool(processes=num_processes) as pool:
-        for _ in tqdm(pool.imap_unordered(func, reach_ids), total=total_tasks, desc="Processing reaches"):
-            pass
+        for mini_watershed in tqdm(pool.imap_unordered(func, reach_ids), total=total_tasks, desc="Processing reaches"):
+            mini_watersheds.append(mini_watershed)
+
+    # Return list of Pathlib objects containing the mini_watersheds source files
+    return mini_watersheds
 
 def make_mini_watershed_reach_cell_data_section(reach_id, df_og_reaches, df_og_cells, df_soil, df_soil_layers, 
                                                 annagnps_master_template_dict, mini_watersheds_dir, 
@@ -540,6 +544,8 @@ def make_mini_watershed_reach_cell_data_section(reach_id, df_og_reaches, df_og_c
 
     annagnps_fil = mini_watershed / 'AnnAGNPS.fil'
     annagnps_fil.write_text('annagnps_master.csv');
+
+    return mini_watershed
 
 def safe_to_numeric(x):
     try:

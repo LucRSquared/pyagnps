@@ -974,6 +974,8 @@ class AIMSWatershed:
                     Whether to share global climate parameters across the mini-watersheds. 
                     If False, the EI, R_fctr, and 10_year_EI parameters will be recalculated
                 num_processes: int Default 8. Number of processes to use.
+                write_folders
+
         """
 
         start_time = time.time()
@@ -982,32 +984,34 @@ class AIMSWatershed:
         num_processes = kwargs.get('num_processes', 8)
         mini_watersheds_dir = self.output_folder / 'mini_watersheds'
 
-        annagnps.fragment_watershed(self.output_folder, 
-                                    mini_watersheds_dir, 
-                                    shared_climate_dir=self.input_folders['climate'],
-                                    num_processes=num_processes,
-                                    precip_zones=self.precip_zones,
-                                    scs_storm_types=self.scs_storm_types,
-                                    cells_geometry=self.cells_geometry,
-                                    share_global_watershed_climate_params=share_global_watershed_climate_params,
-                                    df_og_reaches=self.df_reaches,
-                                    df_og_cells=self.df_cells,
-                                    df_soil=self.df_soil_data,
-                                    df_soil_layers=self.df_soil_layers_data,
-                                    df_mgmt_field=self.df_mgmt_field,
-                                    df_mgmt_oper=self.df_mgmt_oper,
-                                    df_mgmt_sched=self.df_mgmt_schd,
-                                    df_crop=self.df_mgmt_crop,
-                                    df_crop_growth=self.df_mgmt_crop_growth,
-                                    df_non_crop=self.df_mgmt_non_crop,
-                                    df_roc=self.df_roc,
-                                    df_sim_period=convert_dict_to_df(self.simulation_period_data_dict),
-                                    df_watershed_data=convert_dict_to_df(self.watershed_data_dict),
-                                    df_globalfac=convert_dict_to_df(self.global_factors_flags_dict),
-                                    df_out_opts_global=convert_dict_to_df(self.output_options_global_dict),
-                                    df_out_opts_aa=convert_dict_to_df(self.output_options_aa_dict),
-                                    df_out_opts_tbl=convert_dict_to_df(self.output_options_tbl_dict),
-                                    df_annaid=convert_dict_to_df(self.annagnps_id_dict))
+        mini_watersheds = annagnps.fragment_watershed(self.output_folder, 
+                            mini_watersheds_dir, 
+                            shared_climate_dir=self.input_folders['climate'],
+                            num_processes=num_processes,
+                            precip_zones=self.precip_zones,
+                            scs_storm_types=self.scs_storm_types,
+                            cells_geometry=self.cells_geometry,
+                            share_global_watershed_climate_params=share_global_watershed_climate_params,
+                            df_og_reaches=self.df_reaches,
+                            df_og_cells=self.df_cells,
+                            df_soil=self.df_soil_data,
+                            df_soil_layers=self.df_soil_layers_data,
+                            df_mgmt_field=self.df_mgmt_field,
+                            df_mgmt_oper=self.df_mgmt_oper,
+                            df_mgmt_sched=self.df_mgmt_schd,
+                            df_crop=self.df_mgmt_crop,
+                            df_crop_growth=self.df_mgmt_crop_growth,
+                            df_non_crop=self.df_mgmt_non_crop,
+                            df_roc=self.df_roc,
+                            df_sim_period=convert_dict_to_df(self.simulation_period_data_dict),
+                            df_watershed_data=convert_dict_to_df(self.watershed_data_dict),
+                            df_globalfac=convert_dict_to_df(self.global_factors_flags_dict),
+                            df_out_opts_global=convert_dict_to_df(self.output_options_global_dict),
+                            df_out_opts_aa=convert_dict_to_df(self.output_options_aa_dict),
+                            df_out_opts_tbl=convert_dict_to_df(self.output_options_tbl_dict),
+                            df_annaid=convert_dict_to_df(self.annagnps_id_dict))
+        
+
         
         end_time = time.time()
 
