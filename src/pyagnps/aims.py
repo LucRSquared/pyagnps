@@ -26,7 +26,8 @@ from sqlalchemy import create_engine, text as sql_text
 from sqlalchemy import URL
 
 from pyagnps import annagnps, utils, constants, climate
-from pyagnps.utils import relative_input_file_path, write_csv_control_file_from_dict, convert_dict_to_df
+from pyagnps.utils import relative_input_file_path, write_csv_control_file_from_dict, convert_dict_to_df, \
+                          get_relative_path
 
 from tqdm import tqdm
 
@@ -235,7 +236,8 @@ class AIMSWatershed:
     def load_nldas2_centroids(self, path_to_nldas2_centroids=None):
         url_nldas2_centroids = "https://amazon.ncche.olemiss.edu:8443/Luc/pyagnps/-/raw/main/inputs/climate/NLDAS2_GRID_CENTROIDS_epsg4326.gpkg"
         if path_to_nldas2_centroids is None:
-            path_to_nldas2_centroids = Path(url_nldas2_centroids)
+            # path_to_nldas2_centroids = Path(url_nldas2_centroids)
+            path_to_nldas2_centroids = Path().cwd() / "gis_temp" / "NLDAS2_GRID_CENTROIDS_epsg4326.gpkg"
         else:
             path_to_nldas2_centroids = Path(path_to_nldas2_centroids)
 
@@ -249,7 +251,8 @@ class AIMSWatershed:
     def load_scs_storm_types(self, path_to_scs_storm_types=None):
         url_scs_storm_types = "https://amazon.ncche.olemiss.edu:8443/Luc/rusle2-climate-shapefile/-/raw/main/data/scs_storm_types.gpkg"
         if path_to_scs_storm_types is None:
-            path_to_scs_storm_types = Path(url_scs_storm_types)
+            # path_to_scs_storm_types = Path(url_scs_storm_types)
+            path_to_scs_storm_types = Path().cwd() / "gis_temp" / "scs_storm_types.gpkg"
         else:
             path_to_scs_storm_types = Path(path_to_scs_storm_types)
 
@@ -263,7 +266,8 @@ class AIMSWatershed:
     def load_precip_zones(self, path_to_precip_zones=None):
         url_precip_zones = "https://amazon.ncche.olemiss.edu:8443/Luc/rusle2-climate-shapefile/-/raw/main/outputs/precip_zones_RUSLE2_cleaned_manually_extrapolated_pchip_linear_US_units.gpkg"
         if path_to_precip_zones is None:
-            path_to_precip_zones = Path(url_precip_zones)
+            # path_to_precip_zones = Path(url_precip_zones)
+            path_to_precip_zones = Path().cwd() / "gis_temp" / "precip_zones_RUSLE2_cleaned_manually_extrapolated_pchip_linear_US_units.gpkg"
         else:
             path_to_precip_zones = Path(path_to_precip_zones)
 
@@ -1017,6 +1021,17 @@ class AIMSWatershed:
 
         print(f'Fragmentation of watershed took {round(end_time - start_time, 2)} seconds')
         print(f'Fragmented watersheds saved in {mini_watersheds_dir}')
+
+        return mini_watersheds
+
+def generate_df_mini_watersheds_dirs(mini_watersheds, root_folder=None):
+    if root_folder is None:
+        df = pd.DataFrame({'mini_watersheds': ['./' + str(x).replace("\\", "/") for x in mini_watersheds]})
+    else:
+        root_folder = Path(root_folder)
+        df = pd.DataFrame({'mini_watersheds': ['./' + str(get_relative_path(root_folder, x)).replace("\\", "/") for x in mini_watersheds]})
+
+    return df
 
 def open_creds_dict(path_to_json_creds):
     with open(path_to_json_creds, "r") as f:

@@ -53,12 +53,13 @@ def format_mgmt_schedule_for_output(df):
 
 # FUNCTIONS FOR POST PROCESSING ANNAGNPS OUTPUTS
 
-def read_all_annagnps_output_files(output_folder):
+def read_all_annagnps_output_files(output_folder, prepare_for_db=False, thuc_id=''):
     """
     Reads all .csv files in the output folder and returns dataframes
 
     Args:
         output_folder (str): Path to the output folder containing .out files.
+        prepare_for_db (bool): Whether to prepare the data for the database. Defaults to False.
 
         
     # Read all .csv files in the CSV_Output_Files in the root folder
@@ -102,31 +103,6 @@ def read_all_annagnps_output_files(output_folder):
             df_n_oc_p = df_aa_n.merge(df_aa_oc).merge(df_aa_p)
 
             processed_outputs['AnnAGNPS_AA'] = df_n_oc_p
-            # processed_outputs[f"{name}_nitrogen"] = df_aa_n
-            # processed_outputs[f"{name}_organic_carbon"] = df_aa_oc
-            # processed_outputs[f"{name}_phosphorus"] = df_aa_p
-        
-        # THESE FILES ARE REDUNDANT
-        
-        # elif name.startswith('AnnAGNPS_AA_Water_yield_(unit-area)') or \
-        #      name.startswith('AnnAGNPS_AA_Sediment_yield_(unit-area)') or \
-        #      name.startswith('AnnAGNPS_AA_Sediment_erosion_(unit-area)'):
-            
-        #     header_row = find_rows_containing_pattern(file, 'Cell ID')[0]
-
-        #     if name.startswith('AnnAGNPS_AA_Water_yield_(unit-area)'):
-        #         last_row = find_rows_containing_pattern(file, 'Watershed Totals')[0]
-        #     else:
-        #         last_row = find_rows_containing_pattern(file, 'Watershed,Totals')[0]
-                
-        #     df_tmp = pd.read_csv(file, skiprows=header_row, 
-        #                         nrows=last_row-header_row-1, 
-        #                         index_col=False)
-            
-        #     if "Source" in df_tmp.columns:
-        #         df_tmp = df_tmp[df_tmp["Source"] != "Subtotal"]
-
-        #     processed_outputs[name] = df_tmp.copy(deep=True)
             
     # Concatenate all the dataframes that contain "AnnAGNPS_AA_Sediment_erosion_UA_RR_Total"
     df_tmp = pd.concat([processed_outputs.pop(x) for x in list(processed_outputs.keys()) if "Sediment_erosion_UA_RR_Total" in x])
@@ -142,6 +118,84 @@ def read_all_annagnps_output_files(output_folder):
     # Concatenate all the dataframes that contain "AnnAGNPS_AA_Water_yield_UA_RR_Total"
     processed_outputs["AnnAGNPS_AA_Water_yield_UA_RR_Total"] = pd.concat([processed_outputs.pop(x) for x in list(processed_outputs.keys()) if "Water_yield_UA_RR_Total" in x])
     
+    if prepare_for_db:
+        for name, df in processed_outputs.items():
+            if name == "AnnAGNPS_AA":
+                rename_dict_aa = {
+                    'Cell ID': 'cell_id',
+                    'Receiving Reach ID': 'receiving_reach_id',
+                    'Drainage Area [ha]': 'drainage_area_ha',
+                    'Attached N [kg/ha/yr  ]': 'attached_n_kg_ha_yr',
+                    'Dissolved N [kg/ha/yr  ]': 'dissolved_n_kg_ha_yr',
+                    'Attached OC [kg/ha/yr  ]': 'attached_oc_kg_ha_yr',
+                    'Dissolved OC [kg/ha/yr  ]': 'dissolved_oc_kg_ha_yr',
+                    'Attached P [kg/ha/yr  ]': 'attached_p_kg_ha_yr',
+                    'Dissolved P [kg/ha/yr  ]': 'dissolved_p_kg_ha_yr'
+                }
+
+                df = df.drop(columns=[x for x in df.columns if 'Subtotal' in x])
+                df = df.rename(columns=rename_dict_aa)
+                df = df.assign(thuc_id=thuc_id)
+
+            elif name == "AnnAGNPS_AA_Sediment_yield_UA_RR_Total":
+                rename_dict_sediment_yield = {
+                    'Description':                                     'description',
+                    'Total_Yield_by_Mass_Mg_per_yr':                   'total_yield_by_mass_mg_per_yr',
+                    'Cell_ID':                                         'cell_id',
+                    'Rank':                                            'rank',
+                    'Cell_Drainage_Area_hectare':                      'cell_drainage_area_hectare',
+                    'Accumulated_Contributing_Cell_Area_percent':      'accumulated_contributing_cell_area_percent',
+                    'Cell_Yield_by_Unit_Area_Mg_per_hectare_per_year': 'cell_yield_by_unit_area_mg_per_hectare_per_year',
+                    'Yield_Unit_Area_Ranking_Ratio':                   'yield_unit_area_ranking_ratio',
+                    'Cell_Yield_by_Mass_Mg_per_yr':                    'cell_yield_by_mass_mg_per_yr',
+                    'Cell_Yield_by_Mass_percent':                      'cell_yield_by_mass_percent',
+                    'Accumulated_Contributing_Cell_Yield_percent':     'accumulated_contributing_cell_yield_percent'
+                }
+
+                df = df.drop(columns=['Reach_ID', 'Reach_Location'], errors='ignore')
+                df = df.rename(columns=rename_dict_sediment_yield)
+                df = df.assign(thuc_id=thuc_id)
+
+            elif name == "AnnAGNPS_AA_Sediment_erosion_UA_RR_Total":
+                rename_dict_sediment_erosion = {
+                    'Description':                                       'description',
+                    'Total_Erosion_by_Mass_Mg_per_yr':                   'total_erosion_by_mass_mg_per_yr',
+                    'Cell_ID':                                           'cell_id',
+                    'Rank':                                              'rank',
+                    'Cell_Drainage_Area_hectare':                        'cell_drainage_area_hectare',
+                    'Accumulated_Contributing_Cell_Area_percent':        'accumulated_contributing_cell_area_percent',
+                    'Cell_Erosion_by_Unit_Area_Mg_per_hectare_per_year': 'cell_erosion_by_unit_area_mg_per_hectare_per_year',
+                    'Erosion_Unit_Area_Ranking_Ratio':                   'erosion_unit_area_ranking_ratio',
+                    'Cell_Erosion_by_Mass_Mg_per_yr':                    'cell_erosion_by_mass_mg_per_yr',
+                    'Cell_Erosion_by_Mass_percent':                      'cell_erosion_by_mass_percent',
+                    'Accumulated_Contributing_Cell_Erosion_percent':     'accumulated_contributing_cell_erosion_percent'
+                }
+
+                df = df.drop(columns=['Reach_ID', 'Reach_Location'], errors='ignore')
+                df = df.rename(columns=rename_dict_sediment_erosion)
+                df = df.assign(thuc_id=thuc_id)
+
+            elif name == "AnnAGNPS_AA_Water_yield_UA_RR_Total":
+                rename_dict_water_yield = {
+                    'Description':                                 'description',
+                    'Total_Yield_by_Mass_Mg_per_yr':               'total_yield_by_mass_mg_per_yr',
+                    'Cell_ID':                                     'cell_id',
+                    'Rank':                                        'rank',
+                    'Cell_Drainage_Area_hectare':                  'cell_drainage_area_hectare',
+                    'Accumulated_Contributing_Cell_Area_percent':  'accumulated_contributing_cell_area_percent',
+                    'Cell_Yield_by_Unit_Area_mm_per_year':         'cell_yield_by_unit_area_mm_per_year',
+                    'Yield_Unit_Area_Ranking_Ratio':               'yield_unit_area_ranking_ratio',
+                    'Cell_Yield_by_Mass_Mg_per_yr':                'cell_yield_by_mass_mg_per_yr',
+                    'Cell_Yield_by_Mass_percent':                  'cell_yield_by_mass_percent',
+                    'Accumulated_Contributing_Cell_Yield_percent': 'accumulated_contributing_cell_yield_percent'
+                }
+
+                df = df.drop(columns=['Reach_ID', 'Reach_Location'], errors='ignore')
+                df = df.rename(columns=rename_dict_water_yield)
+                df = df.assign(thuc_id=thuc_id)
+
+            processed_outputs[name] = df.copy(deep=True)
+
     return processed_outputs
         
 
@@ -156,7 +210,7 @@ def read_annagnps_aa_file(aa_file):
         tuple: A tuple of pandas DataFrames for nitrogen, organic carbon, and phosphorus.
     """
     # Find the rows with the header and total rows for each chemical
-    header_rows = find_rows_containing_pattern(aa_file, 'Cell ID', skiprows=0)
+    header_rows = find_rows_containing_pattern(aa_file, 'Cell ID,Receiving Reach ID', skiprows=0)
     last_rows = find_rows_containing_pattern(aa_file, 'Watershed,Totals', skiprows=0)
 
     # Initialize the dataframes
@@ -458,7 +512,7 @@ def make_mini_watershed_reach_cell_data_section(reach_id, df_og_reaches, df_og_c
 
     if mini_watershed.exists():
         # print(f'Skipping reach {reach_id}')
-        return
+        return mini_watershed
     else:
         mini_watershed.mkdir(exist_ok=True)
     
