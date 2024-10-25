@@ -227,13 +227,28 @@ def relative_input_file_path(output_folder, path_to_file):
     relative_path = f"./{relative_path}"
     return relative_path
 
-def log_to_file(filepath, message):
+def log_to_file(filepath, message, add_timestamp=False):
+    # Convert to Path object if it isn't already
+    path = Path(filepath)
+    
+    # Ensure directory exists
+    path.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Add timestamp to message
+    if add_timestamp:
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        full_message = f"{timestamp} - {message}"
+    else:
+        full_message = message
+    
+    # Use context manager for stdout
     original_stdout = sys.stdout
-    with open(filepath, "a") as log:
-        sys.stdout = log
-        print(message)
-        sys.stdout = original_stdout
-
+    try:
+        with open(path, "a") as log:
+            sys.stdout = log
+            print(full_message)
+    finally:
+        sys.stdout = original_stdout  # Ensure stdout is restored even if an error occurs
 
 def get_current_time(format="%Y-%m-%d-%H-%M-%S"):
     now = datetime.now()

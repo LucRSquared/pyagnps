@@ -8,6 +8,10 @@ parse_arguments() {
         SIMULATION_DIR="$2"
         shift 2
         ;;
+      --pyagnps_dir)
+        PYAGNPS_DIR="$2"
+        shift 2
+        ;;
       --credentials)
         path_to_db_credentials="$2"
         shift 2
@@ -60,6 +64,10 @@ parse_arguments() {
         num_processes="$2"
         shift 2
         ;;
+      --log_file)
+        LOG_FILE="$2"
+        shift 2
+        ;;
       *)
         echo "Invalid argument: $1"
         exit 1
@@ -73,7 +81,7 @@ parse_arguments "$@"
 
 # Check if required arguments are provided
 if [ -z "$SIMULATION_DIR" -o -z "$path_to_db_credentials" ]; then
-  echo "Error: Missing required arguments: simulation_dir and credentials"
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Missing required arguments: simulation_dir and credentials" | tee -a "$LOG_FILE"
   exit 1
 fi
 
@@ -102,10 +110,19 @@ if [ -z "$num_processes" ]; then
   num_processes=16
 fi
 
+if [ -z "$PYAGNPS_DIR" ]; then
+  PYAGNPS_DIR="/aims-nas/luc/code/pyagnps/"
+fi
+
+# Make a default value of the LOG_FILE in case it is not specified so that it doesn't log to a file
+if [ -z "$LOG_FILE" ]; then
+  LOG_FILE="/dev/null"
+fi
+
 # Rest of the script remains the same...
 
 # Activate the virtual environment
-source "$PYAGNPS_DIR/venv/bin/activate" || { echo "Failed to activate virtual environment"; exit 1; }
+source "$PYAGNPS_DIR/venv/bin/activate" || { echo "$(date '+%Y-%m-%d %H:%M:%S') - Failed to activate virtual environment" | tee -a "$LOG_FILE"; exit 1; }
 
 export PYTHONUNBUFFERED=TRUE
 
@@ -124,4 +141,5 @@ python generate_watershed_files_pre_runs.py \
   --reach_id "$reach_id" \
   --generate_main_files "$generate_main_files" \
   --fragment_watershed "$fragment_watershed" \
-  --num_processes "$num_processes"
+  --num_processes "$num_processes" \
+  --log_file "$LOG_FILE"

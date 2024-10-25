@@ -1,4 +1,5 @@
 from pyagnps import annagnps, aims
+from pyagnps.utils import log_to_file
 from pathlib import Path
 
 from sqlalchemy import create_engine, text as sql_text
@@ -21,15 +22,14 @@ def main():
     args = parser.parse_args()
 
     credentials              = Path(args.credentials)
-
     output_folder            = Path(args.output_folder)
 
     thuc_id    = args.thuc_id
 
-    annagnps_aa_table        = args.annagnps_aa_table
-    aa_water_yield_table     = args.aa_water_yield_table
-    aa_sediment_yield_table  = args.aa_sediment_yield_table
-    aa_sediment_erosion_table= args.aa_sediment_erosion_table
+    annagnps_aa_table         = args.annagnps_aa_table
+    aa_water_yield_table      = args.aa_water_yield_table
+    aa_sediment_yield_table   = args.aa_sediment_yield_table
+    aa_sediment_erosion_table = args.aa_sediment_erosion_table
 
 
     data_output_labels = ['AnnAGNPS_AA','AnnAGNPS_AA_Sediment_erosion_UA_RR_Total','AnnAGNPS_AA_Sediment_yield_UA_RR_Total','AnnAGNPS_AA_Water_yield_UA_RR_Total']

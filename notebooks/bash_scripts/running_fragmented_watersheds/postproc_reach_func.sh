@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Set the root directory (can be changed before script execution)
 
 # Define function to handle arguments
 parse_arguments() {
@@ -10,8 +9,16 @@ parse_arguments() {
         MINI_WATERSHEDS_DIR="$2"
         shift 2
         ;;
+      --credentials)
+        path_to_db_credentials="$2"
+        shift 2
+        ;;
       --csv_file)
         csv_file="$2"
+        shift 2
+        ;;
+      --pyagnps_dir)
+        pyagnps_dir="$2"
         shift 2
         ;;
       --log_file)
@@ -39,6 +46,9 @@ if [ -z "$csv_file" ]; then
     csv_file="${MINI_WATERSHEDS_DIR}/dir_list.csv"
 fi
 
+if [ -z "$PYAGNPS_DIR" ]; then
+  PYAGNPS_DIR="/aims-nas/luc/code/pyagnps/"
+fi
 
 # Get the index of the directory to process from the job array
 dir_index=$((SLURM_ARRAY_TASK_ID))
@@ -54,11 +64,16 @@ if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
     echo "Processing directory: $job_name"
     cd "${dir_list[$dir_index]}" || exit
     
-    # Run annagnps
-    annagnps
+    # DO post processing here
+    python -u post_process_annagnps_outputs.py \
+        --mini_watersheds_dir "./mini_watersheds" \
+        --credentials "$path_to_db_credentials" \
+        --pyagnps_dir "$pyagnps_dir" \
+        --log_file "$LOG_FILE"
+
 
 else
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Invalid directory index: $dir_index" | tee -a "$LOG_FILE"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Invalid directory index: $dir_index, could not do post processing" | tee -a "$LOG_FILE"
     exit 1
 fi
 

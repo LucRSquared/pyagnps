@@ -12,6 +12,10 @@ parse_arguments() {
         PYAGNPS_DIR="$2"
         shift 2
         ;;
+      --credentials)
+        path_to_db_credentials="$2"
+        shift 2
+        ;;
       --batch_size)
         batch_size="$2"
         shift 2
@@ -46,8 +50,7 @@ fi
 
 # Check if required arguments are provided
 if [ -z "$MINI_WATERSHEDS_DIR" ]; then
-  echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Missing required argument: --mini_watersheds_dir" | tee -a "$LOG_FILE"
-  exit 1
+  MINI_WATERSHEDS_DIR=./mini_watersheds
 fi
 
 if [ -z "$PYAGNPS_DIR" ]; then
@@ -96,9 +99,9 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
   sbatch --oversubscribe \
          --array="${start_index}-${end_index}" \
          --partition="$partition" \
-         --job-name="anna_${start_index}-${end_index}" \
-         --output="annagnps_${start_index}-${end_index}_%A_%a_%N.out" \
-         ./run_annagnps_func_normal.sh \
+         --job-name="postproc_${start_index}-${end_index}" \
+         --output="postproc_${start_index}-${end_index}_%A_%a_%N.out" \
+         ./post_proc_reach_func.sh \
          --mini_watersheds_dir "$MINI_WATERSHEDS_DIR" \
          --pyagnps_dir "$PYAGNPS_DIR" &
   sleep 5
