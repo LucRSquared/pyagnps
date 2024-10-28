@@ -69,6 +69,7 @@ num_jobs=0
 if [ -f "${ROOT_DIR}/thuc_list_to_run.csv" ]; then
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Reusing existing thuc_list_to_run.csv file" | tee -a "$LOG_FILE"
     num_jobs=$(wc -l < "${ROOT_DIR}/thuc_list_to_run.csv")
+fi
 
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Found $num_jobs jobs, submitting them in batches of size $batch_size" | tee -a "$LOG_FILE"
 
