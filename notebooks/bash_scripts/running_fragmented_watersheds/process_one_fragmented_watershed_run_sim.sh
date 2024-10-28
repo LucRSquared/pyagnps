@@ -100,7 +100,8 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
          --output="annagnps_${start_index}-${end_index}_%A_%a_%N.out" \
          ./run_annagnps_func_normal.sh \
          --mini_watersheds_dir "$MINI_WATERSHEDS_DIR" \
-         --pyagnps_dir "$PYAGNPS_DIR" &
+         --log_file "$LOG_FILE" & #\
+        #  --pyagnps_dir "$PYAGNPS_DIR" & # Not necessary but here it is anyway in case some python script is needed later
   sleep 5
 
   num_running_jobs=$(squeue --noheader | wc -l)

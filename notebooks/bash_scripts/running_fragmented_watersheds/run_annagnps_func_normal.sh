@@ -39,6 +39,9 @@ if [ -z "$csv_file" ]; then
     csv_file="${MINI_WATERSHEDS_DIR}/dir_list.csv"
 fi
 
+# if [ -z "$PYAGNPS_DIR" ]; then
+#   PYAGNPS_DIR="/aims-nas/luc/code/pyagnps/"
+# fi
 
 # Get the index of the directory to process from the job array
 dir_index=$((SLURM_ARRAY_TASK_ID))

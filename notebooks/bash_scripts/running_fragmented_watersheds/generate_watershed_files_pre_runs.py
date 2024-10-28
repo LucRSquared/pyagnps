@@ -2,6 +2,8 @@ from pyagnps import aims
 from pyagnps.utils import log_to_file
 from pathlib import Path
 
+import sys
+
 import argparse
 
 
@@ -109,22 +111,33 @@ def main():
 
     except Exception as e:
         log_to_file(log_file_path, f"Error THUC {thuc_id}: {e}", add_timestamp=True)
+        sys.exit(1)
         return
 
     if generate_main_files:
         log_to_file(log_file_path, f"Generating main files", add_timestamp=True)
-        w.generate_annagnps_watershed_input_files()
-    else:
-        fragment_watershed = False
+        try:
+            w.generate_annagnps_watershed_input_files()
+        except Exception as e:
+            log_to_file(log_file_path, f"Error THUC {thuc_id}: {e}", add_timestamp=True)
+            sys.exit(1)
+        else:
+            fragment_watershed = False
 
     if fragment_watershed:
         log_to_file(log_file_path, f"Fragmenting watershed", add_timestamp=True)
-        mini_watersheds = w.fragment_watershed(share_global_watershed_climate_params=False, # False to recompute climate parameters for every reach
-                                               num_processes=num_processes)
-        
-        df_mini_watersheds = aims.generate_df_mini_watersheds_dirs(mini_watersheds, root_folder=output_folder / "mini_watersheds")
-        df_mini_watersheds.to_csv(output_folder / "mini_watersheds" / "dir_list.csv", index=False, header=False)
-        log_to_file(log_file_path, f"Mini watershed files generated at {str(output_folder / 'mini_watersheds')}", add_timestamp=True)
+        try:
+            mini_watersheds = w.fragment_watershed(share_global_watershed_climate_params=False, # False to recompute climate parameters for every reach
+                                                   num_processes=num_processes)
+            
+            df_mini_watersheds = aims.generate_df_mini_watersheds_dirs(mini_watersheds, root_folder=output_folder / "mini_watersheds")
+            df_mini_watersheds.to_csv(output_folder / "mini_watersheds" / "dir_list.csv", index=False, header=False)
+            log_to_file(log_file_path, f"Mini watershed files generated at {str(output_folder / 'mini_watersheds')}", add_timestamp=True)
+        except Exception as e:
+            log_to_file(log_file_path, f"Error THUC {thuc_id}: {e}", add_timestamp=True)
+            sys.exit(1)
+
+    sys.exit(0)
 
 if __name__ == '__main__':
     main()

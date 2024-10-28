@@ -8,6 +8,10 @@ parse_arguments() {
         MINI_WATERSHEDS_DIR="$2"
         shift 2
         ;;
+      --thuc_id)
+        THUC_ID="$2"
+        shift 2
+        ;;
       --pyagnps_dir)
         PYAGNPS_DIR="$2"
         shift 2
@@ -59,7 +63,7 @@ fi
 
 # Set defaults for optional arguments
 if [ -z "$batch_size" ]; then
-  batch_size=1000
+  batch_size=1
 fi
 
 if [ -z "$maxiter" ]; then
@@ -68,6 +72,12 @@ fi
 
 if [ -z "$partition" ]; then
   partition="aims-highperf-oversubscribe,aims-default-oversubscribe"
+fi
+
+# Throw error if THUC_ID is not provided
+if [ -z "$THUC_ID" ]; then
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Missing required argument: --thuc_id" | tee -a "$LOG_FILE"
+  exit 1
 fi
 
 # Calculate the total number of jobs based on directory count
@@ -100,10 +110,17 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
          --array="${start_index}-${end_index}" \
          --partition="$partition" \
          --job-name="postproc_${start_index}-${end_index}" \
-         --output="postproc_${start_index}-${end_index}_%A_%a_%N.out" \
+         --output="/dev/null" # \ # "postproc_${start_index}-${end_index}_%A_%a_%N.out"
          ./post_proc_reach_func.sh \
+         --thuc_id "$THUC_ID" \
          --mini_watersheds_dir "$MINI_WATERSHEDS_DIR" \
-         --pyagnps_dir "$PYAGNPS_DIR" &
+         --credentials "$path_to_db_credentials" \
+         --annagnps_aa_table "pre_runs_annagnps_aa" \
+         --aa_water_yield_table "pre_runs_annagnps_aa_water_yield_ua_rr_total" \
+         --aa_sediment_yield_table "pre_runs_annagnps_aa_sediment_yield_ua_rr_total" \
+         --aa_sediment_erosion_table "pre_runs_annagnps_aa_sediment_erosion_ua_rr_total" \
+         --pyagnps_dir "$PYAGNPS_DIR" \
+         --log_file "$LOG_FILE" &
   sleep 5
 
   num_running_jobs=$(squeue --noheader | wc -l)

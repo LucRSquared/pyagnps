@@ -124,10 +124,10 @@ fi
 # Activate the virtual environment
 source "$PYAGNPS_DIR/venv/bin/activate" || { echo "$(date '+%Y-%m-%d %H:%M:%S') - Failed to activate virtual environment" | tee -a "$LOG_FILE"; exit 1; }
 
-export PYTHONUNBUFFERED=TRUE
+# export PYTHONUNBUFFERED=TRUE
 
 # Run the script
-python generate_watershed_files_pre_runs.py \
+python -u "$PYAGNPS_DIR/notebooks/bash_scripts/running_fragmented_watersheds/generate_watershed_files_pre_runs.py" \
   --credentials "$path_to_db_credentials" \
   --nldas2_centroids "$path_to_nldas2_centroids" \
   --scs_storm_types "$path_to_scs_storm_types" \
