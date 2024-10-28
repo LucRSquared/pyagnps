@@ -1,4 +1,4 @@
-#!/bin/sbash
+#!/bin/bash
 
 # STRUCTURE
 # ROOT_DIR
