@@ -22,6 +22,7 @@ def main():
     parser.add_argument('--thuc_id',             type=str, help='THUC ID to generate files for')
     parser.add_argument('--reach_id',            type=int, help='Reach ID to generate files for (default=2)', default=2)
     parser.add_argument('--fragment_watershed',  type=str, help='Reach ID to generate files for (default=2)', default="true")
+    parser.add_argument('--share_global_watershed_parameters_with_mini_watersheds',  type=str, help='If "false", then the climate parameters are recomputed for each mini watershed', default="false")
     parser.add_argument('--generate_main_files', type=str, help='Generate main files', default="true")
     parser.add_argument('--num_processes',       type=int, help='Number of processes to use', default=16)
     parser.add_argument('--log_file',            type=str, help='Path to the log file', default="generate_watershed_files.log")
@@ -49,6 +50,8 @@ def main():
 
     fragment_watershed = args.fragment_watershed
 
+    share_global_watershed_parameters_with_mini_watersheds = args.share_global_watershed_parameters_with_mini_watersheds
+
     num_processes = args.num_processes
 
 
@@ -61,6 +64,11 @@ def main():
         fragment_watershed = True
     else:
         fragment_watershed = False
+
+    if share_global_watershed_parameters_with_mini_watersheds in ['y', 'yes', 'true']:
+        share_global_watershed_parameters_with_mini_watersheds = True
+    else:
+        share_global_watershed_parameters_with_mini_watersheds = False
 
 
     try:
@@ -121,13 +129,11 @@ def main():
         except Exception as e:
             log_to_file(log_file_path, f"Error THUC {thuc_id}: {e}", add_timestamp=True)
             sys.exit(1)
-        else:
-            fragment_watershed = False
 
     if fragment_watershed:
         log_to_file(log_file_path, f"Fragmenting watershed", add_timestamp=True)
         try:
-            mini_watersheds = w.fragment_watershed(share_global_watershed_climate_params=False, # False to recompute climate parameters for every reach
+            mini_watersheds = w.fragment_watershed(share_global_watershed_climate_params=share_global_watershed_parameters_with_mini_watersheds, # False to recompute climate parameters for every reach
                                                    num_processes=num_processes)
             
             df_mini_watersheds = aims.generate_df_mini_watersheds_dirs(mini_watersheds, root_folder=output_folder / "mini_watersheds")

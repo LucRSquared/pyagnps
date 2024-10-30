@@ -8,8 +8,8 @@ parse_arguments() {
         MINI_WATERSHEDS_DIR="$2"
         shift 2
         ;;
-      --pyagnps_dir)
-        PYAGNPS_DIR="$2"
+      --py_bash_dir)
+        PY_BASH_DIR="$2"
         shift 2
         ;;
       --batch_size)
@@ -50,8 +50,9 @@ if [ -z "$MINI_WATERSHEDS_DIR" ]; then
   exit 1
 fi
 
-if [ -z "$PYAGNPS_DIR" ]; then
-  PYAGNPS_DIR="/aims-nas/luc/code/pyagnps/"
+if [ -z "$PY_BASH_DIR" ]; then
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Missing required argument: --py_bash_dir" | tee -a "$LOG_FILE"
+  exit 1
 fi
 
 # Set defaults for optional arguments
@@ -72,17 +73,18 @@ num_jobs=0
 
 if [ -f "${MINI_WATERSHEDS_DIR}/dir_list.csv" ]; then
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Using existing dir_list.csv file" | tee -a "$LOG_FILE"
-    num_jobs=$(wc -l < "${ROOT_DIR}/dir_list.csv")
+    num_jobs=$(wc -l < "${MINI_WATERSHEDS_DIR}/dir_list.csv")
 else
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Looking for jobs to submit..." | tee -a "$LOG_FILE"
     rm -f "${MINI_WATERSHEDS_DIR}/dir_list.csv"  # Remove the CSV file if it exists
-    for subdir in "${ROOT_DIR}"/*/ ; do
-        [[ -d $subdir ]] && echo "${subdir%/}" >> "${ROOT_DIR}/dir_list.csv" && ((num_jobs++))
+    for subdir in "${MINI_WATERSHEDS_DIR}"/*/ ; do
+        [[ -d $subdir ]] && echo "${subdir%/}" >> "${MINI_WATERSHEDS_DIR}/dir_list.csv" && ((num_jobs++))
     done
 fi
 
-echo "$(date '+%Y-%m-%d %H:%M:%S') - Found $num_jobs jobs, submitting them in batches of size $batch_size" | tee -a "$LOG_FILE"
-
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Found $num_jobs mini watersheds, submitting them in batches of size $batch_size" | tee -a "$LOG_FILE"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Current directory: $PWD"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Mini watersheds directory: ${MINI_WATERSHEDS_DIR}"
 # Loop to submit jobs in batches
 for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
   end_index=$((start_index + batch_size - 1))
@@ -90,7 +92,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
   # Ensure end_index doesn't exceed num_jobs
   [[ $end_index -ge $num_jobs ]] && end_index=$((num_jobs-1))
 
-  echo "$(date '+%Y-%m-%d %H:%M:%S') - Submitting jobs ${start_index} to ${end_index}..." | tee -a "$LOG_FILE"
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - Submitting mini watersheds ${start_index} to ${end_index}..." | tee -a "$LOG_FILE"
   
   # Submit the job with the adjusted array range
   sbatch --oversubscribe \
@@ -98,7 +100,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
          --partition="$partition" \
          --job-name="anna_${start_index}-${end_index}" \
          --output="annagnps_${start_index}-${end_index}_%A_%a_%N.out" \
-         ./run_annagnps_func_normal.sh \
+         "${PY_BASH_DIR}/run_annagnps_func_normal.sh" \
          --mini_watersheds_dir "$MINI_WATERSHEDS_DIR" \
          --log_file "$LOG_FILE" & #\
         #  --pyagnps_dir "$PYAGNPS_DIR" & # Not necessary but here it is anyway in case some python script is needed later

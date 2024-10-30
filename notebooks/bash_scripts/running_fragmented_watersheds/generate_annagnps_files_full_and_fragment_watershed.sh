@@ -12,6 +12,10 @@ parse_arguments() {
         PYAGNPS_DIR="$2"
         shift 2
         ;;
+      --py_bash_dir)
+        PY_BASH_DIR="$2"
+        shift 2
+        ;;
       --credentials)
         path_to_db_credentials="$2"
         shift 2
@@ -60,6 +64,10 @@ parse_arguments() {
         fragment_watershed="$2"
         shift 2
         ;;
+      --share_global_watershed_parameters_with_mini_watersheds)
+        share_global_watershed_parameters_with_mini_watersheds="$2"
+        shift 2
+        ;;
       --num_processes)
         num_processes="$2"
         shift 2
@@ -102,6 +110,10 @@ if [ -z "$fragment_watershed" ]; then
   fragment_watershed="true"
 fi
 
+if [ -z "$share_global_watershed_parameters_with_mini_watersheds" ]; then
+  share_global_watershed_parameters_with_mini_watersheds="true"
+fi
+
 if [ -z "$generate_main_files" ]; then
   generate_main_files="true"
 fi
@@ -119,15 +131,13 @@ if [ -z "$LOG_FILE" ]; then
   LOG_FILE="/dev/null"
 fi
 
-# Rest of the script remains the same...
-
 # Activate the virtual environment
 source "$PYAGNPS_DIR/venv/bin/activate" || { echo "$(date '+%Y-%m-%d %H:%M:%S') - Failed to activate virtual environment" | tee -a "$LOG_FILE"; exit 1; }
 
 # export PYTHONUNBUFFERED=TRUE
 
 # Run the script
-python -u "$PYAGNPS_DIR/notebooks/bash_scripts/running_fragmented_watersheds/generate_watershed_files_pre_runs.py" \
+python -u "$PY_BASH_DIR/generate_annagnps_files.py"
   --credentials "$path_to_db_credentials" \
   --nldas2_centroids "$path_to_nldas2_centroids" \
   --scs_storm_types "$path_to_scs_storm_types" \

@@ -25,6 +25,10 @@ parse_arguments() {
         pyagnps_dir="$2"
         shift 2
         ;;
+      --py_bash_dir)
+        PY_BASH_DIR="$2"
+        shift 2
+        ;;
       --log_file)
         LOG_FILE="$2"
         shift 2
@@ -70,6 +74,11 @@ if [ -z "$PYAGNPS_DIR" ]; then
   PYAGNPS_DIR="/aims-nas/luc/code/pyagnps/"
 fi
 
+if [ -z "$PY_BASH_DIR" ]; then
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Missing required argument: --py_bash_dir" | tee -a "$LOG_FILE"
+  exit 1
+fi
+
 if [ -z "$annagnps_aa_table" ]; then
   annagnps_aa_table="pre_runs_annagnps_aa"
 fi
@@ -101,7 +110,7 @@ if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
     cd "${dir_list[$dir_index]}" || exit
     
     # DO post processing here. --output_folder is the current working directory because we cdd there
-    python -u "$PYAGNPS_DIR/notebooks/bash_scripts/running_fragmented_watersheds/post_process_watershed_files_pre_runs.py" \
+    python -u "$PY_BASH_DIR/post_process_watershed_files_pre_runs.py" \
         --thuc_id "$thuc_id" \
         --credentials "$path_to_db_credentials" \
         --output_folder "." \

@@ -61,6 +61,11 @@ if [ -z "$PYAGNPS_DIR" ]; then
   PYAGNPS_DIR="/aims-nas/luc/code/pyagnps/"
 fi
 
+if [ -z "$PY_BASH_DIR" ]; then
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Missing required argument: --py_bash_dir" | tee -a "$LOG_FILE"
+  exit 1
+fi
+
 # Set defaults for optional arguments
 if [ -z "$batch_size" ]; then
   batch_size=1
@@ -85,12 +90,12 @@ num_jobs=0
 
 if [ -f "${MINI_WATERSHEDS_DIR}/dir_list.csv" ]; then
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Using existing dir_list.csv file" | tee -a "$LOG_FILE"
-    num_jobs=$(wc -l < "${ROOT_DIR}/dir_list.csv")
+    num_jobs=$(wc -l < "${MINI_WATERSHEDS_DIR}/dir_list.csv")
 else
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Looking for jobs to submit..." | tee -a "$LOG_FILE"
     rm -f "${MINI_WATERSHEDS_DIR}/dir_list.csv"  # Remove the CSV file if it exists
-    for subdir in "${ROOT_DIR}"/*/ ; do
-        [[ -d $subdir ]] && echo "${subdir%/}" >> "${ROOT_DIR}/dir_list.csv" && ((num_jobs++))
+    for subdir in "${MINI_WATERSHEDS_DIR}"/*/ ; do
+        [[ -d $subdir ]] && echo "${subdir%/}" >> "${MINI_WATERSHEDS_DIR}/dir_list.csv" && ((num_jobs++))
     done
 fi
 
@@ -103,7 +108,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
   # Ensure end_index doesn't exceed num_jobs
   [[ $end_index -ge $num_jobs ]] && end_index=$((num_jobs-1))
 
-  echo "$(date '+%Y-%m-%d %H:%M:%S') - Submitting jobs ${start_index} to ${end_index}..." | tee -a "$LOG_FILE"
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - Submitting post processing mini watersheds ${start_index} to ${end_index}..." | tee -a "$LOG_FILE"
   
   # Submit the job with the adjusted array range
   sbatch --oversubscribe \
@@ -111,7 +116,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
          --partition="$partition" \
          --job-name="postproc_${start_index}-${end_index}" \
          --output="/dev/null" # \ # "postproc_${start_index}-${end_index}_%A_%a_%N.out"
-         ./post_proc_reach_func.sh \
+         "${PY_BASH_DIR}/post_proc_reach_func.sh" \
          --thuc_id "$THUC_ID" \
          --mini_watersheds_dir "$MINI_WATERSHEDS_DIR" \
          --credentials "$path_to_db_credentials" \
@@ -119,8 +124,10 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
          --aa_water_yield_table "pre_runs_annagnps_aa_water_yield_ua_rr_total" \
          --aa_sediment_yield_table "pre_runs_annagnps_aa_sediment_yield_ua_rr_total" \
          --aa_sediment_erosion_table "pre_runs_annagnps_aa_sediment_erosion_ua_rr_total" \
-         --pyagnps_dir "$PYAGNPS_DIR" \
+         --py_bash_dir "$PY_BASH_DIR" \
          --log_file "$LOG_FILE" &
+        #  --pyagnps_dir "$PYAGNPS_DIR" \
+
   sleep 5
 
   num_running_jobs=$(squeue --noheader | wc -l)
