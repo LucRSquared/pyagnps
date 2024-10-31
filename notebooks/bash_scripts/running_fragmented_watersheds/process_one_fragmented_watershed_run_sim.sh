@@ -115,9 +115,15 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
   while [[ $num_running_jobs -gt 30 ]]; do
     ((iteration_count++))
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Too many jobs already running, sleeping and retrying later... ($iteration_count/$maxiter)" | tee -a "$LOG_FILE"
+    
+    if (( iteration_count % 10 == 0 )); then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Running release_requeue.sh script after $iteration_count iterations." | tee -a "$LOG_FILE"
+        bash "${PY_BASH_DIR}/release_requeue.sh"
+    fi
+
     sleep 5
     num_running_jobs=$(squeue --noheader | wc -l)
-    # Exit with an error message if the maximum iterations are reached
+
     if [[ $iteration_count -eq $maxiter ]]; then
         echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Maximum iterations of $maxiter reached in the while loop." | tee -a "$LOG_FILE"
         exit 1
