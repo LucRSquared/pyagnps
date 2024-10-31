@@ -103,6 +103,9 @@ readarray -t dir_list < "$csv_file"
 
 cd "$MINI_WATERSHEDS_DIR"
 
+# Activate the virtual environment
+source "$PYAGNPS_DIR/venv/bin/activate" || { echo "$(date '+%Y-%m-%d %H:%M:%S') - Failed to activate virtual environment" | tee -a "$LOG_FILE"; exit 1; }
+
 # Check if the directory index is valid
 if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
     job_name=$(basename "${dir_list[$dir_index]}")

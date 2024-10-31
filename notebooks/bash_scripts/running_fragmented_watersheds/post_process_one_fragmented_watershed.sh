@@ -16,6 +16,10 @@ parse_arguments() {
         PYAGNPS_DIR="$2"
         shift 2
         ;;
+      --py_bash_dir)
+        PY_BASH_DIR="$2"
+        shift 2
+        ;;
       --credentials)
         path_to_db_credentials="$2"
         shift 2
@@ -126,8 +130,8 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
          --aa_sediment_yield_table "pre_runs_annagnps_aa_sediment_yield_ua_rr_total" \
          --aa_sediment_erosion_table "pre_runs_annagnps_aa_sediment_erosion_ua_rr_total" \
          --py_bash_dir "$PY_BASH_DIR" \
+         --pyagnps_dir "$PYAGNPS_DIR" \
          --log_file "$LOG_FILE" &
-        #  --pyagnps_dir "$PYAGNPS_DIR" \
 
   sleep 5
 

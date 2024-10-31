@@ -155,6 +155,7 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --mini_watersheds_dir "./mini_watersheds" \
         --thuc_id "$thuc_id" \
         --pyagnps_dir "$pyagnps_dir" \
+        --py_bash_dir "$PY_BASH_DIR" \
         --credentials "$path_to_db_credentials" \
         --partition aims-highperf-oversubscribe,aims-default-oversubscribe \
         --log_file "$LOG_FILE" || { # what to do if post processing fails
