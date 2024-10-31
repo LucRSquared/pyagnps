@@ -137,7 +137,7 @@ source "$PYAGNPS_DIR/venv/bin/activate" || { echo "$(date '+%Y-%m-%d %H:%M:%S') 
 # export PYTHONUNBUFFERED=TRUE
 
 # Run the script
-python -u "$PY_BASH_DIR/generate_annagnps_files.py"
+python -u "$PY_BASH_DIR/generate_watershed_files_pre_runs.py" \
   --credentials "$path_to_db_credentials" \
   --nldas2_centroids "$path_to_nldas2_centroids" \
   --scs_storm_types "$path_to_scs_storm_types" \
@@ -151,5 +151,6 @@ python -u "$PY_BASH_DIR/generate_annagnps_files.py"
   --reach_id "$reach_id" \
   --generate_main_files "$generate_main_files" \
   --fragment_watershed "$fragment_watershed" \
+  --share_global_watershed_parameters_with_mini_watersheds "$share_global_watershed_parameters_with_mini_watersheds" \
   --num_processes "$num_processes" \
   --log_file "$LOG_FILE"

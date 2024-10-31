@@ -131,7 +131,7 @@ def main():
             sys.exit(1)
 
     if fragment_watershed:
-        log_to_file(log_file_path, f"Fragmenting watershed", add_timestamp=True)
+        log_to_file(log_file_path, f"Fragmenting watershed with num_processes = {num_processes} and sharing global parameters: {share_global_watershed_parameters_with_mini_watersheds}", add_timestamp=True)
         try:
             mini_watersheds = w.fragment_watershed(share_global_watershed_climate_params=share_global_watershed_parameters_with_mini_watersheds, # False to recompute climate parameters for every reach
                                                    num_processes=num_processes)

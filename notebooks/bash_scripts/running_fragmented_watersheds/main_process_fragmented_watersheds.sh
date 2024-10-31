@@ -24,7 +24,7 @@
 # Set the root directory (can be changed before script execution). This directory should contain thuc_list_to_run.csv and a directory for each watershed that needs to be processed
 ROOT_DIR="/aims-nas/luc/annagnps_pre_runs_2000-01-01_2022-12-31/"  # Needs to use absolute path
 
-PY_BASH_DIR="${ROOT_DIR}" # the location of the python scripts are defined with respect to this
+PY_BASH_DIR="/aims-nas/luc/code/pyagnps/notebooks/bash_scripts/running_fragmented_watersheds/" # the location of the python scripts are defined with respect to this
 
 LOG_FILE="${ROOT_DIR}/annagnps_pre_runs_2000-01-01_2022-12-31.log"
 
@@ -34,7 +34,7 @@ generate_main_files="true"
 
 
 fragment_watershed="true"
-share_global_watershed_parameters_with_mini_watersheds="false"
+share_global_watershed_parameters_with_mini_watersheds="true"
 
 
 simulate_thuc="true"
@@ -56,7 +56,7 @@ path_to_precip_zones="/aims-nas/data/datasets/RUSLE2/Climate/precip_zones_RUSLE2
 
 
 # Batch size for job simulations submissions
-batch_size=1000
+batch_size=500
 maxiter=1000
 num_processes=32
 
@@ -80,7 +80,7 @@ if [ -f "${ROOT_DIR}/thuc_list_to_run.csv" ]; then
     num_jobs=$(wc -l < "${ROOT_DIR}/thuc_list_to_run.csv")
 fi
 
-echo "$(date '+%Y-%m-%d %H:%M:%S') - Found $num_jobs jobs, submitting them in batches of size $batch_size" | tee -a "$LOG_FILE"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Found $num_jobs watersheds" | tee -a "$LOG_FILE"
 
 # Loop to process thucs one by one
 for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
@@ -138,7 +138,6 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
       "${PY_BASH_DIR}/process_one_fragmented_watershed_run_sim.sh" \
         --mini_watersheds_dir "./mini_watersheds" \
         --py_bash_dir "$PY_BASH_DIR" \
-        --pyagnps_dir "$pyagnps_dir" \
         --batch_size "$batch_size" \
         --maxiter "$maxiter" \
         --partition aims-highperf-oversubscribe,aims-default-oversubscribe \

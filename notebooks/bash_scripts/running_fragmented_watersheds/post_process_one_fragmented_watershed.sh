@@ -112,6 +112,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
   
   # Submit the job with the adjusted array range
   sbatch --oversubscribe \
+         --requeue \
          --array="${start_index}-${end_index}" \
          --partition="$partition" \
          --job-name="postproc_${start_index}-${end_index}" \

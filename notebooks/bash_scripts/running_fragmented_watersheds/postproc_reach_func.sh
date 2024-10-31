@@ -99,7 +99,7 @@ fi
 dir_index=$((SLURM_ARRAY_TASK_ID))
 
 # Read the contents of dir_list.csv into an array
-readarray -t dir_list < csv_file
+readarray -t dir_list < "$csv_file"
 
 cd "$MINI_WATERSHEDS_DIR"
 
@@ -107,7 +107,7 @@ cd "$MINI_WATERSHEDS_DIR"
 if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
     job_name=$(basename "${dir_list[$dir_index]}")
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Post Processing directory: $job_name" #| tee -a "$LOG_FILE"
-    cd "${dir_list[$dir_index]}" || exit
+    cd "${dir_list[$dir_index]}" || exit 1
     
     # DO post processing here. --output_folder is the current working directory because we cdd there
     python -u "$PY_BASH_DIR/post_process_watershed_files_pre_runs.py" \
@@ -120,7 +120,8 @@ if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
         --aa_sediment_erosion_table "$aa_sediment_erosion_table" & # \
         # --log_file "$LOG_FILE" &
 
-    cd "$MINI_WATERSHEDS_DIR"
+    # cd "$MINI_WATERSHEDS_DIR" # This didn't work because MINI_WATERSHEDS_DIR = ./mini_watersheds which won't work once we are in the reach folder
+    cd ..
 
     # If the python code finished successfully then delete the current directory
     if [ $? -eq 0 ]; then
@@ -137,5 +138,6 @@ else
 fi
 
 # Return to root directory
-cd "$MINI_WATERSHEDS_DIR"
+# cd "$MINI_WATERSHEDS_DIR"
+# cd ..
 

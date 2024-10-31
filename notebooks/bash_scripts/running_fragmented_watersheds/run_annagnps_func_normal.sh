@@ -47,7 +47,7 @@ fi
 dir_index=$((SLURM_ARRAY_TASK_ID))
 
 # Read the contents of dir_list.csv into an array
-readarray -t dir_list < csv_file
+readarray -t dir_list < "$csv_file"
 
 cd "$MINI_WATERSHEDS_DIR"
 
@@ -55,7 +55,7 @@ cd "$MINI_WATERSHEDS_DIR"
 if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
     job_name=$(basename "${dir_list[$dir_index]}")
     echo "Processing directory: $job_name"
-    cd "${dir_list[$dir_index]}" || exit
+    cd "${dir_list[$dir_index]}" || exit 1
     
     # Run annagnps
     annagnps
@@ -74,5 +74,6 @@ fi
 # fi
 
 # Return to root directory
-cd "$MINI_WATERSHEDS_DIR"
+# cd "$MINI_WATERSHEDS_DIR"
+cd ..
 

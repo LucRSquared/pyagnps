@@ -83,8 +83,8 @@ else
 fi
 
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Found $num_jobs mini watersheds, submitting them in batches of size $batch_size" | tee -a "$LOG_FILE"
-echo "$(date '+%Y-%m-%d %H:%M:%S') - Current directory: $PWD"
-echo "$(date '+%Y-%m-%d %H:%M:%S') - Mini watersheds directory: ${MINI_WATERSHEDS_DIR}"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Current directory: $PWD" | tee -a "$LOG_FILE"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Mini watersheds directory: ${MINI_WATERSHEDS_DIR}" | tee -a "$LOG_FILE"
 # Loop to submit jobs in batches
 for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
   end_index=$((start_index + batch_size - 1))
@@ -96,6 +96,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
   
   # Submit the job with the adjusted array range
   sbatch --oversubscribe \
+         --requeue \
          --array="${start_index}-${end_index}" \
          --partition="$partition" \
          --job-name="anna_${start_index}-${end_index}" \
