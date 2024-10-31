@@ -98,6 +98,8 @@ fi
 # Get the index of the directory to process from the job array
 dir_index=$((SLURM_ARRAY_TASK_ID))
 
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Reading list of directories: $csv_file" | tee -a "$LOG_FILE"
+
 # Read the contents of dir_list.csv into an array
 readarray -t dir_list < "$csv_file"
 

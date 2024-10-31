@@ -103,7 +103,7 @@ else
     done
 fi
 
-echo "$(date '+%Y-%m-%d %H:%M:%S') - Found $num_jobs jobs, submitting them in batches of size $batch_size" | tee -a "$LOG_FILE"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Found $num_jobs watersheds, submitting them in batches of size $batch_size" | tee -a "$LOG_FILE"
 
 # Loop to submit jobs in batches
 for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
