@@ -83,8 +83,10 @@ else
 fi
 
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Found $num_jobs mini watersheds, submitting them in batches of size $batch_size" | tee -a "$LOG_FILE"
-echo "$(date '+%Y-%m-%d %H:%M:%S') - Current directory: $PWD" | tee -a "$LOG_FILE"
-echo "$(date '+%Y-%m-%d %H:%M:%S') - Mini watersheds directory: ${MINI_WATERSHEDS_DIR}" | tee -a "$LOG_FILE"
+
+# Create an array for each task ID in the range
+task_ids=()
+
 # Loop to submit jobs in batches
 for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
   end_index=$((start_index + batch_size - 1))
@@ -95,6 +97,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
   echo "$(date '+%Y-%m-%d %H:%M:%S') - Submitting mini watersheds ${start_index} to ${end_index}..." | tee -a "$LOG_FILE"
   
   # Submit the job with the adjusted array range
+  sbatch_output=$(
   sbatch --oversubscribe \
          --requeue \
          --array="${start_index}-${end_index}" \
@@ -103,9 +106,18 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
          --output="annagnps_${start_index}-${end_index}_%A_%a_%N.out" \
          "${PY_BASH_DIR}/run_annagnps_func_normal.sh" \
          --mini_watersheds_dir "$MINI_WATERSHEDS_DIR" \
-         --log_file "$LOG_FILE" & #\
+         --log_file "$LOG_FILE"
+  )
         #  --pyagnps_dir "$PYAGNPS_DIR" & # Not necessary but here it is anyway in case some python script is needed later
   sleep 5
+
+  # Extract only the job ID from the output
+  job_id=$(echo "$sbatch_output" | awk '{print $NF}')
+
+  # Create an array for each task ID in the range
+  for i in $(seq "$start_index" "$end_index"); do
+    task_ids+=("${job_id}_$i")
+  done
 
   num_running_jobs=$(squeue --noheader | wc -l)
 
@@ -118,7 +130,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
     
     if (( iteration_count % 10 == 0 )); then
         echo "$(date '+%Y-%m-%d %H:%M:%S') - Running release_requeue.sh script after $iteration_count iterations." | tee -a "$LOG_FILE"
-        bash "${PY_BASH_DIR}/release_requeue.sh"
+        bash "${PY_BASH_DIR}/release_requeue.sh" ${LOG_FILE}
     fi
 
     sleep 5
@@ -130,4 +142,35 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
     fi
   done
 
+done
+
+# Do a loop with a maxiter=100 to wait for all jobs to finish, if there are any that have launch faild requeued held then run the release_requeue script. If maxiter is reached then add to a companion log_file (append to the LOG_FILE "_errors" before the .log) and insert the array index and job id
+maxiter=100
+iteration_count=0
+while [[ ${#task_ids[@]} -gt 0 ]]; do
+    ((iteration_count++))
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Waiting for jobs to finish, sleeping and retrying later... ($iteration_count/$maxiter)" | tee -a "$LOG_FILE"
+
+    if (( iteration_count % 10 == 0 )); then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Running release_requeue.sh script after $iteration_count iterations." | tee -a "$LOG_FILE"
+        bash "${PY_BASH_DIR}/release_requeue.sh" ${LOG_FILE}
+    fi
+
+    sleep 5
+
+    # Remove any finished jobs from the array
+    for i in "${!task_ids[@]}"; do
+        if ! squeue -j "${task_ids[$i]}" &> /dev/null; then
+            unset 'task_ids[$i]' # The above statement is true because the job has finished and no longer appears in the squeue
+        fi
+    done
+
+    if [[ $iteration_count -eq $maxiter ]]; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Maximum iterations of $maxiter reached in the while loop." | tee -a "${LOG_FILE%.*}_errors.csv"
+        echo "timestamp,job_id,reason" > "${LOG_FILE%.*}_errors.csv"
+        for i in "${!task_ids[@]}"; do
+            echo "$(date '+%Y-%m-%d %H:%M:%S'),${task_ids[$i]},DNF" | tee -a "${LOG_FILE%.*}_errors.csv"
+        done
+        exit 1
+    fi
 done

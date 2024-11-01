@@ -1,7 +1,27 @@
 #!/bin/bash
 # monitor_held_jobs.sh
 
-LOG_FILE="held_jobs_monitor.log"
+# Parse input arguments
+parse_arguments() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --log_file)
+                LOG_FILE="$2"
+                shift
+                ;;
+            *)
+                echo "Unknown option: $1"
+                exit 1
+                ;;
+        esac
+        shift
+    done
+}
+
+# Define log file if argument is not provided
+if [ -z "$LOG_FILE" ]; then
+    LOG_FILE="/dev/null"
+fi
 
 # Function to log messages with timestamp
 log_message() {
