@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 # Define function to handle arguments
 parse_arguments() {
   while [[ $# -gt 0 ]]; do
@@ -59,6 +58,11 @@ parse_arguments() {
 
 # Call the function to parse arguments
 parse_arguments "$@"
+
+# Make a default value of the LOG_FILE in case it is not specified so that it doesn't log to a file
+if [ -z "$LOG_FILE" ]; then
+  LOG_FILE="/dev/null"
+fi
 
 # Set default value for MINI_WATERSHEDS_DIR if not provided
 if [ -z "$MINI_WATERSHEDS_DIR" ]; then

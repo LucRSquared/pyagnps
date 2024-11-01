@@ -1,33 +1,7 @@
 #!/bin/bash
 # monitor_held_jobs.sh
 
-# Run this script in parallel of the main one to monitor held jobs
-
-# LOG_FILE="held_jobs_monitor.log"
-
-# Function to parse command-line arguments
-parse_arguments() {
-    while [[ $# -gt 0 ]]; do
-        case "$1" in
-            --log_file)
-                LOG_FILE="$2"
-                shift 2
-                ;;
-            *)
-                echo "Unknown argument: $1"
-                exit 1
-                ;;
-        esac
-    done
-}
-
-# Parse command-line arguments
-parse_arguments "$@"
-
-# Make a default value of the LOG_FILE in case it is not specified so that it doesn't log to a file
-if [ -z "$LOG_FILE" ]; then
-    LOG_FILE="/dev/null"
-fi
+LOG_FILE="held_jobs_monitor.log"
 
 # Function to log messages with timestamp
 log_message() {
@@ -66,7 +40,7 @@ check_held_jobs() {
 # Initialize counter for no-jobs-found iterations
 no_jobs_counter=0
 check_interval=5  # Check every 5 seconds
-max_empty_checks=$((100 / check_interval))  # Number of checks to reach 30 seconds
+max_empty_checks=$((30 / check_interval))  # Number of checks to reach 30 seconds
 
 log_message "Starting monitoring of held jobs..."
 

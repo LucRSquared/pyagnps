@@ -72,7 +72,7 @@ fi
 
 # Set defaults for optional arguments
 if [ -z "$batch_size" ]; then
-  batch_size=1
+  batch_size=1 # TEST
 fi
 
 if [ -z "$maxiter" ]; then
@@ -114,14 +114,17 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
 
   echo "$(date '+%Y-%m-%d %H:%M:%S') - Submitting post processing mini watersheds ${start_index} to ${end_index}..." | tee -a "$LOG_FILE"
   
+  # alternative output
+  # --output="postproc_${start_index}-${end_index}_%A_%a_%N.out" \
   # Submit the job with the adjusted array range
+
   sbatch --oversubscribe \
          --requeue \
          --array="${start_index}-${end_index}" \
          --partition="$partition" \
          --job-name="postproc_${start_index}-${end_index}" \
-         --output="/dev/null" # \ # "postproc_${start_index}-${end_index}_%A_%a_%N.out"
-         "${PY_BASH_DIR}/post_proc_reach_func.sh" \
+         --output="/dev/null" \
+         "${PY_BASH_DIR}/postproc_reach_func.sh" \
          --thuc_id "$THUC_ID" \
          --mini_watersheds_dir "$MINI_WATERSHEDS_DIR" \
          --credentials "$path_to_db_credentials" \

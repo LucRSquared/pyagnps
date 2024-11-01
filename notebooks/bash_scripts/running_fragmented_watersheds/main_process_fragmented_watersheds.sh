@@ -54,9 +54,10 @@ path_to_nldas2_centroids="/aims-nas/data/datasets/CLIMATE/NLDAS2/NLDAS2_GRID_CEN
 path_to_scs_storm_types="/aims-nas/data/datasets/TR-55/scs_storm_types.gpkg"
 path_to_precip_zones="/aims-nas/data/datasets/RUSLE2/Climate/precip_zones_RUSLE2_cleaned_manually_extrapolated_pchip_linear_US_units.gpkg"
 
-
+# partition="aims-highperf-oversubscribe,aims-default-oversubscribe"
+partition="aims-highperf-oversubscribe"
 # Batch size for job simulations submissions
-batch_size=500
+batch_size=1000
 maxiter=1000
 num_processes=32
 
@@ -140,7 +141,7 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --py_bash_dir "$PY_BASH_DIR" \
         --batch_size "$batch_size" \
         --maxiter "$maxiter" \
-        --partition aims-highperf-oversubscribe,aims-default-oversubscribe \
+        --partition "$partition" \
         --log_file "$LOG_FILE" || { # what to do if simulation fails
           cd "${ROOT_DIR}" ; echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Simulation failed for thuc $thuc_id, continuing" | tee -a "$LOG_FILE"
           continue
@@ -157,7 +158,7 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --pyagnps_dir "$pyagnps_dir" \
         --py_bash_dir "$PY_BASH_DIR" \
         --credentials "$path_to_db_credentials" \
-        --partition aims-highperf-oversubscribe,aims-default-oversubscribe \
+        --partition "$partition" \
         --log_file "$LOG_FILE" || { # what to do if post processing fails
           cd "${ROOT_DIR}" ; echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Post processing failed for thuc $thuc_id, continuing" | tee -a "$LOG_FILE"
           continue
