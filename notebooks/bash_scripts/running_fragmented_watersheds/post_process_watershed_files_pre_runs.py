@@ -20,11 +20,15 @@ def main():
     parser.add_argument('--aa_water_yield_table',           type=str, help='AnnAGNPS AA water yield table to use',      default='pre_runs_annagnps_aa_water_yield_ua_rr_total')
     parser.add_argument('--aa_sediment_yield_table',        type=str, help='AnnAGNPS AA sediment yield table to use',   default='pre_runs_annagnps_aa_sediment_yield_ua_rr_total')
     parser.add_argument('--aa_sediment_erosion_table',      type=str, help='AnnAGNPS AA sediment erosion table to use', default='pre_runs_annagnps_aa_sediment_erosion_ua_rr_total')
+    parser.add_argument('--log_file',                       type=str, help='Path to the log file',                      default="generate_watershed_files.log")
+
 
     args = parser.parse_args()
 
     credentials               = Path(args.credentials)
     output_folder             = Path(args.output_folder)
+
+    log_file_path = Path(args.log_file)
 
     thuc_id                   = args.thuc_id
 
@@ -42,6 +46,8 @@ def main():
 
 
     try:
+        log_to_file(log_file_path, f"Reading AnnAGNPS files for {thuc_id}...", add_timestamp=True)
+
         data = annagnps.read_all_annagnps_output_files(output_folder, prepare_for_db=True, thuc_id=thuc_id)
         for label, db_table in zip(data_output_labels, [annagnps_aa_table, aa_sediment_erosion_table, aa_sediment_yield_table, aa_water_yield_table]):
             df = data[label]
@@ -51,6 +57,7 @@ def main():
                 df.to_sql(db_table, engine.connect(), if_exists='append', index=False)
             except Exception as e:
                 print(f"Error uploading {label} data to {db_table}: {e}")
+                log_to_file(log_file_path, f"Error uploading {label} data to {db_table}: {e}", add_timestamp=True)
                 sys.exit(1)
 
         sys.exit(0)

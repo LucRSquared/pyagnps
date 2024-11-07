@@ -135,7 +135,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
   iteration_count=0
   while [[ $num_running_jobs -gt 30 ]]; do
     ((iteration_count++))
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Too many jobs already running, sleeping and retrying later... ($iteration_count/$maxiter)" | tee -a "$LOG_FILE"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Too many jobs already running ($num_running_jobs)>30, sleeping for 5 seconds and retrying later... ($iteration_count/$maxiter)" | tee -a "$LOG_FILE"
     
     if (( iteration_count % 10 == 0 )); then
         echo "$(date '+%Y-%m-%d %H:%M:%S') - Running release_requeue.sh script after $iteration_count iterations." | tee -a "$LOG_FILE"
@@ -144,6 +144,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
 
     sleep 5
     num_running_jobs=$(squeue --noheader | wc -l)
+    # echo "$(date '+%Y-%m-%d %H:%M:%S') - After sleeping, num_running_jobs is $num_running_jobs" | tee -a "$LOG_FILE"
 
     if [[ $iteration_count -eq $maxiter ]]; then
         echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Maximum iterations of $maxiter reached in the while loop." | tee -a "$LOG_FILE"
