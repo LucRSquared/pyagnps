@@ -166,6 +166,7 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --credentials "$path_to_db_credentials" \
         --partition "$partition" \
         --exclude "$exclude" \
+        --batch_size 10 \
         --log_file "$LOG_FILE" || { # what to do if post processing fails
           cd "${ROOT_DIR}" ; echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Post processing failed for thuc $thuc_id, continuing" | tee -a "$LOG_FILE"
           continue

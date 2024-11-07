@@ -168,12 +168,14 @@ while [[ ${#task_ids[@]} -gt 0 ]]; do
 
     sleep 5
 
-    # Remove any finished jobs from the array
-    for i in "${!task_ids[@]}"; do
-        if ! squeue -j "${task_ids[$i]}" &> /dev/null; then
-            unset 'task_ids[$i]' # The above statement is true because the job has finished and no longer appears in the squeue
+    # Filter out finished jobs and rebuild the array with only active jobs
+    active_jobs=()
+    for job_id in "${task_ids[@]}"; do
+        if squeue -j "$job_id" &> /dev/null; then
+            active_jobs+=("$job_id")
         fi
     done
+    task_ids=("${active_jobs[@]}")  # Update task_ids with active jobs only
 
     if [[ $iteration_count -eq $maxiter ]]; then
         echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Maximum iterations of $maxiter reached in the while loop." | tee -a "${LOG_FILE%.*}_errors.csv"
