@@ -157,6 +157,12 @@ done
 # Do a loop with a maxiter=100 to wait for all jobs to finish, if there are any that have launch faild requeued held then run the release_requeue script. If maxiter is reached then add to a companion log_file (append to the LOG_FILE "_errors" before the .log) and insert the array index and job id
 maxiter=100
 iteration_count=0
+
+task_ids=$(update_task_ids "${task_ids[@]}")
+
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Number of jobs remaining: ${#task_ids[@]}" | tee -a "$LOG_FILE"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - The remaining jobs are: ${task_ids[@]}" | tee -a "$LOG_FILE"
+
 while [[ ${#task_ids[@]} -gt 0 ]]; do
     ((iteration_count++))
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Waiting for jobs to finish, sleeping and retrying later... ($iteration_count/$maxiter)" | tee -a "$LOG_FILE"
@@ -168,14 +174,7 @@ while [[ ${#task_ids[@]} -gt 0 ]]; do
 
     sleep 5
 
-    # Filter out finished jobs and rebuild the array with only active jobs
-    active_jobs=()
-    for job_id in "${task_ids[@]}"; do
-        if squeue -j "$job_id" &> /dev/null; then
-            active_jobs+=("$job_id")
-        fi
-    done
-    task_ids=("${active_jobs[@]}")  # Update task_ids with active jobs only
+    task_ids=$(update_task_ids "${task_ids[@]}")
 
     if [[ $iteration_count -eq $maxiter ]]; then
         echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Maximum iterations of $maxiter reached in the while loop." | tee -a "${LOG_FILE%.*}_errors.csv"
@@ -186,3 +185,13 @@ while [[ ${#task_ids[@]} -gt 0 ]]; do
         exit 1
     fi
 done
+
+update_task_ids() {
+    local active_jobs=()
+    for job_id in "$@"; do
+        if squeue -j "$job_id" &> /dev/null; then
+            active_jobs+=("$job_id")
+        fi
+    done
+    echo "${active_jobs[*]}"
+}
