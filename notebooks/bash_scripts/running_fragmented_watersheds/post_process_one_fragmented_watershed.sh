@@ -36,6 +36,10 @@ parse_arguments() {
         partition="$2"
         shift 2
         ;;
+      --exclude)
+        exclude="$2"
+        shift 2
+        ;;
       --log_file)
         LOG_FILE="$2"
         shift 2
@@ -83,6 +87,10 @@ if [ -z "$partition" ]; then
   partition="aims-highperf-oversubscribe,aims-default-oversubscribe"
 fi
 
+if [ -z "$exclude" ]; then
+  exclude=""
+fi
+
 # Throw error if THUC_ID is not provided
 if [ -z "$THUC_ID" ]; then
   echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Missing required argument: --thuc_id" | tee -a "$LOG_FILE"
@@ -122,6 +130,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
          --requeue \
          --array="${start_index}-${end_index}" \
          --partition="$partition" \
+         --exclude="$exclude" \
          --job-name="postproc_${start_index}-${end_index}" \
          --output="/dev/null" \
          "${PY_BASH_DIR}/postproc_reach_func.sh" \

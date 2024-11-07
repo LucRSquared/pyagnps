@@ -24,6 +24,10 @@ parse_arguments() {
         partition="$2"
         shift 2
         ;;
+      --exclude)
+        exclude="$2"
+        shift 2
+        ;;
       --log_file)
         LOG_FILE="$2"
         shift 2
@@ -68,6 +72,10 @@ if [ -z "$partition" ]; then
   partition="aims-highperf-oversubscribe,aims-default-oversubscribe"
 fi
 
+if [ -z "$exclude" ]; then
+  exclude=""
+fi
+
 # Calculate the total number of jobs based on directory count
 num_jobs=0
 
@@ -102,6 +110,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
          --requeue \
          --array="${start_index}-${end_index}" \
          --partition="$partition" \
+         --exclude="$exclude" \
          --job-name="anna_${start_index}-${end_index}" \
          --output="annagnps_${start_index}-${end_index}_%A_%a_%N.out" \
          "${PY_BASH_DIR}/run_annagnps_func_normal.sh" \

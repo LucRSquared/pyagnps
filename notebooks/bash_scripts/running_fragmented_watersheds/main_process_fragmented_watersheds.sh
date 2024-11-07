@@ -56,6 +56,11 @@ path_to_precip_zones="/aims-nas/data/datasets/RUSLE2/Climate/precip_zones_RUSLE2
 
 # partition="aims-highperf-oversubscribe,aims-default-oversubscribe"
 partition="aims-highperf-oversubscribe"
+
+# Nodes to exclude
+exclude="aims-node7,aims-node11"
+
+
 # Batch size for job simulations submissions
 batch_size=1000
 maxiter=1000
@@ -142,6 +147,7 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --batch_size "$batch_size" \
         --maxiter "$maxiter" \
         --partition "$partition" \
+        --exclude "$exclude" \
         --log_file "$LOG_FILE" || { # what to do if simulation fails
           cd "${ROOT_DIR}" ; echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Simulation failed for thuc $thuc_id, continuing" | tee -a "$LOG_FILE"
           continue
@@ -159,6 +165,7 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --py_bash_dir "$PY_BASH_DIR" \
         --credentials "$path_to_db_credentials" \
         --partition "$partition" \
+        --exclude "$exclude" \
         --log_file "$LOG_FILE" || { # what to do if post processing fails
           cd "${ROOT_DIR}" ; echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Post processing failed for thuc $thuc_id, continuing" | tee -a "$LOG_FILE"
           continue
