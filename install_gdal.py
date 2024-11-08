@@ -23,7 +23,7 @@ def install_gdal():
     if sys.platform.startswith('linux'):
         try:
             gdal_version_output = subprocess.check_output(['gdal-config', '--version']).decode().strip()
-            gdal_version = gdal_version_output.split(',')[0].split()[1]
+            gdal_version = gdal_version_output.split(',')[0]
             print(f"Detected GDAL version: {gdal_version}")
             subprocess.check_call([sys.executable, '-m', 'pip', 'install', f'GDAL=={gdal_version}'])
         except FileNotFoundError:
