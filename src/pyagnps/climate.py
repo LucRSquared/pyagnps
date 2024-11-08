@@ -2076,7 +2076,8 @@ def variable_agg_func_forA(x):
     if x.name in ['Tair', 'Qair', 'PSurf', 'Wind_E', 'Wind_N', 'LWdown', 'CAPE', 'SWdown', 'RH', 'Tdew', 'wind_speed', 'wind_direction']:
         return x.mean(dim='time')
     elif x.name in ['Rainf', 'CRainf_frac', 'PotEvap']:
-        return x.sum(dim='time')
+        agg_sum = x.sum(dim='time')
+        return xr.where(agg_sum < 0, 0, agg_sum)
     else:
         warnings.warn(f"Unexpected variable name, doesn't know what to do with {x.name}, sum, mean, something else?")
 
