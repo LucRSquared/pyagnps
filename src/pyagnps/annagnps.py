@@ -194,6 +194,7 @@ def read_all_annagnps_output_files(output_folder, prepare_for_db=False, thuc_id=
                 df = df.rename(columns=rename_dict_water_yield)
                 df = df.assign(thuc_id=thuc_id)
 
+            df = df[df['cell_id'] != 0].copy()
             processed_outputs[name] = df.copy(deep=True)
 
     return processed_outputs
