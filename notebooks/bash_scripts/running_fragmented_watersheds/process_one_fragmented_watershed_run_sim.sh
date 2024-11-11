@@ -154,11 +154,14 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
 
 done
 
-# Do a loop with a maxiter=100 to wait for all jobs to finish, if there are any that have launch faild requeued held then run the release_requeue script. If maxiter is reached then add to a companion log_file (append to the LOG_FILE "_errors" before the .log) and insert the array index and job id
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Waiting for jobs to finish..." | tee -a "$LOG_FILE"
+sleep 5
+
 maxiter=100
 iteration_count=0
 
-task_ids=$(update_task_ids "${task_ids[@]}")
+# Initial population of task_ids array
+mapfile -t task_ids < <(update_task_ids "${task_ids[@]}")
 
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Number of jobs remaining: ${#task_ids[@]}" | tee -a "$LOG_FILE"
 echo "$(date '+%Y-%m-%d %H:%M:%S') - The remaining jobs are: ${task_ids[@]}" | tee -a "$LOG_FILE"
@@ -169,12 +172,13 @@ while [[ ${#task_ids[@]} -gt 0 ]]; do
 
     if (( iteration_count % 10 == 0 )); then
         echo "$(date '+%Y-%m-%d %H:%M:%S') - Running release_requeue.sh script after $iteration_count iterations." | tee -a "$LOG_FILE"
-        bash "${PY_BASH_DIR}/release_requeue.sh" ${LOG_FILE}
+        bash "${PY_BASH_DIR}/release_requeue.sh" "$LOG_FILE"
     fi
 
     sleep 5
 
-    task_ids=$(update_task_ids "${task_ids[@]}")
+    # Re-run update_task_ids to get the active job ids and repopulate task_ids array
+    mapfile -t task_ids < <(update_task_ids "${task_ids[@]}")
 
     if [[ $iteration_count -eq $maxiter ]]; then
         echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Maximum iterations of $maxiter reached in the while loop." | tee -a "${LOG_FILE%.*}_errors.csv"
@@ -186,6 +190,9 @@ while [[ ${#task_ids[@]} -gt 0 ]]; do
     fi
 done
 
+echo "$(date '+%Y-%m-%d %H:%M:%S') - All jobs finished!"
+
+# Define the update_task_ids function to filter only active jobs
 update_task_ids() {
     local active_jobs=()
     for job_id in "$@"; do
@@ -193,5 +200,6 @@ update_task_ids() {
             active_jobs+=("$job_id")
         fi
     done
-    echo "${active_jobs[*]}"
+    printf "%s\n" "${active_jobs[@]}"
 }
+

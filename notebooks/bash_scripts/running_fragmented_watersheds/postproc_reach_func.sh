@@ -114,10 +114,13 @@ source "$PYAGNPS_DIR/venv/bin/activate" || { echo "$(date '+%Y-%m-%d %H:%M:%S') 
 
 # Check if the directory index is valid
 if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
-    job_name=$(basename "${dir_list[$dir_index]}")
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Post Processing directory: $job_name" #| tee -a "$LOG_FILE"
-    cd "${dir_list[$dir_index]}" || exit 1
     
+    job_name=$(basename "${dir_list[$dir_index]}")
+    
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Post Processing directory: $job_name" | tee -a "$LOG_FILE"
+    
+    cd "${dir_list[$dir_index]}" || exit 1
+
     # DO post processing here. --output_folder is the current working directory because we cdd there
     python -u "$PY_BASH_DIR/post_process_watershed_files_pre_runs.py" \
         --thuc_id "$thuc_id" \
@@ -126,15 +129,15 @@ if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
         --annagnps_aa_table "$annagnps_aa_table" \
         --aa_water_yield_table "$aa_water_yield_table" \
         --aa_sediment_yield_table "$aa_sediment_yield_table" \
-        --aa_sediment_erosion_table "$aa_sediment_erosion_table" & # \
-        # --log_file "$LOG_FILE" &
+        --aa_sediment_erosion_table "$aa_sediment_erosion_table" \
+        --log_file "$LOG_FILE"
 
     # cd "$MINI_WATERSHEDS_DIR" # This didn't work because MINI_WATERSHEDS_DIR = ./mini_watersheds which won't work once we are in the reach folder
     cd ..
 
     # If the python code finished successfully then delete the current directory
     if [ $? -eq 0 ]; then
-        echo "$(date '+%Y-%m-%d %H:%M:%S') - Post processing finished successfully, deleting directory ${dir_list[$dir_index]}" #| tee -a "$LOG_FILE"
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Post processing finished successfully, deleting directory ${dir_list[$dir_index]}" | tee -a "$LOG_FILE"
         rm -rf "${dir_list[$dir_index]}"
     else
         echo "$(date '+%Y-%m-%d %H:%M:%S') - Post processing failed, not deleting directory ${dir_list[$dir_index]}" | tee -a "$LOG_FILE"

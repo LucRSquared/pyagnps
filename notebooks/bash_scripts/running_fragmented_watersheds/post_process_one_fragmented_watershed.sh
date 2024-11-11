@@ -154,7 +154,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
   iteration_count=0
   while [[ $num_running_jobs -gt 30 ]]; do
     ((iteration_count++))
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Too many jobs already running, sleeping and retrying later... ($iteration_count/$maxiter)" | tee -a "$LOG_FILE"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Too many jobs already running ($num_running_jobs>30), sleeping and retrying later... ($iteration_count/$maxiter)" | tee -a "$LOG_FILE"
     sleep 5
     num_running_jobs=$(squeue --noheader | wc -l)
     # Exit with an error message if the maximum iterations are reached

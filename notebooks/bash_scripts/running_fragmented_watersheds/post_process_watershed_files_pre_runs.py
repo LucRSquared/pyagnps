@@ -13,7 +13,7 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--credentials',                    type=str, help='Path to the credentials JSON file')
-    parser.add_argument('--output_folder',                  type=str, help='Path to the output folder to store the generated files')
+    parser.add_argument('--output_folder',                  type=str, help='Path to the output folder to store the generated files', default=Path.cwd())
     parser.add_argument('--thuc_id',                        type=str, help='THUC ID to generate files for')
     # parser.add_argument('--')
     parser.add_argument('--annagnps_aa_table',              type=str, help='AnnAGNPS AA table to use',                  default='pre_runs_annagnps_aa')
@@ -36,7 +36,6 @@ def main():
     aa_water_yield_table      = args.aa_water_yield_table
     aa_sediment_yield_table   = args.aa_sediment_yield_table
     aa_sediment_erosion_table = args.aa_sediment_erosion_table
-
 
     data_output_labels = ['AnnAGNPS_AA','AnnAGNPS_AA_Sediment_erosion_UA_RR_Total','AnnAGNPS_AA_Sediment_yield_UA_RR_Total','AnnAGNPS_AA_Water_yield_UA_RR_Total']
 
@@ -63,7 +62,7 @@ def main():
         sys.exit(0)
 
     except Exception as e:
-        print(f"Error reading AnnAGNPS files: {e}")
+        log_to_file(log_file_path, f"Error reading AnnAGNPS files: {e}", add_timestamp=True)
         sys.exit(1)
 
 
