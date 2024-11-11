@@ -36,7 +36,7 @@ class AIMSWatershed:
         credentials = open_creds_dict(path_to_json_creds)
         url_object = create_db_url_object(credentials)
 
-        self.engine = create_engine(url_object)
+        self.engine = create_engine(url_object, pool_size=30, max_overflow=70, pool_timeout=120, pool_recycle=1800)
         self.path_to_json_creds = Path(path_to_json_creds)
 
         self.thuc_id        = kwargs.get("thuc_id", None)
