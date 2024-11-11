@@ -227,6 +227,11 @@ def read_annagnps_aa_file(aa_file):
             case 'phosphorus':
                 df_p = pd.read_csv(aa_file, skiprows=n_header, nrows=n_last-n_header-1, index_col=False)
 
+        # Remove rows with Cell ID = 0
+        df_n  = df_n[df_n['Cell ID'] != 0].copy()
+        df_oc = df_oc[df_oc['Cell ID'] != 0].copy()
+        df_p  = df_p[df_p['Cell ID'] != 0].copy()
+    
     # Return the dataframes
     return df_n, df_oc, df_p
 
