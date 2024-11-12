@@ -6,6 +6,8 @@ import sys
 
 import argparse
 
+import traceback
+
 
 def main():
 
@@ -127,7 +129,7 @@ def main():
         try:
             w.generate_annagnps_watershed_input_files()
         except Exception as e:
-            log_to_file(log_file_path, f"Error THUC {thuc_id}: {e}", add_timestamp=True)
+            log_to_file(log_file_path, f"Error THUC {thuc_id}: {e}\n{traceback.format_exc()}", add_timestamp=True)
             sys.exit(1)
 
     if fragment_watershed:
@@ -140,7 +142,7 @@ def main():
             df_mini_watersheds.to_csv(output_folder / "mini_watersheds" / "dir_list.csv", index=False, header=False)
             log_to_file(log_file_path, f"Mini watershed files generated at {str(output_folder / 'mini_watersheds')}", add_timestamp=True)
         except Exception as e:
-            log_to_file(log_file_path, f"Error THUC {thuc_id}: {e}", add_timestamp=True)
+            log_to_file(log_file_path, f"Error THUC {thuc_id}: {e}\n{traceback.format_exc()}", add_timestamp=True)
             sys.exit(1)
 
     sys.exit(0)

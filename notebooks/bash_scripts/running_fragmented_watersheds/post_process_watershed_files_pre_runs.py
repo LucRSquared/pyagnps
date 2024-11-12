@@ -8,6 +8,8 @@ from sqlalchemy import create_engine, text as sql_text
 
 import argparse
 
+import traceback
+
 
 def main():
 
@@ -62,7 +64,7 @@ def main():
         sys.exit(0)
 
     except Exception as e:
-        log_to_file(log_file_path, f"Error reading AnnAGNPS files: {e}", add_timestamp=True)
+        log_to_file(log_file_path, f"Error reading AnnAGNPS files: {e}\n{traceback.format_exc()}", add_timestamp=True)
         sys.exit(1)
 
 
