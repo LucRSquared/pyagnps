@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# Define the update_task_ids function to filter only active jobs
+update_task_ids() {
+    local active_jobs=()
+    for job_id in "$@"; do
+        if squeue -j "$job_id" &> /dev/null; then
+            active_jobs+=("$job_id")
+        fi
+    done
+    printf "%s\n" "${active_jobs[@]}"
+}
+
+
 # Define function to handle arguments
 parse_arguments() {
   while [[ $# -gt 0 ]]; do
@@ -192,14 +204,4 @@ done
 
 echo "$(date '+%Y-%m-%d %H:%M:%S') - All jobs finished!"
 
-# Define the update_task_ids function to filter only active jobs
-update_task_ids() {
-    local active_jobs=()
-    for job_id in "$@"; do
-        if squeue -j "$job_id" &> /dev/null; then
-            active_jobs+=("$job_id")
-        fi
-    done
-    printf "%s\n" "${active_jobs[@]}"
-}
 
