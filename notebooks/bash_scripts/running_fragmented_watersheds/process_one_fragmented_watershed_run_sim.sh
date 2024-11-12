@@ -124,7 +124,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
          --partition="$partition" \
          --exclude="$exclude" \
          --job-name="anna_${start_index}-${end_index}" \
-         --output="annagnps_${start_index}-${end_index}_%A_%a_%N.out" \
+         --output="/dev/null" \
          "${PY_BASH_DIR}/run_annagnps_func_normal.sh" \
          --mini_watersheds_dir "$MINI_WATERSHEDS_DIR" \
          --log_file "$LOG_FILE"
