@@ -10,6 +10,10 @@ parse_arguments() {
         MINI_WATERSHEDS_DIR="$2"
         shift 2
         ;;
+      --force_simulate)
+        force_simulate="$2"
+        shift 2
+        ;;
       --csv_file)
         csv_file="$2"
         shift 2
@@ -39,6 +43,10 @@ if [ -z "$csv_file" ]; then
     csv_file="${MINI_WATERSHEDS_DIR}/dir_list.csv"
 fi
 
+if [ -z "$force_simulate" ]; then
+    force_simulate="false"
+fi
+
 # if [ -z "$PYAGNPS_DIR" ]; then
 #   PYAGNPS_DIR="/aims-nas/luc/code/pyagnps/"
 # fi
@@ -56,9 +64,19 @@ if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
     job_name=$(basename "${dir_list[$dir_index]}")
     echo "Processing directory: $job_name"
     cd "${dir_list[$dir_index]}" || exit 1
+
+    # If force_simulate == true then run annagnps otherwse check if AnnAGNPS.log exists
+    if [ "$force_simulate" == "true" ] || [ ! -e ./AnnAGNPS.log ]; then
+        # Run annagnps
+        annagnps
+    else
+        echo "Skipping directory: $job_name"
+        cd ..
+        exit 0
+    fi
     
     # Run annagnps
-    annagnps
+    # annagnps
 
 else
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Invalid directory index: $dir_index" | tee -a "$LOG_FILE"

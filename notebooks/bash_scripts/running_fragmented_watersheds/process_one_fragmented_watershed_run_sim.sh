@@ -28,6 +28,10 @@ parse_arguments() {
         batch_size="$2"
         shift 2
         ;;
+      --force_simulate)
+        force_simulate="$2"
+        shift 2
+        ;;
       --maxiter)
         maxiter="$2"
         shift 2
@@ -80,6 +84,10 @@ if [ -z "$maxiter" ]; then
   maxiter=1000
 fi
 
+if [ -z "$force_simulate" ]; then
+  force_simulate="false"
+fi
+
 if [ -z "$partition" ]; then
   partition="aims-highperf-oversubscribe,aims-default-oversubscribe"
 fi
@@ -127,6 +135,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
          --output="/dev/null" \
          "${PY_BASH_DIR}/run_annagnps_func_normal.sh" \
          --mini_watersheds_dir "$MINI_WATERSHEDS_DIR" \
+         --force_simulate "$force_simulate" \
          --log_file "$LOG_FILE"
   )
         #  --pyagnps_dir "$PYAGNPS_DIR" & # Not necessary but here it is anyway in case some python script is needed later

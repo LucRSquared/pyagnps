@@ -38,6 +38,8 @@ share_global_watershed_parameters_with_mini_watersheds="true"
 
 
 simulate_thuc="true"
+force_simulate="false" # if true will overwrite existing simulation outputs
+
 post_process="true"
 
 climate_method="nldas2_database"
@@ -45,6 +47,7 @@ climate_table="climate_nldas2"
 
 start_date="2000-01-01"
 end_date="2022-12-31"
+# end_date="2002-12-31"
 
 pyagnps_dir="/aims-nas/luc/code/pyagnps" # the location of the python scripts are defined with respect to this
 
@@ -58,7 +61,7 @@ path_to_precip_zones="/aims-nas/data/datasets/RUSLE2/Climate/precip_zones_RUSLE2
 partition="aims-highperf-oversubscribe"
 
 # Nodes to exclude
-exclude="aims-node7,aims-node11"
+exclude=""
 
 
 # Batch size for job simulations submissions
@@ -145,6 +148,7 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --mini_watersheds_dir "./mini_watersheds" \
         --py_bash_dir "$PY_BASH_DIR" \
         --batch_size "$batch_size" \
+        --force_simulate "$force_simulate" \
         --maxiter "$maxiter" \
         --partition "$partition" \
         --exclude "$exclude" \
@@ -166,7 +170,7 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --credentials "$path_to_db_credentials" \
         --partition "$partition" \
         --exclude "$exclude" \
-        --batch_size 10 \
+        --batch_size 20 \
         --log_file "$LOG_FILE" || { # what to do if post processing fails
           cd "${ROOT_DIR}" ; echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Post processing failed for thuc $thuc_id, continuing" | tee -a "$LOG_FILE"
           continue
