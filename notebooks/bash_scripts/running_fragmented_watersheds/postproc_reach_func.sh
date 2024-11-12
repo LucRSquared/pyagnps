@@ -131,12 +131,11 @@ if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
         --aa_sediment_yield_table "$aa_sediment_yield_table" \
         --aa_sediment_erosion_table "$aa_sediment_erosion_table" \
         --log_file "$LOG_FILE"
-
-    # cd "$MINI_WATERSHEDS_DIR" # This didn't work because MINI_WATERSHEDS_DIR = ./mini_watersheds which won't work once we are in the reach folder
+    exit_status=$?
     cd ..
 
     # If the python code finished successfully then delete the current directory
-    if [ $? -eq 0 ]; then
+    if [ $exit_status -eq 0 ]; then
         echo "$(date '+%Y-%m-%d %H:%M:%S') - Post processing finished successfully, deleting directory ${dir_list[$dir_index]}" | tee -a "$LOG_FILE"
         rm -rf "${dir_list[$dir_index]}"
     else
