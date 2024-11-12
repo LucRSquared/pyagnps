@@ -182,12 +182,13 @@ maxiter=100
 iteration_count=0
 
 # Initial population of task_ids array
-mapfile -t task_ids < <(update_task_ids "${task_ids[@]}")
+remaining_task_ids=()
+mapfile -t remaining_task_ids < <(update_task_ids "${task_ids[@]}")
 
-echo "$(date '+%Y-%m-%d %H:%M:%S') - Number of jobs remaining: ${#task_ids[@]}" | tee -a "$LOG_FILE"
-echo "$(date '+%Y-%m-%d %H:%M:%S') - The remaining jobs are: ${task_ids[@]}" | tee -a "$LOG_FILE"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Number of jobs remaining: ${#remaining_task_ids[@]}" | tee -a "$LOG_FILE"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - The remaining jobs are: ${remaining_task_ids[@]}" | tee -a "$LOG_FILE"
 
-while [[ ${#task_ids[@]} -gt 0 ]]; do
+while [[ ${#remaining_task_ids[@]} -gt 0 ]]; do
     ((iteration_count++))
     echo "$(date '+%Y-%m-%d %H:%M:%S') - Waiting for jobs to finish, sleeping and retrying later... ($iteration_count/$maxiter)" | tee -a "$LOG_FILE"
 
@@ -199,13 +200,13 @@ while [[ ${#task_ids[@]} -gt 0 ]]; do
     sleep 5
 
     # Re-run update_task_ids to get the active job ids and repopulate task_ids array
-    mapfile -t task_ids < <(update_task_ids "${task_ids[@]}")
+    mapfile -t remaining_task_ids < <(update_task_ids "${task_ids[@]}")
 
     if [[ $iteration_count -eq $maxiter ]]; then
         echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Maximum iterations of $maxiter reached in the while loop." | tee -a "${LOG_FILE%.*}_errors.csv"
         echo "timestamp,job_id,reason" > "${LOG_FILE%.*}_errors.csv"
-        for i in "${!task_ids[@]}"; do
-            echo "$(date '+%Y-%m-%d %H:%M:%S'),${task_ids[$i]},DNF" | tee -a "${LOG_FILE%.*}_errors.csv"
+        for i in "${!remaining_task_ids[@]}"; do
+            echo "$(date '+%Y-%m-%d %H:%M:%S'),${remaining_task_ids[$i]},DNF" | tee -a "${LOG_FILE%.*}_errors.csv"
         done
         exit 1
     fi
