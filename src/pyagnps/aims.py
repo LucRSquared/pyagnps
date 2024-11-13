@@ -244,7 +244,8 @@ class AIMSWatershed:
         if not(path_to_nldas2_centroids.exists()):
             # Download the file
             out_folder = Path(path_to_nldas2_centroids).parent
-            utils.download_simple_file(url_nldas2_centroids, out_folder=out_folder)            
+
+            utils.download_simple_file(url_nldas2_centroids, out_dir=out_folder)            
 
         self.nldas2_centroids = gpd.read_file(path_to_nldas2_centroids)
 
@@ -259,7 +260,7 @@ class AIMSWatershed:
         if not(path_to_scs_storm_types.exists()):
             # Download the file
             out_folder = Path(path_to_scs_storm_types).parent
-            utils.download_simple_file(url_scs_storm_types, out_folder=out_folder)            
+            utils.download_simple_file(url_scs_storm_types, out_dir=out_folder)            
 
         self.scs_storm_types = gpd.read_file(path_to_scs_storm_types).to_crs("epsg:4326")
 
@@ -274,7 +275,7 @@ class AIMSWatershed:
         if not(path_to_precip_zones.exists()):
             # Download the file
             out_folder = Path(path_to_precip_zones).parent
-            utils.download_simple_file(url_precip_zones, out_folder=out_folder)            
+            utils.download_simple_file(url_precip_zones, out_dir=out_folder)            
 
         self.precip_zones = gpd.read_file(path_to_precip_zones)
 
