@@ -11,6 +11,17 @@ update_task_ids() {
     printf "%s\n" "${active_jobs[@]}"
 }
 
+get_num_running_jobs() {
+  # Count total number of running jobs
+  num_running_jobs=$(squeue --noheader | wc -l)
+  
+  # Check for any line with a job array format (number followed by _[)
+  if squeue --noheader | grep -qE "[0-9]+_\["; then
+    ((num_running_jobs += 1000))
+  fi
+  
+  echo "$num_running_jobs"
+}
 
 # Define function to handle arguments
 parse_arguments() {
@@ -122,7 +133,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
   # Ensure end_index doesn't exceed num_jobs
   [[ $end_index -ge $num_jobs ]] && end_index=$((num_jobs-1))
 
-  echo "$(date '+%Y-%m-%d %H:%M:%S') - Submitting mini watersheds ${start_index} to ${end_index}..." | tee -a "$LOG_FILE"
+  # echo "$(date '+%Y-%m-%d %H:%M:%S') - Submitting mini watersheds ${start_index} to ${end_index}..." | tee -a "$LOG_FILE"
   
   # Submit the job with the adjusted array range
   sbatch_output=$(
@@ -149,7 +160,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
     task_ids+=("${job_id}_$i")
   done
 
-  num_running_jobs=$(squeue --noheader | wc -l)
+  num_running_jobs=$(get_num_running_jobs)
 
 #   # Optional delay between batch submissions
   # Check the number of currently running jobs
@@ -164,7 +175,8 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
     fi
 
     sleep 5
-    num_running_jobs=$(squeue --noheader | wc -l)
+    num_running_jobs=$(get_num_running_jobs)
+
     # echo "$(date '+%Y-%m-%d %H:%M:%S') - After sleeping, num_running_jobs is $num_running_jobs" | tee -a "$LOG_FILE"
 
     if [[ $iteration_count -eq $maxiter ]]; then
@@ -188,9 +200,9 @@ mapfile -t remaining_task_ids < <(update_task_ids "${task_ids[@]}")
 echo "$(date '+%Y-%m-%d %H:%M:%S') - Number of jobs remaining: ${#remaining_task_ids[@]}" | tee -a "$LOG_FILE"
 echo "$(date '+%Y-%m-%d %H:%M:%S') - The remaining jobs are: ${remaining_task_ids[@]}" | tee -a "$LOG_FILE"
 
-while [[ ${#remaining_task_ids[@]} -gt 0 ]]; do
+while [[ ${#remaining_task_ids[@]} -gt 0 ]] && [ -n "${remaining_jobs[0]}" ]; do # The second condition is to handle empty strings potentially present in the array
     ((iteration_count++))
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Waiting for jobs to finish, sleeping and retrying later... ($iteration_count/$maxiter)" | tee -a "$LOG_FILE"
+    # echo "$(date '+%Y-%m-%d %H:%M:%S') - Waiting for jobs to finish, sleeping and retrying later... ($iteration_count/$maxiter)" | tee -a "$LOG_FILE"
 
     if (( iteration_count % 10 == 0 )); then
         echo "$(date '+%Y-%m-%d %H:%M:%S') - Running release_requeue.sh script after $iteration_count iterations." | tee -a "$LOG_FILE"

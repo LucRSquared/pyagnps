@@ -70,7 +70,7 @@ if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
         # Run annagnps
         annagnps
     else
-        echo "Skipping directory: $job_name"
+        # echo "Skipping directory: $job_name" | tee -a "$LOG_FILE"
         cd ..
         exit 0
     fi
@@ -83,15 +83,5 @@ else
     exit 1
 fi
 
-# # Using [[ ]]
-# if [[ -e ./AnnAGNPS.log ]]; then
-#     echo "Skipping directory: $job_name"
-#     exit 1
-# else
-#     echo "Processing directory: $job_name"
-# fi
-
-# Return to root directory
-# cd "$MINI_WATERSHEDS_DIR"
 cd ..
 

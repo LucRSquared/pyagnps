@@ -69,6 +69,33 @@ batch_size=1000
 maxiter=1000
 num_processes=32
 
+# Print parameters to the log file
+{
+  echo "ROOT_DIR: $ROOT_DIR"
+  echo "PY_BASH_DIR: $PY_BASH_DIR"
+  echo "LOG_FILE: $LOG_FILE"
+  echo "generate_main_files: $generate_main_files"
+  echo "fragment_watershed: $fragment_watershed"
+  echo "share_global_watershed_parameters_with_mini_watersheds: $share_global_watershed_parameters_with_mini_watersheds"
+  echo "simulate_thuc: $simulate_thuc"
+  echo "force_simulate: $force_simulate"
+  echo "post_process: $post_process"
+  echo "climate_method: $climate_method"
+  echo "climate_table: $climate_table"
+  echo "start_date: $start_date"
+  echo "end_date: $end_date"
+  echo "pyagnps_dir: $pyagnps_dir"
+  echo "path_to_db_credentials: $path_to_db_credentials"
+  echo "path_to_nldas2_centroids: $path_to_nldas2_centroids"
+  echo "path_to_scs_storm_types: $path_to_scs_storm_types"
+  echo "path_to_precip_zones: $path_to_precip_zones"
+  echo "partition: $partition"
+  echo "exclude: $exclude"
+  echo "batch_size: $batch_size"
+  echo "maxiter: $maxiter"
+  echo "num_processes: $num_processes"
+} | tee -a "$LOG_FILE"
+
 # Loop through thuc list
 # For each thuc:
 #   - check if AnnAGNPS.fil exists (if yes it means the regular input files were already generated)
@@ -93,12 +120,17 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - Found $num_jobs watersheds" | tee -a "$LOG_
 
 # Loop to process thucs one by one
 for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
+  START_ALL=$(date +%s)
+
   thuc_id=$(sed -n "${thuc_index}p" "${ROOT_DIR}/thuc_list_to_run.csv" | tr -d '\r\n') # The tr command removes trailing new line
-  echo "$(date '+%Y-%m-%d %H:%M:%S') - Processing thuc $thuc_id" | tee -a "$LOG_FILE"
+
+  THUC_LOG_FILE="${LOG_FILE%.*}_${thuc_id}.log"
+
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - Processing thuc $thuc_id" | tee -a "$THUC_LOG_FILE"
 
   # Check if regular input files exist (AnnAGNPS.fil) exists
   if [ -f "${ROOT_DIR}/thuc_${thuc}/AnnAGNPS.fil" ] || [ "$generate_main_files" = "false" ]; then
-      echo "$(date '+%Y-%m-%d %H:%M:%S') - Skipping thuc $thuc_id, input files already exist" | tee -a "$LOG_FILE"
+      echo "$(date '+%Y-%m-%d %H:%M:%S') - Skipping thuc $thuc_id, input files already exist" | tee -a "$THUC_LOG_FILE"
       generate_main_files="false"
   else
       generate_main_files="true"
@@ -112,10 +144,11 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
   fi
 
   #---------------------------------------
-
+  START_GENERATE=$(date +%s)
   if [[ "$generate_main_files" == "true" ]]; then
   
-      echo "$(date '+%Y-%m-%d %H:%M:%S') - Generating input files for thuc $thuc_id and fragmenting it into mini watersheds" | tee -a "$LOG_FILE"
+      
+      echo "$(date '+%Y-%m-%d %H:%M:%S') - Generating input files for thuc $thuc_id and fragmenting it into mini watersheds" | tee -a "$THUC_LOG_FILE"
 
       "${PY_BASH_DIR}/generate_annagnps_files_full_and_fragment_watershed.sh" \
         --pyagnps_dir "$pyagnps_dir" \
@@ -135,14 +168,18 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --fragment_watershed "$fragment_watershed" \
         --share_global_watershed_parameters_with_mini_watersheds "$share_global_watershed_parameters_with_mini_watersheds" \
         --num_processes "$num_processes" \
-        --log_file "$LOG_FILE" || { # what to do if generation of files fails
-          cd "${ROOT_DIR}" ; echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Failed to generate input files for thuc $thuc_id" | tee -a "$LOG_FILE"
+        --log_file "$THUC_LOG_FILE" || { # what to do if generation of files fails
+          cd "${ROOT_DIR}" ; echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Failed to generate input files for thuc $thuc_id" | tee -a "$THUC_LOG_FILE"
           continue
         }
   fi
+
+  END_GENERATE=$(date +%s)
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - [$thuc_index/$num_jobs] - Finished simulating thuc $thuc_id, elapsed time: $(($END_GENERATE - $START_GENERATE)) seconds" | tee -a "$LOG_FILE"
   
+  START_SIMULATE=$(date +%s)
   if [[ "$simulate_thuc" == "true" ]]; then
-      echo "$(date '+%Y-%m-%d %H:%M:%S') - Simulating thuc $thuc_id using distributed method" | tee -a "$LOG_FILE"
+      echo "$(date '+%Y-%m-%d %H:%M:%S') - Simulating thuc $thuc_id using distributed method" | tee -a "$THUC_LOG_FILE"
       cd "${ROOT_DIR}/thuc_${thuc_id}"
       "${PY_BASH_DIR}/process_one_fragmented_watershed_run_sim.sh" \
         --mini_watersheds_dir "./mini_watersheds" \
@@ -152,15 +189,19 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --maxiter "$maxiter" \
         --partition "$partition" \
         --exclude "$exclude" \
-        --log_file "$LOG_FILE" || { # what to do if simulation fails
-          cd "${ROOT_DIR}" ; echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Simulation failed for thuc $thuc_id, continuing" | tee -a "$LOG_FILE"
+        --log_file "$THUC_LOG_FILE" || { # what to do if simulation fails
+          cd "${ROOT_DIR}" ; echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Simulation failed for thuc $thuc_id, continuing" | tee -a "$THUC_LOG_FILE"
           continue
         }
       cd "${ROOT_DIR}"
   fi
 
+  END_SIMULATE=$(date +%s)
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - [$thuc_index/$num_jobs] - Finished simulating thuc $thuc_id, elapsed time: $(($END_SIMULATE - $START_SIMULATE)) seconds" | tee -a "$LOG_FILE"
+  
+  START_POSTPROCESS=$(date +%s)
   if [[ "$post_process" == "true" ]]; then
-      echo "$(date '+%Y-%m-%d %H:%M:%S') - Post processing thuc $thuc_id and uploading results to db" | tee -a "$LOG_FILE"
+      echo "$(date '+%Y-%m-%d %H:%M:%S') - Post processing thuc $thuc_id and uploading results to db" | tee -a "$THUC_LOG_FILE"
       cd "${ROOT_DIR}/thuc_${thuc_id}"
       "${PY_BASH_DIR}/post_process_one_fragmented_watershed.sh" \
         --mini_watersheds_dir "./mini_watersheds" \
@@ -171,11 +212,18 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --partition "$partition" \
         --exclude "$exclude" \
         --batch_size 20 \
-        --log_file "$LOG_FILE" || { # what to do if post processing fails
-          cd "${ROOT_DIR}" ; echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Post processing failed for thuc $thuc_id, continuing" | tee -a "$LOG_FILE"
+        --log_file "$THUC_LOG_FILE" || { # what to do if post processing fails
+          cd "${ROOT_DIR}" ; echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Post processing failed for thuc $thuc_id, continuing" | tee -a "$THUC_LOG_FILE"
           continue
         }
       cd "${ROOT_DIR}"
   fi
+
+  END_POSTPROCESS=$(date +%s)
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - [$thuc_index/$num_jobs] - Finished post processing thuc $thuc_id, elapsed time: $(($END_POSTPROCESS - $START_POSTPROCESS)) seconds" | tee -a "$LOG_FILE"
+
+  END_ALL=$(date +%s)
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - [$thuc_index/$num_jobs] - Finished processing thuc $thuc_id, elapsed time: $(($END_ALL - $START_ALL)) seconds" | tee -a "$LOG_FILE"
 done
+
 
