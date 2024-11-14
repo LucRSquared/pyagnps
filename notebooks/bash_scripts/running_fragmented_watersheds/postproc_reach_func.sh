@@ -140,6 +140,8 @@ if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
         # echo "$(date '+%Y-%m-%d %H:%M:%S') - Post processing finished successfully, deleting directory ${dir_list[$dir_index]}" | tee -a "$LOG_FILE"
         # rm -rf "${dir_list[$dir_index]}"
     else
+        ERROR_LOG_FILE="${LOG_FILE%.*}_failed_post_process.log"
+        echo "${dir_list[$dir_index]}" | tee -a "$ERROR_LOG_FILE"
         echo "$(date '+%Y-%m-%d %H:%M:%S') - Post processing failed: ${dir_list[$dir_index]}" | tee -a "$LOG_FILE"
     fi
 
@@ -152,4 +154,4 @@ fi
 # Return to root directory
 # cd "$MINI_WATERSHEDS_DIR"
 # cd ..
-
+# THUC_LOG_FILE="${LOG_FILE%.*}_${thuc_id}.log"

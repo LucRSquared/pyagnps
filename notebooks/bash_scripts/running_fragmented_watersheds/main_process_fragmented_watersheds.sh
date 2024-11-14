@@ -61,11 +61,11 @@ path_to_precip_zones="/aims-nas/data/datasets/RUSLE2/Climate/precip_zones_RUSLE2
 partition="aims-highperf-oversubscribe"
 
 # Nodes to exclude
-exclude=""
+exclude="aims-node6,aims-node7,aims-node11"
 
 
 # Batch size for job simulations submissions
-batch_size=1000
+batch_size=500
 maxiter=1000
 num_processes=32
 

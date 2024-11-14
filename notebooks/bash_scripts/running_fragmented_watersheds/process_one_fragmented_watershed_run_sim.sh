@@ -224,6 +224,6 @@ while [[ ${#remaining_task_ids[@]} -gt 0 ]] && [ -n "${remaining_jobs[0]}" ]; do
     fi
 done
 
-echo "$(date '+%Y-%m-%d %H:%M:%S') - All jobs finished!"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - All jobs finished!" | tee -a "$LOG_FILE"
 
 

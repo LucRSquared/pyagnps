@@ -68,7 +68,10 @@ if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
     # If force_simulate == true then run annagnps otherwse check if AnnAGNPS.log exists
     if [ "$force_simulate" == "true" ] || [ ! -e ./AnnAGNPS.log ]; then
         # Run annagnps
-        annagnps
+        if ! annagnps; then
+            ERROR_LOG_FILE="${LOG_FILE%.*}_failed_process.log"
+            echo "${dir_list[$dir_index]}" | tee -a "$ERROR_LOG_FILE"
+        fi
     else
         # echo "Skipping directory: $job_name" | tee -a "$LOG_FILE"
         cd ..
