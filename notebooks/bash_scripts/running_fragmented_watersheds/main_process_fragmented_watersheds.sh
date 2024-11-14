@@ -27,6 +27,7 @@ ROOT_DIR="/aims-nas/luc/annagnps_pre_runs_2000-01-01_2022-12-31/"  # Needs to us
 PY_BASH_DIR="/aims-nas/luc/code/pyagnps/notebooks/bash_scripts/running_fragmented_watersheds/" # the location of the python scripts are defined with respect to this
 
 LOG_FILE="${ROOT_DIR}/annagnps_pre_runs_2000-01-01_2022-12-31.log"
+FAILED_THUCS="${ROOT_DIR}/failed_thucs.csv"
 
 
 # Set boolean parameters to generate and fragment, simulate, post-process results (and populate them to the database)
@@ -169,13 +170,15 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --share_global_watershed_parameters_with_mini_watersheds "$share_global_watershed_parameters_with_mini_watersheds" \
         --num_processes "$num_processes" \
         --log_file "$THUC_LOG_FILE" || { # what to do if generation of files fails
-          cd "${ROOT_DIR}" ; echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Failed to generate input files for thuc $thuc_id" | tee -a "$THUC_LOG_FILE"
+          cd "${ROOT_DIR}" ; 
+          echo "$(date '+%Y-%m-%d %H:%M:%S'),$thuc_id,failed_generation" | tee -a "$FAILED_THUCS"
+          echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Failed to generate input files for thuc $thuc_id" | tee -a "$THUC_LOG_FILE"
           continue
         }
   fi
 
   END_GENERATE=$(date +%s)
-  echo "$(date '+%Y-%m-%d %H:%M:%S') - [$thuc_index/$num_jobs] - Finished simulating thuc $thuc_id, elapsed time: $(($END_GENERATE - $START_GENERATE)) seconds" | tee -a "$LOG_FILE"
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - [$thuc_index/$num_jobs] - Finished generating thuc $thuc_id, elapsed time: $(($END_GENERATE - $START_GENERATE)) seconds" | tee -a "$LOG_FILE"
   
   START_SIMULATE=$(date +%s)
   if [[ "$simulate_thuc" == "true" ]]; then
@@ -190,7 +193,9 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --partition "$partition" \
         --exclude "$exclude" \
         --log_file "$THUC_LOG_FILE" || { # what to do if simulation fails
-          cd "${ROOT_DIR}" ; echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Simulation failed for thuc $thuc_id, continuing" | tee -a "$THUC_LOG_FILE"
+          cd "${ROOT_DIR}" ;
+          echo "$(date '+%Y-%m-%d %H:%M:%S'),$thuc_id,failed_simulation" | tee -a "$FAILED_THUCS" 
+          echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Simulation failed for thuc $thuc_id, continuing" | tee -a "$THUC_LOG_FILE"
           continue
         }
       cd "${ROOT_DIR}"
@@ -213,7 +218,9 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --exclude "$exclude" \
         --batch_size 20 \
         --log_file "$THUC_LOG_FILE" || { # what to do if post processing fails
-          cd "${ROOT_DIR}" ; echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Post processing failed for thuc $thuc_id, continuing" | tee -a "$THUC_LOG_FILE"
+          cd "${ROOT_DIR}" ; 
+          echo "$(date '+%Y-%m-%d %H:%M:%S'),$thuc_id,failed_postprocessing" | tee -a "$FAILED_THUCS"
+          echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Post processing failed for thuc $thuc_id, continuing" | tee -a "$THUC_LOG_FILE"
           continue
         }
       cd "${ROOT_DIR}"
