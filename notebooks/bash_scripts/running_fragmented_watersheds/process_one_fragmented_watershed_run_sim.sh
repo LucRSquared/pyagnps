@@ -39,6 +39,10 @@ parse_arguments() {
         batch_size="$2"
         shift 2
         ;;
+      --thuc_id)
+        thuc_id="$2"
+        shift 2
+        ;;
       --force_simulate)
         force_simulate="$2"
         shift 2
@@ -107,6 +111,10 @@ if [ -z "$exclude" ]; then
   exclude=""
 fi
 
+if [ -z "$thuc_id" ]; then
+  thuc_id=""
+fi
+
 # Calculate the total number of jobs based on directory count
 num_jobs=0
 
@@ -145,6 +153,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
          --job-name="anna_${start_index}-${end_index}" \
          --output="/dev/null" \
          "${PY_BASH_DIR}/run_annagnps_func_normal.sh" \
+         --thuc_id "$thuc_id" \
          --mini_watersheds_dir "$MINI_WATERSHEDS_DIR" \
          --force_simulate "$force_simulate" \
          --log_file "$LOG_FILE"

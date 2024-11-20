@@ -10,6 +10,10 @@ parse_arguments() {
         MINI_WATERSHEDS_DIR="$2"
         shift 2
         ;;
+      --thuc_id)
+        thuc_id="$2"
+        shift 2
+        ;;
       --force_simulate)
         force_simulate="$2"
         shift 2
@@ -47,6 +51,10 @@ if [ -z "$force_simulate" ]; then
     force_simulate="false"
 fi
 
+if [-z "$thuc_id" ]; then
+    thuc_id=""
+fi
+
 # if [ -z "$PYAGNPS_DIR" ]; then
 #   PYAGNPS_DIR="/aims-nas/luc/code/pyagnps/"
 # fi
@@ -71,6 +79,9 @@ if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
         if ! annagnps; then
             ERROR_LOG_FILE="${LOG_FILE%.*}_failed_process.log"
             echo "${dir_list[$dir_index]}" | tee -a "$ERROR_LOG_FILE"
+
+            FAILED_THUCS="${LOG_FILE%/*}/failed_thucs.csv"
+            echo "$(date '+%Y-%m-%d %H:%M:%S'),$thuc_id,failed_processing" | tee -a "$FAILED_THUCS"
         fi
     else
         # echo "Skipping directory: $job_name" | tee -a "$LOG_FILE"

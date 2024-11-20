@@ -171,8 +171,8 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --num_processes "$num_processes" \
         --log_file "$THUC_LOG_FILE" || { # what to do if generation of files fails
           cd "${ROOT_DIR}" ; 
-          echo "$(date '+%Y-%m-%d %H:%M:%S'),$thuc_id,failed_generation" | tee -a "$FAILED_THUCS"
-          echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Failed to generate input files for thuc $thuc_id" | tee -a "$THUC_LOG_FILE"
+          echo "$(date '+%
+          echo "$(date '+%Y-%Y-%m-%d %H:%M:%S'),$thuc_id,failed_generation" | tee -a "$FAILED_THUCS"m-%d %H:%M:%S') - Error: Failed to generate input files for thuc $thuc_id" | tee -a "$THUC_LOG_FILE"
           continue
         }
   fi
@@ -187,6 +187,7 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
       "${PY_BASH_DIR}/process_one_fragmented_watershed_run_sim.sh" \
         --mini_watersheds_dir "./mini_watersheds" \
         --py_bash_dir "$PY_BASH_DIR" \
+        --thuc_id "$thuc_id" \
         --batch_size "$batch_size" \
         --force_simulate "$force_simulate" \
         --maxiter "$maxiter" \
