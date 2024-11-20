@@ -11,6 +11,9 @@ from pyagnps.utils import month_difference, download_files_from_url
 
 from pyagnps.constants import _BASE_URL_NLDAS, _NLDAS_PRODUCTS_20, _NLDAS_PRODUCTS_002
 
+# Example use from command line
+# download-nldas2 --from_date 2024-01-01 --to_date 2024-03-1 --products NLDAS_FORA0125_H.002 --output_dir Path/to/NLDAS2/ --username myusername --password mypassword
+
 class SessionWithHeaderRedirection(requests.Session):
     """
     adapted from

@@ -26,6 +26,9 @@ from pyagnps import climate
 
 
 # This script is used to generate climate data from pre-aggregated netcdf files
+# Example usage
+
+# aggregate-nldas2 --product NLDAS_FORA0125_H.2.0 --files_dir "path/to/netcdf_hourly/" --output_dir_agg_netcdf "path/to/netcdf_daily/" --from_date 2020-01-02 --to_date 2020-01-04
 
 def main(**kwargs):
 
