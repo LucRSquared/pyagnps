@@ -413,21 +413,28 @@ class AIMSWatershed:
     def query_management_crop(self):
 
         mgmt_crop_ids_list = self.df_mgmt_schd['New_Crop_ID'].dropna().unique()
-        mgmt_crop_ids_string = ", ".join(f"'{m}'" for m in mgmt_crop_ids_list)
-
-        query_mgmt_schd_data = f"""SELECT * FROM annagnps_crop WHERE "Crop_ID" in ({mgmt_crop_ids_string})"""
-        df_mgmt_crop = pd.read_sql_query(sql=sql_text(query_mgmt_schd_data), con=self.engine.connect())
+        if len(mgmt_crop_ids_list) == 0:
+            query_mgmt_schd_data = """SELECT * FROM annagnps_crop WHERE FALSE"""
+            df_mgmt_crop = pd.read_sql_query(sql=sql_text(query_mgmt_schd_data), con=self.engine.connect())
+        else:
+            mgmt_crop_ids_string = ", ".join(f"'{m}'" for m in mgmt_crop_ids_list)
+            query_mgmt_schd_data = f"""SELECT * FROM annagnps_crop WHERE "Crop_ID" in ({mgmt_crop_ids_string})"""
+            df_mgmt_crop = pd.read_sql_query(sql=sql_text(query_mgmt_schd_data), con=self.engine.connect())
 
         self.df_mgmt_crop = df_mgmt_crop
         self.df_mgmt_crop_ids_list = mgmt_crop_ids_list
 
+
     def query_management_crop_growth(self):
 
         mgmt_crop_ids_list = self.df_mgmt_schd['New_Crop_ID'].dropna().unique()
-        mgmt_crop_ids_string = ", ".join(f"'{m}'" for m in mgmt_crop_ids_list)
-
-        query_mgmt_crop_growth_data = f"""SELECT * FROM annagnps_crop_growth WHERE "Crop_Growth_ID" in ({mgmt_crop_ids_string})"""
-        df_mgmt_crop_growth = pd.read_sql_query(sql=sql_text(query_mgmt_crop_growth_data), con=self.engine.connect())
+        if len(mgmt_crop_ids_list) == 0:
+            query_mgmt_crop_growth_data = """SELECT * FROM annagnps_crop_growth WHERE FALSE"""
+            df_mgmt_crop_growth = pd.read_sql_query(sql=sql_text(query_mgmt_crop_growth_data), con=self.engine.connect())
+        else:
+            mgmt_crop_ids_string = ", ".join(f"'{m}'" for m in mgmt_crop_ids_list)
+            query_mgmt_crop_growth_data = f"""SELECT * FROM annagnps_crop_growth WHERE "Crop_Growth_ID" in ({mgmt_crop_ids_string})"""
+            df_mgmt_crop_growth = pd.read_sql_query(sql=sql_text(query_mgmt_crop_growth_data), con=self.engine.connect())
 
         self.df_mgmt_crop_growth = df_mgmt_crop_growth
         self.mgmt_crop_ids_list = mgmt_crop_ids_list
@@ -435,10 +442,13 @@ class AIMSWatershed:
     def query_management_non_crop(self):
 
         mgmt_non_crop_ids_list = self.df_mgmt_schd['New_Non-Crop_ID'].dropna().unique()
-        mgmt_non_crop_ids_string = ", ".join(f"'{m}'" for m in mgmt_non_crop_ids_list)
-
-        query_mgmt_non_cropdata = f"""SELECT * FROM annagnps_non_crop WHERE "Non-Crop_ID" in ({mgmt_non_crop_ids_string})"""
-        df_mgmt_non_crop = pd.read_sql_query(sql=sql_text(query_mgmt_non_cropdata), con=self.engine.connect())
+        if len(mgmt_non_crop_ids_list) == 0:
+            query_mgmt_non_cropdata = """SELECT * FROM annagnps_non_crop WHERE FALSE"""
+            df_mgmt_non_crop = pd.read_sql_query(sql=sql_text(query_mgmt_non_cropdata), con=self.engine.connect())
+        else:
+            mgmt_non_crop_ids_string = ", ".join(f"'{m}'" for m in mgmt_non_crop_ids_list)
+            query_mgmt_non_cropdata = f"""SELECT * FROM annagnps_non_crop WHERE "Non-Crop_ID" in ({mgmt_non_crop_ids_string})"""
+            df_mgmt_non_crop = pd.read_sql_query(sql=sql_text(query_mgmt_non_cropdata), con=self.engine.connect())
 
         self.df_mgmt_non_crop = df_mgmt_non_crop
         self.df_mgmt_non_crop_ids_list = mgmt_non_crop_ids_list
@@ -446,11 +456,14 @@ class AIMSWatershed:
     def query_management_operation(self):
 
         mgmt_oper_ids_list = self.df_mgmt_schd['Mgmt_Operation_ID'].dropna().unique()
-        mgmt_oper_ids_string = ", ".join(f"'{m}'" for m in mgmt_oper_ids_list)
+        if len(mgmt_oper_ids_list) == 0:
+            query_mgmt_oper_data = """SELECT * FROM annagnps_mgmt_oper WHERE FALSE"""
+            df_mgmt_oper = pd.read_sql_query(sql=sql_text(query_mgmt_oper_data), con=self.engine.connect())
+        else:
+            mgmt_oper_ids_string = ", ".join(f"'{m}'" for m in mgmt_oper_ids_list)
+            query_mgmt_oper_data = f"""SELECT * FROM annagnps_mgmt_oper WHERE "Mgmt_Operation_ID" in ({mgmt_oper_ids_string})"""
 
-        query_mgmt_oper_data = f"""SELECT * FROM annagnps_mgmt_oper WHERE "Mgmt_Operation_ID" in ({mgmt_oper_ids_string})"""
-
-        df_mgmt_oper = pd.read_sql_query(sql=sql_text(query_mgmt_oper_data), con=self.engine.connect())
+            df_mgmt_oper = pd.read_sql_query(sql=sql_text(query_mgmt_oper_data), con=self.engine.connect())
 
         self.df_mgmt_oper = df_mgmt_oper
         self.df_mgmt_oper_ids_list = mgmt_oper_ids_list
@@ -458,13 +471,17 @@ class AIMSWatershed:
     def query_runoff_curve(self):
 
         roc_ids_list = self.df_mgmt_schd['Curve_Number_ID'].dropna().unique()
-        roc_ids_string = ", ".join(f"'{m}'" for m in roc_ids_list)
-
-        query_roc_data = f"""SELECT * FROM annagnps_runoff_curve WHERE "Curve_Number_ID" in ({roc_ids_string})"""
-        df_roc = pd.read_sql_query(sql=sql_text(query_roc_data), con=self.engine.connect())
+        if len(roc_ids_list) == 0:
+            query_roc_data = """SELECT * FROM annagnps_runoff_curve WHERE FALSE"""
+            df_roc = pd.read_sql_query(sql=sql_text(query_roc_data), con=self.engine.connect())
+        else:
+            roc_ids_string = ", ".join(f"'{m}'" for m in roc_ids_list)
+            query_roc_data = f"""SELECT * FROM annagnps_runoff_curve WHERE "Curve_Number_ID" in ({roc_ids_string})"""
+            df_roc = pd.read_sql_query(sql=sql_text(query_roc_data), con=self.engine.connect())
 
         self.df_roc = df_roc
         self.df_roc_ids_list = roc_ids_list
+
 
     def get_watershed_bounds(self, cells_geometry=None, save=True):
         """
