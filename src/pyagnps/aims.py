@@ -803,47 +803,57 @@ class AIMSWatershed:
         # Export soil data
         soil_data_path = general_dir / 'soil_data.csv'
         if not(soil_data_path.exists()) or self.overwrite:
-            self.df_soil_data.to_csv(soil_data_path, index=False)
+            if not self.df_soil_data.empty:
+                self.df_soil_data.to_csv(soil_data_path, index=False)
 
         soil_layers_data_path = general_dir / 'soil_layers_data.csv'
         if not(soil_layers_data_path.exists()) or self.overwrite:
-            self.df_soil_layers_data.to_csv(soil_layers_data_path, index=False)
+            if not self.df_soil_layers_data.empty:
+                self.df_soil_layers_data.to_csv(soil_layers_data_path, index=False)
 
         raw_soil_data_path = general_dir / 'raw_soil_data_gNATSGO.csv'
         if not(raw_soil_data_path.exists()) or self.overwrite:
-            self.df_raw.to_csv(raw_soil_data_path, index=False)
+            if not self.df_raw.empty:
+                self.df_raw.to_csv(raw_soil_data_path, index=False)
 
         # Export management data
         management_operation_path = general_dir / 'management_oper.csv'
         if not(management_operation_path.exists()) or self.overwrite:
-            self.df_mgmt_oper = annagnps.format_mgmt_operation_for_output(self.df_mgmt_oper)
-            self.df_mgmt_oper.to_csv(management_operation_path, index=False)
+            if not self.df_mgmt_oper.empty:
+                self.df_mgmt_oper = annagnps.format_mgmt_operation_for_output(self.df_mgmt_oper)
+                self.df_mgmt_oper.to_csv(management_operation_path, index=False)
 
         management_schedule_path = general_dir / 'management_schedule.csv'
         if not(management_schedule_path.exists()) or self.overwrite:
-            self.df_mgmt_schd = annagnps.format_mgmt_schedule_for_output(self.df_mgmt_schd)
-            self.df_mgmt_schd.to_csv(management_schedule_path, index=False)
+            if not self.df_mgmt_schd.empty:
+                self.df_mgmt_schd = annagnps.format_mgmt_schedule_for_output(self.df_mgmt_schd)
+                self.df_mgmt_schd.to_csv(management_schedule_path, index=False)
 
         crop_data_path = general_dir / 'crop_data.csv'
         if not(crop_data_path.exists()) or self.overwrite:
-            self.df_mgmt_crop.to_csv(crop_data_path, index=False)
+            if not self.df_mgmt_crop.empty:
+                self.df_mgmt_crop.to_csv(crop_data_path, index=False)
 
         crop_growth_path = general_dir / 'crop_growth.csv'
         if not(crop_growth_path.exists()) or self.overwrite:
-            self.df_mgmt_crop_growth.to_csv(crop_growth_path, index=False)
+            if not self.df_mgmt_crop_growth.empty:
+                self.df_mgmt_crop_growth.to_csv(crop_growth_path, index=False)
 
         non_crop_path = general_dir / 'non_crop.csv'
         if not(non_crop_path.exists()) or self.overwrite:
-            self.df_mgmt_non_crop.to_csv(non_crop_path, index=False)
+            if not self.df_mgmt_non_crop.empty:
+                self.df_mgmt_non_crop.to_csv(non_crop_path, index=False)
 
         management_field_path = general_dir / 'management_field.csv'
         if not(management_field_path.exists()) or self.overwrite:
-            self.df_mgmt_field.to_csv(management_field_path, index=False)
+            if not self.df_mgmt_field.empty:
+                self.df_mgmt_field.to_csv(management_field_path, index=False)
 
         # Export Runoff Curve
         roc_path = general_dir / 'runoffcurve.csv'
         if not(roc_path.exists()) or self.overwrite:
-            self.df_roc.to_csv(roc_path, index=False)
+            if not self.df_roc.empty:
+                self.df_roc.to_csv(roc_path, index=False)
 
         print('Computing watershed global parameters...')
         bounds = self.get_watershed_bounds(save=True)
@@ -943,13 +953,13 @@ class AIMSWatershed:
         master_file = {
             'AnnAGNPS ID': relative_input_file_path(output_folder, annaid_path),
             'Cell Data': relative_input_file_path(output_folder, cells_path),
-            'Crop Data': relative_input_file_path(output_folder, crop_data_path),
-            'Crop Growth Data': relative_input_file_path(output_folder, crop_growth_path),
+            'Crop Data': relative_input_file_path(output_folder, crop_data_path) if not self.df_mgmt_crop.empty else 'ignore',
+            'Crop Growth Data': relative_input_file_path(output_folder, crop_growth_path) if not self.df_mgmt_crop_growth else 'ignore',
             'Global IDs Factors and Flags Data': relative_input_file_path(output_folder, globfac_path),
-            'Management Field Data': relative_input_file_path(output_folder, management_field_path),
-            'Management Operation Data': relative_input_file_path(output_folder, management_operation_path),
-            'Management Schedule Data': relative_input_file_path(output_folder, management_schedule_path),
-            'Non-Crop Data': relative_input_file_path(output_folder, non_crop_path),
+            'Management Field Data': relative_input_file_path(output_folder, management_field_path) if not self.df_mgmt_field.empty else 'ignore',
+            'Management Operation Data': relative_input_file_path(output_folder, management_operation_path) if not self.df_mgmt_oper.empty else 'ignore',
+            'Management Schedule Data': relative_input_file_path(output_folder, management_schedule_path) if not self.df_mgmt_schd.empty else 'ignore',
+            'Non-Crop Data': relative_input_file_path(output_folder, non_crop_path) if not self.df_mgmt_non_crop.empty else 'ignore',
             'Reach Data': relative_input_file_path(output_folder, reaches_path),
             'Runoff Curve Number Data': relative_input_file_path(output_folder, roc_path),
             'Simulation Period Data': relative_input_file_path(output_folder, sim_period_path),
@@ -963,6 +973,9 @@ class AIMSWatershed:
             'CLIMATE DATA - DAILY': relative_input_file_path(output_folder, climate_dir / 'climate_daily.csv'),
             'CLIMATE DATA - STATION': relative_input_file_path(output_folder, climate_dir / 'climate_station.csv')
         }
+
+        # Remove the entries with 'ignore' in the master file
+        master_file = {k: v for k, v in master_file.items() if v != 'ignore'}
 
         self.master_file_dict = master_file
 
