@@ -954,7 +954,7 @@ class AIMSWatershed:
             'AnnAGNPS ID': relative_input_file_path(output_folder, annaid_path),
             'Cell Data': relative_input_file_path(output_folder, cells_path),
             'Crop Data': relative_input_file_path(output_folder, crop_data_path) if not self.df_mgmt_crop.empty else 'ignore',
-            'Crop Growth Data': relative_input_file_path(output_folder, crop_growth_path) if not self.df_mgmt_crop_growth else 'ignore',
+            'Crop Growth Data': relative_input_file_path(output_folder, crop_growth_path) if not self.df_mgmt_crop_growth.empty else 'ignore',
             'Global IDs Factors and Flags Data': relative_input_file_path(output_folder, globfac_path),
             'Management Field Data': relative_input_file_path(output_folder, management_field_path) if not self.df_mgmt_field.empty else 'ignore',
             'Management Operation Data': relative_input_file_path(output_folder, management_operation_path) if not self.df_mgmt_oper.empty else 'ignore',
