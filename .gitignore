@@ -21,6 +21,7 @@ aiohttp_cache.sqlite
 nohup.out
 *.pyc
 .venv/*
+venv/*
 *egg-info*
 .vscode
 db_credentials*.json
