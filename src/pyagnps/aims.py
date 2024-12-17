@@ -305,7 +305,9 @@ class AIMSWatershed:
 
         return input_folders
     
-    def query_cells(self):
+    def query_cells(self, **kwargs):
+
+        perform_data_checks = kwargs.get('perform_data_checks', True)
 
         if self.thuc_id is None:
             self.get_thuc_id_by_xy()
@@ -330,6 +332,9 @@ class AIMSWatershed:
         columns = [col for col in df_cells.columns if col not in ['soil_id_annagnps_valid']]
 
         df_cells = df_cells[columns]
+
+        if perform_data_checks:
+            df_cells = annagnps.check_cell_data(df_cells)
 
         cells_geometry = cells_geometry.merge(df_cells, on='cell_id')
 
@@ -368,7 +373,9 @@ class AIMSWatershed:
         self.reaches_geometry = reaches_geometry
         self.reaches_list = reaches_list
     
-    def query_soil(self):
+    def query_soil(self, **kwargs):
+
+        perform_data_checks = kwargs.get('perform_data_checks', True)
 
         soil_ids_list = self.df_cells['soil_id'].unique()
         soil_ids_string = ", ".join(map(str, soil_ids_list.tolist()))
@@ -382,6 +389,11 @@ class AIMSWatershed:
                             .sort_values(by=['Soil_ID','Layer_Number'])
 
         df_raw = pd.read_sql_query(sql=sql_text(query_raw), con=self.engine.connect())
+
+        if perform_data_checks:
+            # df_soil_data = annagnps.check_soil_data(df_soil_data)
+            df_soil_layers_data = annagnps.check_soil_layers(df_soil_layers_data)
+            # df_raw = annagnps.check_raw_soil_data(df_raw)
 
         self.soil_ids_list = soil_ids_list
         self.df_soil_data = df_soil_data
@@ -750,6 +762,8 @@ class AIMSWatershed:
         """
 
         start_time = time.time()
+
+        perform_data_checks = kwargs.get('perform_data_checks', True)
         
         self.get_thuc_id_by_xy()
 
@@ -761,9 +775,9 @@ class AIMSWatershed:
 
         # Query database
         print('Querying database...')
-        self.query_cells()
+        self.query_cells(perform_data_checks=perform_data_checks)
         self.query_reaches()
-        self.query_soil()
+        self.query_soil(perform_data_checks=perform_data_checks)
         self.query_management_field()
         self.query_management_schedule()
         self.query_management_crop()

@@ -51,6 +51,16 @@ def format_mgmt_schedule_for_output(df):
 
     return df
 
+def check_cell_data(df):
+    # Check if values in the sheet_flow_slope column are greater than 3 and if so set them to 3
+    df.loc[df['sheet_flow_slope'] > 3, 'sheet_flow_slope'] = 3
+    return df
+
+def check_soil_layers(df):
+    # Check if values in the Layer_Depth column are greater than 3000 and if so set them to 3000
+    df.loc[df['Layer_Depth'] > 3000, 'Layer_Depth'] = 3000
+    return df
+
 # FUNCTIONS FOR POST PROCESSING ANNAGNPS OUTPUTS
 
 def read_all_annagnps_output_files(output_folder, prepare_for_db=False, thuc_id=''):
