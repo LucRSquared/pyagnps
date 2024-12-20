@@ -443,6 +443,9 @@ def fragment_watershed(annagnps_dir, mini_watersheds_dir, **kwargs):
     for master_key, df_name, filename, recompute in dataframes_and_filenames:
         df = df_name  # Access DataFrame using its name
 
+        if df.empty: # if dataframe is empty no need to add it to the master file
+            continue
+
         if recompute:
             new_path = filename
             new_master_file_template[master_key] = f"./{filename}"
