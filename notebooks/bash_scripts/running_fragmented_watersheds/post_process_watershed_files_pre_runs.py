@@ -1,10 +1,10 @@
 from pyagnps import annagnps, aims
-from pyagnps.utils import log_to_file
+from pyagnps.utils import log_to_file, upsert_dataframe
 from pathlib import Path
 
 import sys
 
-from sqlalchemy import create_engine, text as sql_text
+from sqlalchemy import create_engine
 
 import argparse
 
@@ -49,13 +49,26 @@ def main():
     try:
         log_to_file(log_file_path, f"Reading AnnAGNPS files for {thuc_id}...", add_timestamp=True)
 
-        data = annagnps.read_all_annagnps_output_files(output_folder, prepare_for_db=True, thuc_id=thuc_id)
+        try:
+            data = annagnps.read_all_annagnps_output_files(output_folder, prepare_for_db=True, thuc_id=thuc_id)
+        except Exception as e:
+            log_to_file(log_file_path, f"Error reading AnnAGNPS files: {e}\n{traceback.format_exc()}", add_timestamp=True)
+            sys.exit(1)
+
+        db_table_unique_columns = {
+            'pre_runs_annagnps_aa': ['thuc_id', 'cell_id'],
+            'pre_runs_annagnps_aa_sediment_erosion_ua_rr_total': ['thuc_id', 'cell_id', 'description'],
+            'pre_runs_annagnps_aa_sediment_yield_ua_rr_total': ['thuc_id', 'cell_id', 'description'],
+            'pre_runs_annagnps_aa_water_yield_ua_rr_total': ['thuc_id', 'cell_id', 'description'],
+        }
+
         for label, db_table in zip(data_output_labels, [annagnps_aa_table, aa_sediment_erosion_table, aa_sediment_yield_table, aa_water_yield_table]):
             df = data[label]
 
-            # Upload to DB using append method
+            # Upload to DB using upsert method
             try:
-                df.to_sql(db_table, engine.connect(), if_exists='append', index=False)
+                upsert_dataframe(engine, df, db_table, unique_columns=db_table_unique_columns[db_table])
+                # df.to_sql(db_table, engine.connect(), if_exists='append', index=False)
             except Exception as e:
                 print(f"Error uploading {label} data to {db_table}: {e}")
                 log_to_file(log_file_path, f"Error uploading {label} data to {db_table}: {e}", add_timestamp=True)

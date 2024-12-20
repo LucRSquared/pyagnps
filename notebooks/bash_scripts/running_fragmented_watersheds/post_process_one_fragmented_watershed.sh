@@ -44,6 +44,10 @@ parse_arguments() {
         LOG_FILE="$2"
         shift 2
         ;;
+      --failed_log_file)
+        FAILED_THUCS="$2"
+        shift 2
+        ;;
       *)
         echo "Invalid argument: $1"
         exit 1
@@ -58,6 +62,11 @@ parse_arguments "$@"
 # Make a default value of the LOG_FILE in case it is not specified so that it doesn't log to a file
 if [ -z "$LOG_FILE" ]; then
   LOG_FILE="/dev/null"
+fi
+
+# Make a default value of the FAILED_THUCS in case it is not specified so that it doesn't log to a file
+if [ -z "$FAILED_THUCS" ]; then
+  FAILED_THUCS="/dev/null"
 fi
 
 # Check if required arguments are provided
@@ -143,7 +152,8 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
          --aa_sediment_erosion_table "pre_runs_annagnps_aa_sediment_erosion_ua_rr_total" \
          --py_bash_dir "$PY_BASH_DIR" \
          --pyagnps_dir "$PYAGNPS_DIR" \
-         --log_file "$LOG_FILE" &
+         --log_file "$LOG_FILE" \
+         --failed_log_file "$FAILED_THUCS" &
 
   sleep 5
 

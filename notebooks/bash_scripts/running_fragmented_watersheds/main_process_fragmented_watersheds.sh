@@ -28,6 +28,7 @@ PY_BASH_DIR="/aims-nas/luc/code/pyagnps/notebooks/bash_scripts/running_fragmente
 
 LOG_FILE="${ROOT_DIR}/annagnps_pre_runs_2000-01-01_2022-12-31.log"
 FAILED_THUCS="${ROOT_DIR}/failed_thucs.csv"
+chmod 666 "${FAILED_THUCS}"
 
 
 # Set boolean parameters to generate and fragment, simulate, post-process results (and populate them to the database)
@@ -171,8 +172,8 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --num_processes "$num_processes" \
         --log_file "$THUC_LOG_FILE" || { # what to do if generation of files fails
           cd "${ROOT_DIR}" ; 
-          echo "$(date '+%
-          echo "$(date '+%Y-%Y-%m-%d %H:%M:%S'),$thuc_id,failed_generation" | tee -a "$FAILED_THUCS"m-%d %H:%M:%S') - Error: Failed to generate input files for thuc $thuc_id" | tee -a "$THUC_LOG_FILE"
+          echo "$(date '+%m-%d %H:%M:%S') - Error: Failed to generate input files for thuc $thuc_id" | tee -a "$THUC_LOG_FILE"
+          echo "$(date '+%Y-%Y-%m-%d %H:%M:%S'),$thuc_id,failed_generation" | tee -a "$FAILED_THUCS"
           continue
         }
   fi
@@ -193,7 +194,8 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --maxiter "$maxiter" \
         --partition "$partition" \
         --exclude "$exclude" \
-        --log_file "$THUC_LOG_FILE" || { # what to do if simulation fails
+        --log_file "$THUC_LOG_FILE" \
+        --failed_log_file "$FAILED_THUCS" || { # what to do if simulation fails
           cd "${ROOT_DIR}" ;
           echo "$(date '+%Y-%m-%d %H:%M:%S'),$thuc_id,failed_simulation" | tee -a "$FAILED_THUCS" 
           echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Simulation failed for thuc $thuc_id, continuing" | tee -a "$THUC_LOG_FILE"
@@ -218,7 +220,8 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --partition "$partition" \
         --exclude "$exclude" \
         --batch_size 20 \
-        --log_file "$THUC_LOG_FILE" || { # what to do if post processing fails
+        --log_file "$THUC_LOG_FILE" \
+        --failed_log_file "$FAILED_THUCS" || { # what to do if post processing fails
           cd "${ROOT_DIR}" ; 
           echo "$(date '+%Y-%m-%d %H:%M:%S'),$thuc_id,failed_postprocessing" | tee -a "$FAILED_THUCS"
           echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Post processing failed for thuc $thuc_id, continuing" | tee -a "$THUC_LOG_FILE"

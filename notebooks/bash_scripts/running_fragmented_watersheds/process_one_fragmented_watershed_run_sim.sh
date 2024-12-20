@@ -63,6 +63,10 @@ parse_arguments() {
         LOG_FILE="$2"
         shift 2
         ;;
+      --failed_log_file)
+        FAILED_THUCS="$2"
+        shift 2
+        ;;
       *)
         echo "Invalid argument: $1"
         exit 1
@@ -77,6 +81,11 @@ parse_arguments "$@"
 # Make a default value of the LOG_FILE in case it is not specified so that it doesn't log to a file
 if [ -z "$LOG_FILE" ]; then
   LOG_FILE="/dev/null"
+fi
+
+# Make a default value of the FAILED_THUCS in case it is not specified so that it doesn't log to a file
+if [ -z "$FAILED_THUCS" ]; then
+  FAILED_THUCS="/dev/null"
 fi
 
 # Check if required arguments are provided
@@ -156,7 +165,8 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
          --thuc_id "$thuc_id" \
          --mini_watersheds_dir "$MINI_WATERSHEDS_DIR" \
          --force_simulate "$force_simulate" \
-         --log_file "$LOG_FILE"
+         --log_file "$LOG_FILE" \
+         --failed_log_file "$FAILED_THUCS"
   )
         #  --pyagnps_dir "$PYAGNPS_DIR" & # Not necessary but here it is anyway in case some python script is needed later
   sleep 5
@@ -176,10 +186,10 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
   iteration_count=0
   while [[ $num_running_jobs -gt 30 ]]; do
     ((iteration_count++))
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Too many jobs already running ($num_running_jobs>30), sleeping for 5 seconds and retrying later... ($iteration_count/$maxiter)" | tee -a "$LOG_FILE"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Too many jobs already running ($num_running_jobs>30), sleeping for 5 seconds and retrying later... ($iteration_count/$maxiter)" # | tee -a "$LOG_FILE"
     
     if (( iteration_count % 10 == 0 )); then
-        echo "$(date '+%Y-%m-%d %H:%M:%S') - Running release_requeue.sh script after $iteration_count iterations." | tee -a "$LOG_FILE"
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Running release_requeue.sh script after $iteration_count iterations." # | tee -a "$LOG_FILE"
         bash "${PY_BASH_DIR}/release_requeue.sh" ${LOG_FILE}
     fi
 
@@ -196,7 +206,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
 
 done
 
-echo "$(date '+%Y-%m-%d %H:%M:%S') - Waiting for jobs to finish..." | tee -a "$LOG_FILE"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Waiting for jobs to finish..." # | tee -a "$LOG_FILE"
 sleep 5
 
 maxiter=100
@@ -206,15 +216,15 @@ iteration_count=0
 remaining_task_ids=()
 mapfile -t remaining_task_ids < <(update_task_ids "${task_ids[@]}")
 
-echo "$(date '+%Y-%m-%d %H:%M:%S') - Number of jobs remaining: ${#remaining_task_ids[@]}" | tee -a "$LOG_FILE"
-echo "$(date '+%Y-%m-%d %H:%M:%S') - The remaining jobs are: ${remaining_task_ids[@]}" | tee -a "$LOG_FILE"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Number of jobs remaining: ${#remaining_task_ids[@]}" # | tee -a "$LOG_FILE"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - The remaining jobs are: ${remaining_task_ids[@]}" # | tee -a "$LOG_FILE"
 
 while [[ ${#remaining_task_ids[@]} -gt 0 ]] && [ -n "${remaining_jobs[0]}" ]; do # The second condition is to handle empty strings potentially present in the array
     ((iteration_count++))
     # echo "$(date '+%Y-%m-%d %H:%M:%S') - Waiting for jobs to finish, sleeping and retrying later... ($iteration_count/$maxiter)" | tee -a "$LOG_FILE"
 
     if (( iteration_count % 10 == 0 )); then
-        echo "$(date '+%Y-%m-%d %H:%M:%S') - Running release_requeue.sh script after $iteration_count iterations." | tee -a "$LOG_FILE"
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - Running release_requeue.sh script after $iteration_count iterations." # | tee -a "$LOG_FILE"
         bash "${PY_BASH_DIR}/release_requeue.sh" "$LOG_FILE"
     fi
 

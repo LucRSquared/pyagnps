@@ -26,6 +26,10 @@ parse_arguments() {
         LOG_FILE="$2"
         shift 2
         ;;
+      --failed_log_file)
+        FAILED_THUCS="$2"
+        shift 2
+        ;;
       *)
         echo "Invalid argument: $1"
         exit 1
@@ -40,6 +44,16 @@ parse_arguments "$@"
 # Set default value for MINI_WATERSHEDS_DIR if not provided
 if [ -z "$MINI_WATERSHEDS_DIR" ]; then
     MINI_WATERSHEDS_DIR=$(pwd)
+fi
+
+# Make a default value of the LOG_FILE in case it is not specified so that it doesn't log to a file
+if [ -z "$LOG_FILE" ]; then
+  LOG_FILE="/dev/null"
+fi
+
+# Make a default value of the FAILED_THUCS in case it is not specified so that it doesn't log to a file
+if [ -z "$FAILED_THUCS" ]; then
+  FAILED_THUCS="/dev/null"
 fi
 
 # Set default value for csv_file if not provided
@@ -80,7 +94,6 @@ if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
             ERROR_LOG_FILE="${LOG_FILE%.*}_failed_process.log"
             echo "${dir_list[$dir_index]}" | tee -a "$ERROR_LOG_FILE"
 
-            FAILED_THUCS="${LOG_FILE%/*}/failed_thucs.csv"
             echo "$(date '+%Y-%m-%d %H:%M:%S'),$thuc_id,failed_processing" | tee -a "$FAILED_THUCS"
         fi
     else

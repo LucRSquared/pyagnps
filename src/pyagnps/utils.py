@@ -11,6 +11,9 @@ import requests
 
 import pandas as pd
 import geopandas as gpd
+
+from sqlalchemy import Table, MetaData, text as sql_text
+
 import shutil, os, glob, sys
 import time
 
@@ -403,3 +406,69 @@ def download_files_from_url(session, urls, out_dir):
                     f.write(f'{url}\n')
 
     return responses
+
+def upsert_dataframe(engine, df, table_name, schema=None, unique_columns=None):
+    """
+    Perform upsert using raw SQL when no database constraint exists
+    
+    Parameters:
+    - engine: SQLAlchemy engine
+    - df: DataFrame to upsert
+    - table_name: Name of the table
+    - schema: Database schema (optional)
+    - unique_columns: List of column names to use for identifying unique rows
+
+    example usage: 
+        >>> df = df.reset_index(
+        >>> upsert_dataframe(engine, df, table_name, unique_columns=['cell_id'])
+    """
+
+    # Reflect the table from the database
+    metadata = MetaData(schema=schema)
+    table = Table(table_name, metadata, autoload_with=engine)
+
+    # If no unique_columns specified, use the index of the DataFrame
+    # Determine index elements
+    if unique_columns is None:
+        # If no unique_columns provided, try to use DataFrame's index
+        if df.index.name:
+            # If index has a name, use that
+            unique_columns = [df.index.name]
+        else:
+            # Otherwise, use the first column of the table
+            unique_columns = [table.columns.keys()[0]]
+
+
+    # Convert DataFrame to list of dictionaries
+    records = df.to_dict(orient='records')
+    
+    # Construct the upsert SQL
+    with engine.begin() as connection:
+        for record in records:
+            # Prepare column lists
+            all_columns = list(record.keys())
+            non_unique_columns = [col for col in all_columns if col not in unique_columns]
+            
+            # Construct the WHERE clause based on unique columns
+            where_conditions = ' AND '.join([
+                f"{col} = :{col}" for col in unique_columns
+            ])
+            
+            # Prepare the update set clause
+            update_set = ', '.join([f"{col} = :{col}" for col in non_unique_columns])
+            
+            # Construct full SQL
+            upsert_sql = sql_text(f"""
+            WITH upsert AS (
+                UPDATE {table_name}
+                SET {update_set}
+                WHERE {where_conditions}
+                RETURNING *
+            )
+            INSERT INTO {table_name} ({', '.join(all_columns)})
+            SELECT {', '.join([f":{col}" for col in all_columns])}
+            WHERE NOT EXISTS (SELECT 1 FROM upsert)
+            """)
+            
+            # Execute the upsert
+            connection.execute(upsert_sql, record)
