@@ -127,7 +127,7 @@ def main():
     if generate_main_files:
         log_to_file(log_file_path, f"Generating main files", add_timestamp=True)
         try:
-            w.generate_annagnps_watershed_input_files()
+            w.generate_annagnps_watershed_input_files(perform_data_checks=True)
         except Exception as e:
             log_to_file(log_file_path, f"Error THUC {thuc_id}: {e}\n{traceback.format_exc()}", add_timestamp=True)
             sys.exit(1)
