@@ -4,8 +4,6 @@ from pathlib import Path
 
 import sys
 
-from sqlalchemy import create_engine
-
 import argparse
 
 import traceback
@@ -43,7 +41,7 @@ def main():
 
     db_url = aims.create_db_url_object(credentials)
 
-    engine = create_engine(db_url)
+    engine = aims.create_engine(db_url)
 
 
     try:
