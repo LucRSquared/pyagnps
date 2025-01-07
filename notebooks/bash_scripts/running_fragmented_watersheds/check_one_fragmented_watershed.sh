@@ -134,6 +134,7 @@ for table in "${check_tables_array[@]}"; do
 
   if [ $? -ne 0 ]; then
     success=false
+    echo "$(date '+%Y-%m-%d %H:%M:%S'),$thuc_id,failed ${table}" | tee -a "$FAILED_THUCS"
   fi
 done
 
@@ -146,6 +147,6 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') - Check finished with success status: $succes
 # If all the checks were successful, exit with 0
 if [ $success = true ]; then
   exit 0
+else
+  exit 1
 fi
-
-
