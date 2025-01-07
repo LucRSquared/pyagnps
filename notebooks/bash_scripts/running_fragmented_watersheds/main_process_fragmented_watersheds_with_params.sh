@@ -130,8 +130,8 @@ num_processes=32
 # Calculate the total number of jobs based on directory count
 num_jobs=0
 
-if [ -f "${ROOT_DIR}/thuc_list_to_run.csv" ]; then
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Reusing existing thuc_list_to_run.csv file" | tee -a "$LOG_FILE"
+if [ -f "${ROOT_DIR}/thuc_list_to_run_params.csv" ]; then
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Reusing existing thuc_list_to_run_params.csv file" | tee -a "$LOG_FILE"
     num_jobs=$(wc -l < "${ROOT_DIR}/thuc_list_to_run_params.csv")
     num_jobs-=1 # Account for the header
 fi
