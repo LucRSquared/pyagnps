@@ -24,6 +24,10 @@ parse_arguments() {
         PY_BASH_DIR="$2"
         shift 2
         ;;
+      --pyagnps_dir)
+        PYAGNPS_DIR="$2"
+        shift 2
+        ;;
       --thuc_id)
         thuc_id="$2"
         shift 2
@@ -77,6 +81,11 @@ fi
 
 if [ -z "$PY_BASH_DIR" ]; then
   echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Missing required argument: --py_bash_dir" | tee -a "$LOG_FILE"
+  exit 1
+fi
+
+if [ -z "$PYAGNPS_DIR" ]; then
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Missing required argument: --pyagnps_dir" | tee -a "$LOG_FILE"
   exit 1
 fi
 
