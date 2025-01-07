@@ -294,6 +294,8 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
 
   END_ALL=$(date +%s)
   echo "$(date '+%Y-%m-%d %H:%M:%S') - [$thuc_index/$num_jobs] - Finished processing thuc $thuc_id, elapsed time: $(($END_ALL - $START_ALL)) seconds" | tee -a "$LOG_FILE"
+  fi
+
 done
 
 
