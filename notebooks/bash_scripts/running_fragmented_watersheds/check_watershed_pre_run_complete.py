@@ -73,7 +73,7 @@ def main():
 
     thuc_id  = args.thuc_id
 
-    db_table = args.annagnps_aa_table
+    db_table = args.table
 
     db_url = aims.create_db_url_object(credentials)
 
