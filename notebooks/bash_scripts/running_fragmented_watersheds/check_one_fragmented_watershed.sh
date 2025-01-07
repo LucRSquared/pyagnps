@@ -103,6 +103,15 @@ else
   path_to_db_credentials="$credentials"
 fi
 
+# Print all input arguments to the log file
+echo "$(date '+%Y-%m-%d %H:%M:%S') - thuc_id: $thuc_id" | tee -a "$LOG_FILE"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - credentials: $path_to_db_credentials" | tee -a "$LOG_FILE"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - check_tables: $check_tables" | tee -a "$LOG_FILE"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - log_file: $LOG_FILE" | tee -a "$LOG_FILE"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - failed_log_file: $FAILED_THUCS" | tee -a "$LOG_FILE"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - success_thucs: $SUCCESS_THUCS" | tee -a "$LOG_FILE"
+
+
 
 # Activate the virtual environment
 source "$PYAGNPS_DIR/venv/bin/activate" || { echo "$(date '+%Y-%m-%d %H:%M:%S') - Failed to activate virtual environment" | tee -a "$LOG_FILE"; exit 1; }
@@ -117,7 +126,7 @@ success=true
 for table in "${check_tables_array[@]}"; do
 
   echo "$(date '+%Y-%m-%d %H:%M:%S') - Checking table: $table" | tee -a "$LOG_FILE"
-  python -u "${PY_BASH_DIR}/check_one_fragmented_watershed.py" \
+  python -u "${PY_BASH_DIR}/check_watershed_pre_run_complete.py" \
     --credentials "$path_to_db_credentials" \
     --thuc_id "$thuc_id" \
     --table "$table" \
