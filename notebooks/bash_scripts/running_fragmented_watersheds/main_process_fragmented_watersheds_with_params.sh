@@ -279,6 +279,7 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
   if [[ "$check_results" == "true" ]]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') - Checking thuc $thuc_id" | tee -a "$THUC_LOG_FILE"      
       "${PY_BASH_DIR}/check_one_fragmented_watershed.sh" \
+        --pyagnps_dir "$pyagnps_dir" \
         --py_bash_dir "$PY_BASH_DIR" \
         --thuc_id "$thuc_id" \
         --credentials "$path_to_db_credentials" \
