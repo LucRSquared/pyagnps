@@ -42,18 +42,20 @@ chmod 666 "${SUCCESS_THUCS}"
 
 
 # Set boolean parameters to generate and fragment, simulate, post-process results (and populate them to the database)
-generate_main_files="true"
+# generate_main_files="true"
 
 
-fragment_watershed="true"
-share_global_watershed_parameters_with_mini_watersheds="true"
+# fragment_watershed="true"
+# share_global_watershed_parameters_with_mini_watersheds="true"
 
 
-simulate_thuc="true"
-force_simulate="false" # if true will overwrite existing simulation outputs
+# simulate_thuc="true"
+# force_simulate="false" # if true will overwrite existing simulation outputs
 
-post_process="true"
-check_results="true"
+# post_process="true"
+# check_results="true"
+
+
 # List of tables to check for same number of cell ids as the cell data section for the corresponding thuc
 check_tables="pre_runs_annagnps_aa pre_runs_annagnps_aa_sediment_erosion_ua_rr_total pre_runs_annagnps_aa_sediment_yield_ua_rr_total pre_runs_annagnps_aa_water_yield_ua_rr_total"
 
@@ -150,7 +152,7 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
     continue
   fi
 
-  IFS=, read -r thuc_id generate_main_files fragment_watershed share_global_watershed_parameters_with_mini_watersheds simulate_thuc force_simulate post_process <<< "$line"
+  IFS=, read -r thuc_id generate_main_files fragment_watershed share_global_watershed_parameters_with_mini_watersheds simulate_thuc force_simulate post_process check_results <<< "$line"
   
   
   thuc_id=$(echo "$thuc_id" | tr -d '\r\n')
