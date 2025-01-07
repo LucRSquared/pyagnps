@@ -22,12 +22,12 @@
 #         └── etc.
 
 # Example thuc_list_to_run_params.csv
-# thuc_id,generate_main_files,fragment_watershed,share_global_watershed_parameters_with_mini_watersheds,simulate,force_simulate,post_process
-# 1506,false,false,true,true,true,true
-# 0552,false,false,true,true,true,true
-# 0558,false,false,true,true,true,true
-# 0566,false,false,true,true,true,true
-# 0569,false,false,true,true,true,true
+# thuc_id,generate_main_files,fragment_watershed,share_global_watershed_parameters_with_mini_watersheds,simulate,force_simulate,post_process,check_results
+# 1506,false,false,true,true,true,true,true
+# 0552,false,false,true,true,true,true,true
+# 0558,false,false,true,true,true,true,true
+# 0566,false,false,true,true,true,true,true
+# 0569,false,false,true,true,true,true,true
 
 # Set the root directory (can be changed before script execution). This directory should contain thuc_list_to_run.csv and a directory for each watershed that needs to be processed
 ROOT_DIR="/aims-nas/luc/annagnps_pre_runs_2000-01-01_2022-12-31/"  # Needs to use absolute path
@@ -53,6 +53,7 @@ simulate_thuc="true"
 force_simulate="false" # if true will overwrite existing simulation outputs
 
 post_process="true"
+check_results="true"
 # List of tables to check for same number of cell ids as the cell data section for the corresponding thuc
 check_tables="pre_runs_annagnps_aa pre_runs_annagnps_aa_sediment_erosion_ua_rr_total pre_runs_annagnps_aa_sediment_yield_ua_rr_total pre_runs_annagnps_aa_water_yield_ua_rr_total"
 
@@ -95,6 +96,7 @@ num_processes=32
   echo "simulate_thuc: thuc basis"
   echo "force_simulate: thuc basis"
   echo "post_process: thuc basis"
+  echo "check_results: thuc basis"
   echo "climate_method: $climate_method"
   echo "climate_table: $climate_table"
   echo "start_date: $start_date"
@@ -158,6 +160,7 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
   simulate_thuc=$(echo "$simulate_thuc" | tr -d '\r\n')
   force_simulate=$(echo "$force_simulate" | tr -d '\r\n')
   post_process=$(echo "$post_process" | tr -d '\r\n')
+  check_results=$(echo "$check_results" | tr -d '\r\n')
 
 
   THUC_LOG_FILE="${LOG_FILE%.*}_${thuc_id}.log"
@@ -271,7 +274,7 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
   echo "$(date '+%Y-%m-%d %H:%M:%S') - [$thuc_index/$num_jobs] - Finished post processing thuc $thuc_id, elapsed time: $(($END_POSTPROCESS - $START_POSTPROCESS)) seconds" | tee -a "$LOG_FILE"
 
   START_CHECK=$(date +%s)
-  if [[ "$check_thuc" == "true" ]]; then
+  if [[ "$check_results" == "true" ]]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') - Checking thuc $thuc_id" | tee -a "$THUC_LOG_FILE"      
       "${PY_BASH_DIR}/check_one_fragmented_watershed.sh" \
         --py_bash_dir "$PY_BASH_DIR" \
