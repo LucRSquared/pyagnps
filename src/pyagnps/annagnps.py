@@ -508,6 +508,9 @@ def fragment_watershed(annagnps_dir, mini_watersheds_dir, **kwargs):
             mini_watersheds.append(mini_watershed)
 
     # Return list of Pathlib objects containing the mini_watersheds source files
+    # Sort mini_watersheds by increasing reach_id knowing that the reach_ids are in the format f"reach_{reach_id:010.0f}"
+    mini_watersheds = sorted(mini_watersheds, key=lambda x: int(x.name.split("_")[1]))
+
     return mini_watersheds
 
 def make_mini_watershed_reach_cell_data_section(reach_id, df_og_reaches, df_og_cells, df_soil, df_soil_layers, 
