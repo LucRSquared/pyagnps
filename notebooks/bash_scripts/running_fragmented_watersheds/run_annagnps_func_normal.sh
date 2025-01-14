@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Hello with SLURM_ARRAY_TASK_ID=$SLURM_ARRAY_TASK_ID" >&2
+
 # Set the root directory (can be changed before script execution)
 
 # Define function to handle arguments
@@ -65,7 +67,7 @@ if [ -z "$force_simulate" ]; then
     force_simulate="false"
 fi
 
-if [-z "$thuc_id" ]; then
+if [ -z "$thuc_id" ]; then
     thuc_id=""
 fi
 
@@ -81,34 +83,84 @@ readarray -t dir_list < "$csv_file"
 
 cd "$MINI_WATERSHEDS_DIR"
 
+echo "Hello from dir_index=$dir_index and reach ${dir_list[$dir_index]}, the array has length ${#dir_list[@]}" | tee -a "$LOG_FILE"
+
+
+echo "[DEBUG] Starting job with:" >&2
+echo "  dir_index: $dir_index" >&2
+echo "  array length: ${#dir_list[@]}" >&2
+echo "  current dir: $(pwd)" >&2
+echo "  target dir: ${dir_list[$dir_index]:-NONE}" >&2
+
 # Check if the directory index is valid
 if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
     job_name=$(basename "${dir_list[$dir_index]}")
-    echo "Processing directory: $job_name"
-    cd "${dir_list[$dir_index]}" || exit 1
+    echo "Processing directory: $job_name" | tee -a "$LOG_FILE"
+    
+    if [ ! -d "${dir_list[$dir_index]}" ]; then
+        echo "ERROR: Directory ${dir_list[$dir_index]} does not exist" >&2
+        exit 1
+    fi
+    
+    if ! cd "${dir_list[$dir_index]}"; then
+        echo "ERROR: Could not cd to directory: $job_name" >&2
+        exit 1
+    fi
 
-    # If force_simulate == true then run annagnps otherwse check if AnnAGNPS.log exists
-    if [ "$force_simulate" == "true" ] || [ ! -e ./AnnAGNPS.log ]; then
+    # If force_simulate == true then run annagnps otherwise check if AnnAGNPS.log exists
+    if [ "$force_simulate" = "true" ] || [ ! -e ./AnnAGNPS.log ]; then
+        # Verify annagnps command exists
+        if ! command -v annagnps &> /dev/null; then
+            echo "ERROR: annagnps command not found" >&2
+            exit 1
+        fi
+        
         # Run annagnps
         if ! annagnps; then
             ERROR_LOG_FILE="${LOG_FILE%.*}_failed_process.log"
             echo "${dir_list[$dir_index]}" | tee -a "$ERROR_LOG_FILE"
-
             echo "$(date '+%Y-%m-%d %H:%M:%S'),$thuc_id,failed_processing" | tee -a "$FAILED_THUCS"
+            exit 1
         fi
     else
-        # echo "Skipping directory: $job_name" | tee -a "$LOG_FILE"
-        cd ..
-        exit 0
+        echo "Skipping directory: $job_name (AnnAGNPS.log exists)" | tee -a "$LOG_FILE"
     fi
-    
-    # Run annagnps
-    # annagnps
-
 else
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Invalid directory index: $dir_index" | tee -a "$LOG_FILE"
+    echo "ERROR: Invalid directory index: $dir_index" >&2
     exit 1
 fi
 
-cd ..
+cd ".." || exit 1
+
+
+# # Check if the directory index is valid
+# if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
+#     job_name=$(basename "${dir_list[$dir_index]}")
+#     echo "Processing directory: $job_name" | tee -a "$LOG_FILE"
+#     cd "${dir_list[$dir_index]}" || { echo "Could not cd to directory: $job_name" | tee -a "$LOG_FILE" && exit 1 }
+
+#     # If force_simulate == true then run annagnps otherwse check if AnnAGNPS.log exists
+#     if [ "$force_simulate" == "true" ] || [ ! -e ./AnnAGNPS.log ]; then
+#         # Run annagnps
+#         if ! annagnps; then
+#             ERROR_LOG_FILE="${LOG_FILE%.*}_failed_process.log"
+#             echo "${dir_list[$dir_index]}" | tee -a "$ERROR_LOG_FILE"
+
+#             echo "$(date '+%Y-%m-%d %H:%M:%S'),$thuc_id,failed_processing" | tee -a "$FAILED_THUCS"
+#         fi
+#     else
+#         echo "Skipping directory: $job_name" | tee -a "$LOG_FILE"
+#         cd ..
+#         exit 0
+#     fi
+    
+#     # Run annagnps
+#     # annagnps
+
+# else
+#     echo "$(date '+%Y-%m-%d %H:%M:%S') - Invalid directory index: $dir_index" | tee -a "$LOG_FILE"
+#     exit 1
+# fi
+
+# cd ..
 

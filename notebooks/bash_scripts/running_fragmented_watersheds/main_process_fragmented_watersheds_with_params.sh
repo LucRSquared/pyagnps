@@ -78,7 +78,11 @@ path_to_precip_zones="/aims-nas/data/datasets/RUSLE2/Climate/precip_zones_RUSLE2
 partition="aims-highperf-oversubscribe"
 
 # Nodes to exclude
-exclude="aims-node9"
+# exclude="aims-node4"
+# exclude="aims-node4,aims-node8,aims-node9,aims-node10,aims-node12"
+#exclude="aims-node4,aims-node5,aims-node6,aims-node7,aims-node8,aims-node9,aims-node10,aims-node12"
+exclude="aims-node4,aims-node8,aims-node9,aims-node10,aims-node12"
+#exclude="aims-node4,aims-node7,aims-node8,aims-node9,aims-node10,aims-node11,aims-node12"
 # exclude="aims-node6,aims-node7,aims-node11"
 
 
@@ -261,7 +265,7 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --credentials "$path_to_db_credentials" \
         --partition "$partition" \
         --exclude "$exclude" \
-        --batch_size 50 \
+        --batch_size 30 \
         --log_file "$THUC_LOG_FILE" \
         --failed_log_file "$FAILED_THUCS" || { # what to do if post processing fails
           cd "${ROOT_DIR}" ; 

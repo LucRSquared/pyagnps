@@ -11,6 +11,13 @@ update_task_ids() {
     printf "%s\n" "${active_jobs[@]}"
 }
 
+# Function to check if a job is complete
+check_job_complete() {
+    local job_id=$1
+    sacct -j "$job_id" --format=State | grep -q "COMPLETED"
+    return $?
+}
+
 get_num_running_jobs() {
   # Count total number of running jobs
   num_running_jobs=$(squeue --noheader | wc -l)
@@ -145,12 +152,13 @@ task_ids=()
 
 # Loop to submit jobs in batches
 for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
+  
   end_index=$((start_index + batch_size - 1))
   
   # Ensure end_index doesn't exceed num_jobs
   [[ $end_index -ge $num_jobs ]] && end_index=$((num_jobs-1))
 
-  # echo "$(date '+%Y-%m-%d %H:%M:%S') - Submitting mini watersheds ${start_index} to ${end_index}..." | tee -a "$LOG_FILE"
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - Submitting mini watersheds ${start_index} to ${end_index}..." | tee -a "$LOG_FILE"
   
   # Submit the job with the adjusted array range
   sbatch_output=$(
@@ -161,6 +169,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
          --exclude="$exclude" \
          --job-name="anna_${start_index}-${end_index}" \
          --output="/dev/null" \
+         --error="/dev/null" \
          "${PY_BASH_DIR}/run_annagnps_func_normal.sh" \
          --thuc_id "$thuc_id" \
          --mini_watersheds_dir "$MINI_WATERSHEDS_DIR" \
@@ -169,7 +178,18 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
          --failed_log_file "$FAILED_THUCS"
   )
         #  --pyagnps_dir "$PYAGNPS_DIR" & # Not necessary but here it is anyway in case some python script is needed later
-  sleep 5
+  # Verify submission
+
+  # --error="${LOG_FILE%.*}_%N_%a.err" \
+
+
+  if [ $? -ne 0 ]; then
+    echo "Failed to submit batch ${start_index}-${end_index}, retrying..."
+    ((start_index-=batch_size))  # Retry this batch
+    continue
+  fi
+
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - Completed submission of batch ${start_index} to ${end_index}" | tee -a "$LOG_FILE"
 
   # Extract only the job ID from the output
   job_id=$(echo "$sbatch_output" | awk '{print $NF}')
