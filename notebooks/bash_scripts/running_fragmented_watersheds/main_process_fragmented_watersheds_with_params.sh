@@ -41,20 +41,6 @@ chmod 666 "${FAILED_THUCS}"
 chmod 666 "${SUCCESS_THUCS}"
 
 
-# Set boolean parameters to generate and fragment, simulate, post-process results (and populate them to the database)
-# generate_main_files="true"
-
-
-# fragment_watershed="true"
-# share_global_watershed_parameters_with_mini_watersheds="true"
-
-
-# simulate_thuc="true"
-# force_simulate="false" # if true will overwrite existing simulation outputs
-
-# post_process="true"
-# check_results="true"
-
 
 # List of tables to check for same number of cell ids as the cell data section for the corresponding thuc
 check_tables="pre_runs_annagnps_aa pre_runs_annagnps_aa_sediment_erosion_ua_rr_total pre_runs_annagnps_aa_sediment_yield_ua_rr_total pre_runs_annagnps_aa_water_yield_ua_rr_total"
@@ -65,6 +51,10 @@ climate_table="climate_nldas2"
 start_date="2000-01-01"
 end_date="2022-12-31"
 # end_date="2002-12-31"
+
+postproc_save_method="files" # "files" or "db". If "db", the results will be uploaded to the database directly for each reach
+# if "files", for each thuc the results will be written to parquet files and then uploaded to the database all at once
+postproc_batch_size=30 # number of reaches to postprocess at once
 
 pyagnps_dir="/aims-nas/luc/code/pyagnps" # the location of the python scripts are defined with respect to this
 
@@ -257,7 +247,8 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
   if [[ "$post_process" == "true" ]]; then
       echo "$(date '+%Y-%m-%d %H:%M:%S') - Post processing thuc $thuc_id and uploading results to db" | tee -a "$THUC_LOG_FILE"
       cd "${ROOT_DIR}/thuc_${thuc_id}"
-      "${PY_BASH_DIR}/post_process_one_fragmented_watershed.sh" \
+      # "${PY_BASH_DIR}/post_process_one_fragmented_watershed.sh" \
+      "${PY_BASH_DIR}/post_process_one_fragmented_watershed_one_transaction.sh" \
         --mini_watersheds_dir "./mini_watersheds" \
         --thuc_id "$thuc_id" \
         --pyagnps_dir "$pyagnps_dir" \
@@ -265,7 +256,8 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --credentials "$path_to_db_credentials" \
         --partition "$partition" \
         --exclude "$exclude" \
-        --batch_size 30 \
+        --batch_size $postproc_batch_size \
+        --save_method "$postproc_save_method" \
         --log_file "$THUC_LOG_FILE" \
         --failed_log_file "$FAILED_THUCS" || { # what to do if post processing fails
           cd "${ROOT_DIR}" ; 

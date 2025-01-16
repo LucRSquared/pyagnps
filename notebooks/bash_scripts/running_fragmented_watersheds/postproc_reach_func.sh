@@ -36,6 +36,10 @@ parse_arguments() {
         FAILED_THUCS="$2"
         shift 2
         ;;
+      --save_method)
+        save_method="$2"
+        shift 2
+        ;;
       --annagnps_aa_table)
         annagnps_aa_table="$2"
         shift 2
@@ -92,6 +96,10 @@ if [ -z "$PY_BASH_DIR" ]; then
   exit 1
 fi
 
+if [ -z "$save_method" ]; then
+  save_method="db" # 'db' or 'files'
+fi
+
 if [ -z "$annagnps_aa_table" ]; then
   annagnps_aa_table="pre_runs_annagnps_aa"
 fi
@@ -135,6 +143,7 @@ if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
         --thuc_id "$thuc_id" \
         --credentials "$path_to_db_credentials" \
         --output_folder "." \
+        --save_method "$save_method" \
         --annagnps_aa_table "$annagnps_aa_table" \
         --aa_water_yield_table "$aa_water_yield_table" \
         --aa_sediment_yield_table "$aa_sediment_yield_table" \
