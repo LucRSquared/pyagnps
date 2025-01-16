@@ -186,6 +186,9 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
 done
 
 if [ "$save_method" != "db" ]; then
+    # Activate the virtual environment
+    source "$PYAGNPS_DIR/venv/bin/activate" || { echo "$(date '+%Y-%m-%d %H:%M:%S') - Failed to activate virtual environment" | tee -a "$LOG_FILE"; exit 1; }
+
     # Call a python script to collect all the partial results and post them to the database
     python -u "${PY_BASH_DIR}/upload_post_processed_reaches_to_db.py" \
         --thuc_id "$THUC_ID" \

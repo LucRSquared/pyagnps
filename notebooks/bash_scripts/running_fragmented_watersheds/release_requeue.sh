@@ -53,7 +53,7 @@ handle_held_job() {
 
 # Function to check for held jobs
 check_held_jobs() {
-    squeue -h -t PD -o "%i %r" | \
+    squeue -h -u luc -t PD -o "%i %r" | \
     grep -E "launch failed requeued held|launch failed held|dependency never satisfied|QOSMaxGRPJobsLimit|AssocGrpCPUMinutesLimit" || true
 }
 
