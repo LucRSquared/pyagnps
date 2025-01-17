@@ -54,7 +54,7 @@ end_date="2022-12-31"
 
 postproc_save_method="files" # "files" or "db". If "db", the results will be uploaded to the database directly for each reach
 # if "files", for each thuc the results will be written to parquet files and then uploaded to the database all at once
-postproc_batch_size=30 # number of reaches to postprocess at once
+postproc_batch_size=500 # number of reaches to postprocess at once
 
 pyagnps_dir="/aims-nas/luc/code/pyagnps" # the location of the python scripts are defined with respect to this
 
@@ -294,5 +294,3 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
   fi
 
 done
-
-

@@ -54,7 +54,7 @@ def main():
 
 
     try:
-        log_to_file(log_file_path, f"Reading AnnAGNPS files for {thuc_id}...", add_timestamp=True)
+        # log_to_file(log_file_path, f"Reading AnnAGNPS files for {thuc_id}...", add_timestamp=True)
 
         try:
             data = annagnps.read_all_annagnps_output_files(output_folder, prepare_for_db=True, thuc_id=thuc_id)
@@ -83,7 +83,7 @@ def main():
                         log_to_file(log_file_path, f"Error uploading {label} data to {db_table}: {e}", add_timestamp=True)
                         sys.exit(1)
                 case 'files':
-                    reach_name = output_folder.name
+                    reach_name = output_folder.absolute().name
                     table_output_folder = save_results_folder / db_table
                     table_output_folder.mkdir(exist_ok=True, parents=True)
 

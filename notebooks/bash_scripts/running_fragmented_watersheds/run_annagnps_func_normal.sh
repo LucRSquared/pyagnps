@@ -83,14 +83,14 @@ readarray -t dir_list < "$csv_file"
 
 cd "$MINI_WATERSHEDS_DIR"
 
-echo "Hello from dir_index=$dir_index and reach ${dir_list[$dir_index]}, the array has length ${#dir_list[@]}" | tee -a "$LOG_FILE"
+# echo "Hello from dir_index=$dir_index and reach ${dir_list[$dir_index]}, the array has length ${#dir_list[@]}" | tee -a "$LOG_FILE"
 
 
-echo "[DEBUG] Starting job with:" >&2
-echo "  dir_index: $dir_index" >&2
-echo "  array length: ${#dir_list[@]}" >&2
-echo "  current dir: $(pwd)" >&2
-echo "  target dir: ${dir_list[$dir_index]:-NONE}" >&2
+# echo "[DEBUG] Starting job with:" >&2
+# echo "  dir_index: $dir_index" >&2
+# echo "  array length: ${#dir_list[@]}" >&2
+# echo "  current dir: $(pwd)" >&2
+# echo "  target dir: ${dir_list[$dir_index]:-NONE}" >&2
 
 # Check if the directory index is valid
 if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then

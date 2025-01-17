@@ -191,7 +191,6 @@ if [ "$save_method" != "db" ]; then
 
     # Call a python script to collect all the partial results and post them to the database
     python -u "${PY_BASH_DIR}/upload_post_processed_reaches_to_db.py" \
-        --thuc_id "$THUC_ID" \
         --post_processing_dir "$MINI_WATERSHEDS_DIR/post_processed_files" \
         --delete_post_processed_files_on_success "yes" \
         --credentials "$path_to_db_credentials" \

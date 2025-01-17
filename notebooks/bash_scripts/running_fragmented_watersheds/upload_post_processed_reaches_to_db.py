@@ -25,7 +25,7 @@ def main():
     credentials            = Path(args.credentials)
     post_processing_dir    = Path(args.post_processing_dir)
 
-    delete_post_processed_files = args.delete_post_processed_files
+    delete_post_processed_files = args.delete_post_processed_files_on_success
 
     log_file_path          = Path(args.log_file)
 
@@ -73,7 +73,7 @@ def main():
 
                 if delete_post_processed_files:
                     log_to_file(log_file_path, f"Deleting post-processed files from {table_folder}...", add_timestamp=True)
-                    for file in df_list:
+                    for file in parquet_files:
                         file.unlink()
 
             except Exception as e:
