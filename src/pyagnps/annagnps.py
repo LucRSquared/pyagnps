@@ -54,6 +54,11 @@ def format_mgmt_schedule_for_output(df):
 def check_cell_data(df):
     # Check if values in the sheet_flow_slope column are greater than 3 and if so set them to 3
     df.loc[df['sheet_flow_slope'] > 3, 'sheet_flow_slope'] = 3
+    df.loc[df['sheet_flow_slope'] < 0.00001, 'sheet_flow_slope'] = 0.00001
+
+    df.loc[df['shallow_conc_flow_slope'] > 3, 'shallow_conc_flow_slope'] = 3
+    df.loc[df['shallow_conc_flow_slope'] < 0.00001, 'shallow_conc_flow_slope'] = 0.00001
+    
     return df
 
 def check_soil_layers(df):
