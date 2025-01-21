@@ -58,7 +58,7 @@ def check_cell_data(df):
 
     df.loc[df['shallow_conc_flow_slope'] > 3, 'shallow_conc_flow_slope'] = 3
     df.loc[df['shallow_conc_flow_slope'] < 0.00001, 'shallow_conc_flow_slope'] = 0.00001
-    
+
     return df
 
 def check_soil_layers(df):
@@ -535,11 +535,9 @@ def make_mini_watershed_reach_cell_data_section(reach_id, df_og_reaches, df_og_c
     # print(f'Processing reach {reach_id}')
     mini_watershed = mini_watersheds_dir / f"reach_{reach_id:010.0f}"
 
-    if mini_watershed.exists():
+    if not(mini_watershed.exists()):
         # print(f'Skipping reach {reach_id}')
-        return mini_watershed
-    else:
-        mini_watershed.mkdir(exist_ok=True)
+        mini_watershed.mkdir(exist_ok=True, parents=True)
     
     df_og_reaches = df_og_reaches[df_og_reaches['length']!=0]
     
