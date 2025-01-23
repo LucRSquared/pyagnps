@@ -61,9 +61,87 @@ def check_cell_data(df):
 
     return df
 
+def check_soil(df):
+    # Check if values in the Layer_Depth column are greater than 3000 and if so set them to 3000
+    df.loc[df['K_Factor'] < 0, 'K_Factor'] = 0
+    df.loc[df['K_Factor'] > 0.1317, 'K_Factor'] = 0.1317
+
+    df.loc[df['Albedo'] < 0, 'Albedo'] = 0
+    df.loc[df['Albedo'] > 1, 'Albedo'] = 1
+
+    df.loc[df['Time_to_Consolidation'] < 0, 'Time_to_Consolidation'] = 0
+    df.loc[df['Time_to_Consolidation'] > 100, 'Time_to_Consolidation'] = 100
+
+    df.loc[df['Impervious_Depth'] < 50.9, 'Impervious_Depth'] = 50.9
+    df.loc[df['Impervious_Depth'] > 10000000, 'Impervious_Depth'] = 10000000
+
+    df.loc[df['Specific_Gravity'] < 0, 'Specific_Gravity'] = 0
+    df.loc[df['Specific_Gravity'] > 4, 'Specific_Gravity'] = 4
+
+
+    return df
+
+
 def check_soil_layers(df):
     # Check if values in the Layer_Depth column are greater than 3000 and if so set them to 3000
+    df.loc[df['Layer_Depth'] < 1.0, 'Layer_Depth'] = 1.0
     df.loc[df['Layer_Depth'] > 3000, 'Layer_Depth'] = 3000
+
+    df.loc[df['Bulk_Density'] < 0.1, 'Bulk_Density'] = 0.1
+    df.loc[df['Bulk_Density'] > 2.7, 'Bulk_Density'] = 2.7
+
+    df.loc[df['Clay_Ratio'] < 0, 'Clay_Ratio'] = 0
+    df.loc[df['Clay_Ratio'] > 1, 'Clay_Ratio'] = 1
+
+    df.loc[df['Silt_Ratio'] < 0, 'Silt_Ratio'] = 0
+    df.loc[df['Silt_Ratio'] > 1, 'Silt_Ratio'] = 1
+
+    df.loc[df['Sand_Ratio'] < 0, 'Sand_Ratio'] = 0
+    df.loc[df['Sand_Ratio'] > 1, 'Sand_Ratio'] = 1
+
+    df.loc[df['Rock_Ratio'].notna() & (df['Rock_Ratio'] < 0), 'Rock_Ratio'] = 0
+    df.loc[df['Rock_Ratio'].notna() & (df['Rock_Ratio'] > 1), 'Rock_Ratio'] = 1
+
+    df.loc[df['Very_Fine_Sand_Ratio'].isna(), 'Very_Fine_Sand_Ratio'] = 0
+    df.loc[df['Very_Fine_Sand_Ratio'] < 0, 'Very_Fine_Sand_Ratio'] = 0
+    df.loc[df['Very_Fine_Sand_Ratio'] > 1, 'Very_Fine_Sand_Ratio'] = 1
+
+    df.loc[df['CaCO3_Content'].notna() & (df['CaCO3_Content'] < 0), 'CaCO3_Content'] = 0
+    df.loc[df['CaCO3_Content'].notna() & (df['CaCO3_Content'] > 1), 'CaCO3_Content'] = 1
+
+    df.loc[df['Saturated_Conductivity'] < 0.0, 'Saturated_Conductivity'] = 0.0
+    df.loc[df['Saturated_Conductivity'] > 254000, 'Saturated_Conductivity'] = 254000
+
+    df.loc[df['Wilting_Point'] < 0, 'Wilting_Point'] = 0
+    df.loc[df['Wilting_Point'] > 1, 'Wilting_Point'] = 1
+
+    df.loc[df['Field_Capacity'] < df['Wilting_Point'], 'Field_Capacity'] = df['Wilting_Point']
+    df.loc[df['Field_Capacity'] > 1, 'Field_Capacity'] = 1
+
+    df.loc[df['Base_Saturation'] < 0, 'Base_Saturation'] = 0
+    df.loc[df['Base_Saturation'] > 100, 'Base_Saturation'] = 100
+
+    df.loc[df['Unstable_Aggregate_Ratio'].notna() & (df['Unstable_Aggregate_Ratio'] < 0), 'Unstable_Aggregate_Ratio'] = 0
+    df.loc[df['Unstable_Aggregate_Ratio'].notna() & (df['Unstable_Aggregate_Ratio'] > 1), 'Unstable_Aggregate_Ratio'] = 1
+
+    df.loc[df['pH'].isna() | (df['pH'] < 1.0), 'pH'] = 1.0
+    df.loc[df['pH'] > 14.0, 'pH'] = 14.0
+
+    df.loc[df['Organic_Matter_Ratio'].isna() | (df['Organic_Matter_Ratio'] < 0), 'Organic_Matter_Ratio'] = 0
+    df.loc[df['Organic_Matter_Ratio'] > 1, 'Organic_Matter_Ratio'] = 1
+
+    df.loc[df['Organic_N_Ratio'].isna() | (df['Organic_N_Ratio'] < 0), 'Organic_N_Ratio'] = 0
+    df.loc[df['Organic_N_Ratio'] > 100000, 'Organic_N_Ratio'] = 100000
+
+    df.loc[df['Inorganic_N_Ratio'].isna() | (df['Inorganic_N_Ratio'] < 0), 'Inorganic_N_Ratio'] = 0
+    df.loc[df['Inorganic_N_Ratio'] > 100000, 'Inorganic_N_Ratio'] = 100000
+
+    df.loc[df['Organic_P_Ratio'].isna() | (df['Organic_P_Ratio'] < 0), 'Organic_P_Ratio'] = 0
+    df.loc[df['Organic_P_Ratio'] > 10000, 'Organic_P_Ratio'] = 10000
+
+    df.loc[df['Inorganic_P_Ratio'].isna() | (df['Inorganic_P_Ratio'] < 0), 'Inorganic_P_Ratio'] = 0
+    df.loc[df['Inorganic_P_Ratio'] > 10000, 'Inorganic_P_Ratio'] = 10000
+    
     return df
 
 # FUNCTIONS FOR POST PROCESSING ANNAGNPS OUTPUTS
