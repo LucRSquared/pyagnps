@@ -1,5 +1,17 @@
 #!/bin/bash
 
+get_num_running_jobs() {
+  # Count total number of running jobs
+  num_running_jobs=$(squeue --noheader | wc -l)
+  
+  # Check for any line with a job array format (number followed by _[)
+  if squeue --noheader | grep -qE "[0-9]+_\["; then
+    ((num_running_jobs += 1000))
+  fi
+  
+  echo "$num_running_jobs"
+}
+
 # Define function to handle arguments
 parse_arguments() {
   while [[ $# -gt 0 ]]; do
@@ -166,7 +178,8 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
 
   sleep 5
 
-  num_running_jobs=$(squeue --noheader | wc -l)
+  # num_running_jobs=$(squeue --noheader | wc -l)
+  num_running_jobs=$(get_num_running_jobs)
 
 #   # Optional delay between batch submissions
   # Check the number of currently running jobs
@@ -186,14 +199,20 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
 done
 
 if [ "$save_method" != "db" ]; then
-    # Activate the virtual environment
-    source "$PYAGNPS_DIR/venv/bin/activate" || { echo "$(date '+%Y-%m-%d %H:%M:%S') - Failed to activate virtual environment" | tee -a "$LOG_FILE"; exit 1; }
+    srun --partition="$partition" \
+         --exclude="$exclude" \
+         --output="/dev/null" \
+         --export=ALL \
+         bash -c "
+             # Activate the virtual environment
+             source \"$PYAGNPS_DIR/venv/bin/activate\" || { echo \"$(date '+%Y-%m-%d %H:%M:%S') - Failed to activate virtual environment\" | tee -a \"$LOG_FILE\"; exit 1; }
 
-    # Call a python script to collect all the partial results and post them to the database
-    python -u "${PY_BASH_DIR}/upload_post_processed_reaches_to_db.py" \
-        --post_processing_dir "$MINI_WATERSHEDS_DIR/post_processed_files" \
-        --delete_post_processed_files_on_success "yes" \
-        --credentials "$path_to_db_credentials" \
-        --log_file "$LOG_FILE"
+             # Call a python script to collect all the partial results and post them to the database
+             python -u \"${PY_BASH_DIR}/upload_post_processed_reaches_to_db.py\" \
+                 --post_processing_dir \"$MINI_WATERSHEDS_DIR/post_processed_files\" \
+                 --delete_post_processed_files_on_success \"yes\" \
+                 --credentials \"$path_to_db_credentials\" \
+                 --log_file \"$LOG_FILE\" &&
+             deactivate"
 fi
 

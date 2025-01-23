@@ -52,10 +52,6 @@ start_date="2000-01-01"
 end_date="2022-12-31"
 # end_date="2002-12-31"
 
-postproc_save_method="files" # "files" or "db". If "db", the results will be uploaded to the database directly for each reach
-# if "files", for each thuc the results will be written to parquet files and then uploaded to the database all at once
-postproc_batch_size=500 # number of reaches to postprocess at once
-
 pyagnps_dir="/aims-nas/luc/code/pyagnps" # the location of the python scripts are defined with respect to this
 
 path_to_db_credentials="/aims-nas/luc/code/pyagnps/inputs/db_credentials.json"
@@ -71,7 +67,7 @@ partition="aims-highperf-oversubscribe"
 # exclude="aims-node4"
 # exclude="aims-node4,aims-node8,aims-node9,aims-node10,aims-node12"
 #exclude="aims-node4,aims-node5,aims-node6,aims-node7,aims-node8,aims-node9,aims-node10,aims-node12"
-exclude="aims-node4,aims-node8,aims-node9,aims-node10,aims-node12"
+exclude="aims-node12"
 #exclude="aims-node4,aims-node7,aims-node8,aims-node9,aims-node10,aims-node11,aims-node12"
 # exclude="aims-node6,aims-node7,aims-node11"
 
@@ -80,6 +76,10 @@ exclude="aims-node4,aims-node8,aims-node9,aims-node10,aims-node12"
 batch_size=500
 maxiter=1000
 num_processes=32
+
+postproc_save_method="files" # "files" or "db". If "db", the results will be uploaded to the database directly for each reach
+# if "files", for each thuc the results will be written to parquet files and then uploaded to the database all at once
+postproc_batch_size=500 # number of reaches to postprocess at once
 
 # Print parameters to the log file
 {

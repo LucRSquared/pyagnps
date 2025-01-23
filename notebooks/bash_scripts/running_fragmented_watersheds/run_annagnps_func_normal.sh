@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Hello with SLURM_ARRAY_TASK_ID=$SLURM_ARRAY_TASK_ID" >&2
+# echo "Hello with SLURM_ARRAY_TASK_ID=$SLURM_ARRAY_TASK_ID" >&2
 
 # Set the root directory (can be changed before script execution)
 
