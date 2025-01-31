@@ -391,7 +391,7 @@ class AIMSWatershed:
         df_raw = pd.read_sql_query(sql=sql_text(query_raw), con=self.engine.connect())
 
         if perform_data_checks:
-            df_soil_data = annagnps.check_soil_data(df_soil_data)
+            df_soil_data = annagnps.check_soil(df_soil_data)
             df_soil_layers_data = annagnps.check_soil_layers(df_soil_layers_data)
             # df_raw = annagnps.check_raw_soil_data(df_raw)
 
