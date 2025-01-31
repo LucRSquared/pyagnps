@@ -201,6 +201,7 @@ done
 if [ "$save_method" != "db" ]; then
     srun --partition="$partition" \
          --exclude="$exclude" \
+         --job-name="postproc_collect" \
          --output="/dev/null" \
          --export=ALL \
          bash -c "
