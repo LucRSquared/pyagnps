@@ -183,7 +183,6 @@ class ClimateAnnAGNPSCoords:
 
     def _query_nldas2_climate(
         self,
-        source="netcdf",
         variables=[
             "prcp",
             "temp",
@@ -200,7 +199,6 @@ class ClimateAnnAGNPSCoords:
             start_date=self.start,
             end_date=self.end,
             variables=variables,
-            source=source,
             n_conn=4,
         )
 
@@ -306,13 +304,12 @@ class ClimateAnnAGNPSCoords:
         if not self.coords:
             raise Exception("Coordinates are missing. Please provide coords!")
 
-        self._query_nldas2_climate(source="netcdf")
+        self._query_nldas2_climate()
         # Test if there are any NaN values
         if self.clm.isna().any().any():
             self.warnings.append('NaN values were found in the NLDAS-2 data, values supplemented by DAYMET data') 
             # Use alternative method using Day Met
             self._query_nldas2_climate(
-                source="grib",
                 variables=["prcp", "temp", "rsds", "pet", "wind_u", "wind_v"],
             )
             self._resample_and_compute_additional_climate_variables_method_nldas2_and_daymet()
