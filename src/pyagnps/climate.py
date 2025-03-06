@@ -198,8 +198,7 @@ class ClimateAnnAGNPSCoords:
             coords=self.coords,
             start_date=self.start,
             end_date=self.end,
-            variables=variables,
-            n_conn=4,
+            variables=variables
         )
 
         # Express dates in local mode
