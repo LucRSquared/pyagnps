@@ -216,4 +216,3 @@ if [ "$save_method" != "db" ]; then
                  --log_file \"$LOG_FILE\" &&
              deactivate"
 fi
-

@@ -43,7 +43,7 @@ import os, shutil
 
 os.environ[
     "HYRIVER_CACHE_NAME"
-] = "/tmp/climate_cache.sqlite"  # On Windows systems it will be under C:/tmp
+] = "./cached_date/climate_cache.sqlite"  # On Windows systems it will be under C:/tmp
 # os.environ["HYRIVER_CACHE_DISABLE"] = "true"
 
 
