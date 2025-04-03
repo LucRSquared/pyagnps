@@ -39,7 +39,6 @@ dependencies = [
     "holoviews>=1.17.1",
     "hvplot>=0.8.4",
     "selenium>=4.10.0",
-    "pynldas2>=0.15.1",
     "pydaymet>=0.15.1",
     "timezonefinder>=6.2.0",
     "jupyter-bokeh>=3.0.7",
@@ -52,6 +51,7 @@ dependencies = [
     "geoalchemy2>=0.15.1",
     "bottleneck>=1.4.0",
     "dask-jobqueue>=0.8.5",
+    "pynldas2>=0.19.1",
 ]
 requires-python = ">=3.9"
 readme = "README.md"

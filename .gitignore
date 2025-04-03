@@ -31,5 +31,6 @@ inputs/soil/ALL_US_v3_SSURGO_STATSGO2_RSS/*
 .pdm-python
 build
 tmp/
-
+notebooks/aims/cached_date/*
+notebooks/aims/gis_temp/*
 
