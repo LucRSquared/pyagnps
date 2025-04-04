@@ -57,6 +57,7 @@ class AIMSWatershed:
         self.bounds = None # GeoDataFrame with geom column representing the outline of the group of cells
 
         self.climate_method = kwargs.get("climate_method", "nldas2_database")
+        self.keep_potential_et = kwargs.get("keep_potential_et", True)
         self.date_mode      = kwargs.get("date_mode", "local")
 
         # Database climate table name
@@ -692,7 +693,9 @@ class AIMSWatershed:
 
                 clm = climate.ClimateAnnAGNPSCoords(coords=(x,y), 
                                                     start=self.start_date, end=self.end_date, 
-                                                    date_mode=date_mode)
+                                                    date_mode=date_mode,
+                                                    keep_potential_et=self.keep_potential_et)
+                
                 df = clm.query_nldas2_generate_annagnps_climate_daily()
                 # implement with data rods query
             elif self.climate_method == 'nldas2_database':
@@ -704,7 +707,8 @@ class AIMSWatershed:
                                                                   engine=self.engine,
                                                                   climate_table=climate_table,
                                                                   start_date=self.start_date,
-                                                                  end_date=self.end_date)
+                                                                  end_date=self.end_date,
+                                                                  keep_potential_et=self.keep_potential_et)
 
             elif self.climate_method == 'cmip5':
 
@@ -714,8 +718,8 @@ class AIMSWatershed:
                 clm.update_coords_start_end_dates(coords=(x,y), 
                                                   start=self.start_date, end=self.end_date, 
                                                   date_mode=date_mode)
-                df = clm.generate_annagnps_daily_climate_data_cmip5_maca()
-
+                df = clm.generate_annagnps_daily_climate_data_cmip5_maca(keep_potential_et=self.keep_potential_et)
+              
 
             # Store climate station data
             climate_station = {

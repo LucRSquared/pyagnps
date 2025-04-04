@@ -54,6 +54,7 @@ class ClimateAnnAGNPSCoords:
         start: str = "2022-01-01",
         end: str = "2022-12-31",
         date_mode: str = "local",
+        keep_potential_et: bool = True,
     ):
         """
         ## Positional arguments:
@@ -79,6 +80,8 @@ class ClimateAnnAGNPSCoords:
                                            start=start,
                                            end=end,
                                            date_mode=date_mode)
+
+        self.keep_potential_et = keep_potential_et
 
         self.warnings = []
         self.clm = None  # DataFrame
@@ -183,23 +186,25 @@ class ClimateAnnAGNPSCoords:
 
     def _query_nldas2_climate(
         self,
-        variables=[
-            "prcp",
-            "temp",
-            "rsds",
-            "pet",
-            "humidity",
-            "wind_u",
-            "wind_v",
-            "psurf",
-        ],
+        variables = ["prcp","temp","rsds","pet","humidity","wind_u","wind_v","psurf"],
     ):
+        
+        if not(self.keep_potential_et) and "pet" in variables:
+            variables = variables.copy()
+            variables.remove("pet")
+
         clm = pynldas2.get_bycoords(
             coords=self.coords,
             start_date=self.start,
             end_date=self.end,
             variables=variables
         )
+
+        # We still want to have a "pet" column but empty
+        if not(self.keep_potential_et):
+            clm = clm.assign(
+                pet = float("nan")
+            )
 
         # Express dates in local mode
         if self.date_mode == "local":
@@ -308,9 +313,14 @@ class ClimateAnnAGNPSCoords:
         if self.clm.isna().any().any():
             self.warnings.append('NaN values were found in the NLDAS-2 data, values supplemented by DAYMET data') 
             # Use alternative method using Day Met
-            self._query_nldas2_climate(
-                variables=["prcp", "temp", "rsds", "pet", "wind_u", "wind_v"],
-            )
+
+            if self.keep_potential_et:
+                variables=["prcp","temp","rsds","pet","humidity","wind_u","wind_v","psurf"]
+            else:
+                variables=["prcp","temp","rsds",      "humidity","wind_u","wind_v","psurf"]
+
+            self._query_nldas2_climate(variables=variables)
+            
             self._resample_and_compute_additional_climate_variables_method_nldas2_and_daymet()
         else:
             # do normal way
@@ -1347,6 +1357,7 @@ class ClimateAnnAGNPSCoords:
         output_filepath=None,
         saveformat="csv",
         float_format="%.3f",
+        keep_potential_et=True,
     ):
         """Generate a climate file for a given period. Returns a DataFrame and writes to csv if output_filepath is provided.
 
@@ -1359,6 +1370,9 @@ class ClimateAnnAGNPSCoords:
         saveformat : str, optional
             Format to save the output file, by default 'csv', also accepts 'parquet'
         float_format : str, optional default = '%.3f'
+            Format to save the output file, by default '%.3f'
+        keep_potential_et : bool, optional
+            Whether to keep the Potential_ET column or not, by default True
 
         Returns
         -------
@@ -1421,7 +1435,7 @@ class ClimateAnnAGNPSCoords:
         df["Input_Units_Code"] = 1
 
         # No need to convert precipitation (PotEvap) to mm/day, if we assume rhow = 1000 kg/m3 = 1 kg/L -> 1 mm = 1 L/m2 = 1 kg/m2
-        if "pet" in df:
+        if "pet" in df and keep_potential_et:
             df["pet"] = df["pet"].apply(lambda x: max(x, 0) if x is not None else None)
         else:
             df["pet"] = None
@@ -2515,6 +2529,7 @@ def query_annagnps_climate_timeseries_db(**kwargs):
     lat = kwargs.get("lat", None)
     start_date = kwargs.get("start_date", None)
     end_date = kwargs.get("end_date", None)
+    keep_potential_et = kwargs.get("keep_potential_et", True)
 
     if (start_date is None) or (end_date is None):
         raise ValueError("Provide a start and end date")
@@ -2537,7 +2552,7 @@ def query_annagnps_climate_timeseries_db(**kwargs):
                 wind_direction,
                 solar_radiation,
                 storm_type_id,
-                potential_et,
+                {"" if keep_potential_et else "NULL as"} potential_et,
                 actual_et,
                 input_units_code
             FROM {table}
@@ -2557,7 +2572,7 @@ def query_annagnps_climate_timeseries_db(**kwargs):
                 wind_direction,
                 solar_radiation,
                 storm_type_id,
-                potential_et,
+                {"" if keep_potential_et else "NULL as"} potential_et,
                 actual_et,
                 input_units_code
             FROM {table}
