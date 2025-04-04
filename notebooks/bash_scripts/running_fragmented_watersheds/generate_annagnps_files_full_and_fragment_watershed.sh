@@ -48,6 +48,10 @@ parse_arguments() {
         climate_table="$2"
         shift 2
         ;;
+      --keep_potential_et)
+        keep_potential_et="$2"
+        shift 2
+        ;;
       --thuc_id)
         thuc_id="$2"
         shift 2
@@ -106,6 +110,10 @@ if [ -z "$climate_table" ]; then
   climate_table="climate_nldas2"
 fi
 
+if [ -z "$keep_potential_et" ]; then
+  keep_potential_et="true"
+fi
+
 if [ -z "$fragment_watershed" ]; then
   fragment_watershed="true"
 fi
@@ -147,6 +155,7 @@ python -u "$PY_BASH_DIR/generate_watershed_files_pre_runs.py" \
   --end_date "$end_date" \
   --climate_method "$climate_method" \
   --climate_table "$climate_table" \
+  --keep_potential_et "$keep_potential_et" \
   --thuc_id "$thuc_id" \
   --reach_id "$reach_id" \
   --generate_main_files "$generate_main_files" \

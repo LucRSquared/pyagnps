@@ -47,6 +47,7 @@ check_tables="pre_runs_annagnps_aa pre_runs_annagnps_aa_sediment_erosion_ua_rr_t
 
 climate_method="nldas2_database"
 climate_table="climate_nldas2"
+keep_potential_et="true"
 
 start_date="2000-01-01"
 end_date="2022-12-31"
@@ -96,6 +97,7 @@ postproc_batch_size=210 # number of reaches to postprocess at once
   echo "check_results: thuc basis"
   echo "climate_method: $climate_method"
   echo "climate_table: $climate_table"
+  echo "keep_potential_et: $keep_potential_et"
   echo "start_date: $start_date"
   echo "end_date: $end_date"
   echo "pyagnps_dir: $pyagnps_dir"
@@ -201,6 +203,7 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --end_date "$end_date" \
         --climate_method "$climate_method" \
         --climate_table "$climate_table" \
+        --keep_potential_et "$keep_potential_et" \
         --thuc_id "$thuc_id" \
         --reach_id "$reach_id" \
         --generate_main_files "$generate_main_files" \

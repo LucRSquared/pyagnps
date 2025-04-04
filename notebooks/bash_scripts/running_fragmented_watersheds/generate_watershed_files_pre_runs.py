@@ -21,6 +21,7 @@ def main():
     parser.add_argument('--end_date',            type=str, help='End date of the simulation', default='2022-12-31')
     parser.add_argument('--climate_method',      type=str, help='Climate method to generate files for', default='nldas2_database')
     parser.add_argument('--climate_table',       type=str, help='Climate table to generate files for', default='climate_nldas2')
+    parser.add_argument('--keep_potential_et',   type=str, help='Keep potential evapotranspiration from the dataset', default='true')
     parser.add_argument('--thuc_id',             type=str, help='THUC ID to generate files for')
     parser.add_argument('--reach_id',            type=int, help='Reach ID to generate files for (default=2)', default=2)
     parser.add_argument('--fragment_watershed',  type=str, help='Reach ID to generate files for (default=2)', default="true")
@@ -44,6 +45,7 @@ def main():
 
     climate_method = args.climate_method
     climate_table  = args.climate_table
+    keep_potential_et = args.keep_potential_et
     
     start_date = args.start_date
     end_date   = args.end_date
@@ -72,6 +74,10 @@ def main():
     else:
         share_global_watershed_parameters_with_mini_watersheds = False
 
+    if keep_potential_et in ['y', 'yes', 'true']:
+        keep_potential_et = True
+    else:
+        keep_potential_et = False
 
     try:
 
@@ -88,6 +94,7 @@ def main():
                     # selected_reaches_for_output=["OUTLET"],
                     climate_method=climate_method,
                     climate_table=climate_table,
+                    keep_potential_et=keep_potential_et,
                     # path_to_cmip_dir=path_to_cmip5_data_dir,
                     # path_to_cmip_station_points_id=path_to_cmip5_station_points_clim_id,
                     path_to_nldas2_centroids=path_to_nldas2_centroids,
