@@ -309,8 +309,10 @@ class ClimateAnnAGNPSCoords:
             raise Exception("Coordinates are missing. Please provide coords!")
 
         self._query_nldas2_climate()
-        # Test if there are any NaN values
-        if self.clm.isna().any().any():
+        # Test if there are any NaN values except for Potential ET
+        columns = [col for col in self.clm.columns if col.lower() != "pet" or self.keep_potential_et]
+
+        if self.clm.loc[:, columns].isna().any().any():
             self.warnings.append('NaN values were found in the NLDAS-2 data, values supplemented by DAYMET data') 
             # Use alternative method using Day Met
 
@@ -1356,8 +1358,7 @@ class ClimateAnnAGNPSCoords:
         use_resampled=True,
         output_filepath=None,
         saveformat="csv",
-        float_format="%.3f",
-        keep_potential_et=True,
+        float_format="%.3f"
     ):
         """Generate a climate file for a given period. Returns a DataFrame and writes to csv if output_filepath is provided.
 
@@ -1371,8 +1372,6 @@ class ClimateAnnAGNPSCoords:
             Format to save the output file, by default 'csv', also accepts 'parquet'
         float_format : str, optional default = '%.3f'
             Format to save the output file, by default '%.3f'
-        keep_potential_et : bool, optional
-            Whether to keep the Potential_ET column or not, by default True
 
         Returns
         -------
@@ -1435,7 +1434,7 @@ class ClimateAnnAGNPSCoords:
         df["Input_Units_Code"] = 1
 
         # No need to convert precipitation (PotEvap) to mm/day, if we assume rhow = 1000 kg/m3 = 1 kg/L -> 1 mm = 1 L/m2 = 1 kg/m2
-        if "pet" in df and keep_potential_et:
+        if "pet" in df and self.keep_potential_et:
             df["pet"] = df["pet"].apply(lambda x: max(x, 0) if x is not None else None)
         else:
             df["pet"] = None
