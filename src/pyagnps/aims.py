@@ -769,7 +769,8 @@ class AIMSWatershed:
 
         perform_data_checks = kwargs.get('perform_data_checks', True)
         
-        self.get_thuc_id_by_xy()
+        if self.thuc_id is None:
+            self.get_thuc_id_by_xy()
 
         print('Loading static layers...')
         self.load_static_files()
