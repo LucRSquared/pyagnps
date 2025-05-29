@@ -146,7 +146,7 @@ def check_soil_layers(df):
 
 # FUNCTIONS FOR POST PROCESSING ANNAGNPS OUTPUTS
 
-def read_all_annagnps_output_files(output_folder, prepare_for_db=False, thuc_id=''):
+def read_all_annagnps_output_files(output_folder, prepare_for_db=False, thuc_id='', note=''):
     """
     Reads all .csv files in the output folder and returns dataframes
 
@@ -228,7 +228,6 @@ def read_all_annagnps_output_files(output_folder, prepare_for_db=False, thuc_id=
 
                 df = df.drop(columns=[x for x in df.columns if 'Subtotal' in x])
                 df = df.rename(columns=rename_dict_aa)
-                df = df.assign(thuc_id=thuc_id)
 
             elif name == "AnnAGNPS_AA_Sediment_yield_UA_RR_Total":
                 rename_dict_sediment_yield = {
@@ -247,7 +246,6 @@ def read_all_annagnps_output_files(output_folder, prepare_for_db=False, thuc_id=
 
                 df = df.drop(columns=['Reach_ID', 'Reach_Location'], errors='ignore')
                 df = df.rename(columns=rename_dict_sediment_yield)
-                df = df.assign(thuc_id=thuc_id)
 
             elif name == "AnnAGNPS_AA_Sediment_erosion_UA_RR_Total":
                 rename_dict_sediment_erosion = {
@@ -266,7 +264,6 @@ def read_all_annagnps_output_files(output_folder, prepare_for_db=False, thuc_id=
 
                 df = df.drop(columns=['Reach_ID', 'Reach_Location'], errors='ignore')
                 df = df.rename(columns=rename_dict_sediment_erosion)
-                df = df.assign(thuc_id=thuc_id)
 
             elif name == "AnnAGNPS_AA_Water_yield_UA_RR_Total":
                 rename_dict_water_yield = {
@@ -285,8 +282,10 @@ def read_all_annagnps_output_files(output_folder, prepare_for_db=False, thuc_id=
 
                 df = df.drop(columns=['Reach_ID', 'Reach_Location'], errors='ignore')
                 df = df.rename(columns=rename_dict_water_yield)
-                df = df.assign(thuc_id=thuc_id)
-
+                
+            df = df.assign(thuc_id=thuc_id)
+            df = df.assign(note=note)
+            
             df = df[df['cell_id'] != 0].copy()
             processed_outputs[name] = df.copy(deep=True)
 

@@ -22,7 +22,7 @@
 #         └── etc.
 
 # Set the root directory (can be changed before script execution). This directory should contain thuc_list_to_run.csv and a directory for each watershed that needs to be processed
-ROOT_DIR="/aims-nas/luc/annagnps_pre_runs_2000-01-01_2022-12-31/"  # Needs to use absolute path
+ROOT_DIR="/aims-nas/luc/annagnps_pre_runs_2000-01-01_2022-12-31_unforced_potet/"  # Needs to use absolute path
 
 PY_BASH_DIR="/aims-nas/luc/code/pyagnps/notebooks/bash_scripts/running_fragmented_watersheds/" # the location of the python scripts are defined with respect to this
 

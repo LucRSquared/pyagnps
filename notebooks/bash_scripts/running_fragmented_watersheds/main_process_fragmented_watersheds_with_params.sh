@@ -30,16 +30,15 @@
 # 0569,false,false,true,true,true,true,true
 
 # Set the root directory (can be changed before script execution). This directory should contain thuc_list_to_run.csv and a directory for each watershed that needs to be processed
-ROOT_DIR="/aims-nas/luc/annagnps_pre_runs_2000-01-01_2022-12-31/"  # Needs to use absolute path
+ROOT_DIR="/aims-nas/luc/annagnps_pre_runs_2000-01-01_2022-12-31_unforced_potet/"  # Needs to use absolute path
 
 PY_BASH_DIR="/aims-nas/luc/code/pyagnps/notebooks/bash_scripts/running_fragmented_watersheds/" # the location of the python scripts are defined with respect to this
 
-LOG_FILE="${ROOT_DIR}/annagnps_pre_runs_2000-01-01_2022-12-31.log"
-FAILED_THUCS="${ROOT_DIR}/failed_thucs.csv"
-SUCCESS_THUCS="${ROOT_DIR}/thuc_list_done.csv"
+LOG_FILE="${ROOT_DIR}/logs/annagnps_pre_runs_2000-01-01_2022-12-31.log"
+FAILED_THUCS="${ROOT_DIR}/logs/failed_thucs.csv"
+SUCCESS_THUCS="${ROOT_DIR}/logs/thuc_list_done.csv"
 chmod 666 "${FAILED_THUCS}"
 chmod 666 "${SUCCESS_THUCS}"
-
 
 
 # List of tables to check for same number of cell ids as the cell data section for the corresponding thuc
@@ -47,11 +46,12 @@ check_tables="pre_runs_annagnps_aa pre_runs_annagnps_aa_sediment_erosion_ua_rr_t
 
 climate_method="nldas2_database"
 climate_table="climate_nldas2"
-keep_potential_et="true"
+keep_potential_et="false"
 
 start_date="2000-01-01"
 end_date="2022-12-31"
 # end_date="2002-12-31"
+note="unforced_potet" # Note added to the note column of the pre runs tables
 
 pyagnps_dir="/aims-nas/luc/code/pyagnps" # the location of the python scripts are defined with respect to this
 
@@ -255,6 +255,7 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
       "${PY_BASH_DIR}/post_process_one_fragmented_watershed_one_transaction.sh" \
         --mini_watersheds_dir "./mini_watersheds" \
         --thuc_id "$thuc_id" \
+        --note "$note" \
         --pyagnps_dir "$pyagnps_dir" \
         --py_bash_dir "$PY_BASH_DIR" \
         --credentials "$path_to_db_credentials" \

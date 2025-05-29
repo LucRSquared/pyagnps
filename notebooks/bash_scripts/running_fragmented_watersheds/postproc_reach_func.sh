@@ -12,6 +12,10 @@ parse_arguments() {
         thuc_id="$2"
         shift 2
         ;;
+      --note)
+        note="$2"
+        shift 2
+        ;;
       --credentials)
         path_to_db_credentials="$2"
         shift 2
@@ -100,6 +104,15 @@ if [ -z "$save_method" ]; then
   save_method="db" # 'db' or 'files'
 fi
 
+if [ -z "$thuc_id" ]; then
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - Error: Missing required argument: --thuc_id" | tee -a "$LOG_FILE"
+  exit 1
+fi
+
+if [ -z "$note" ]; then
+  note="unforced_potet"
+fi
+
 if [ -z "$annagnps_aa_table" ]; then
   annagnps_aa_table="pre_runs_annagnps_aa"
 fi
@@ -141,6 +154,7 @@ if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
     # DO post processing here. --output_folder is the current working directory because we cdd there
     python -u "$PY_BASH_DIR/post_process_watershed_files_pre_runs.py" \
         --thuc_id "$thuc_id" \
+        --note "$note" \
         --credentials "$path_to_db_credentials" \
         --output_folder "." \
         --save_method "$save_method" \

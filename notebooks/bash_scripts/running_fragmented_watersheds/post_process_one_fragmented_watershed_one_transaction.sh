@@ -24,6 +24,10 @@ parse_arguments() {
         THUC_ID="$2"
         shift 2
         ;;
+      --note)
+        note="$2"
+        shift 2
+        ;;
       --pyagnps_dir)
         PYAGNPS_DIR="$2"
         shift 2
@@ -126,6 +130,10 @@ if [ -z "$THUC_ID" ]; then
   exit 1
 fi
 
+if [ -z "$note" ]; then
+  note="unforced_potet"
+fi
+
 # Calculate the total number of jobs based on directory count
 num_jobs=0
 
@@ -164,6 +172,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
          --output="/dev/null" \
          "${PY_BASH_DIR}/postproc_reach_func.sh" \
          --thuc_id "$THUC_ID" \
+         --note "$note" \
          --mini_watersheds_dir "$MINI_WATERSHEDS_DIR" \
          --credentials "$path_to_db_credentials" \
          --save_method "$save_method" \

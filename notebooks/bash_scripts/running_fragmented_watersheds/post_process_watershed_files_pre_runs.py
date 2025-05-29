@@ -15,6 +15,7 @@ def main():
     parser.add_argument('--credentials',                    type=str, help='Path to the credentials JSON file')
     parser.add_argument('--output_folder',                  type=str, help='Path to the output folder to store the generated files', default=Path.cwd())
     parser.add_argument('--thuc_id',                        type=str, help='THUC ID to generate files for')
+    parser.add_argument('--note',                           type=str, help='Note to add to the note column', default='')
     # parser.add_argument('--')
     parser.add_argument('--annagnps_aa_table',              type=str, help='AnnAGNPS AA table to use',                     default='pre_runs_annagnps_aa')
     parser.add_argument('--aa_water_yield_table',           type=str, help='AnnAGNPS AA water yield table to use',         default='pre_runs_annagnps_aa_water_yield_ua_rr_total')
@@ -32,6 +33,8 @@ def main():
     log_file_path             = Path(args.log_file)
 
     thuc_id                   = args.thuc_id
+
+    note                      = args.note
 
     save_method               = args.save_method
 
@@ -57,7 +60,7 @@ def main():
         # log_to_file(log_file_path, f"Reading AnnAGNPS files for {thuc_id}...", add_timestamp=True)
 
         try:
-            data = annagnps.read_all_annagnps_output_files(output_folder, prepare_for_db=True, thuc_id=thuc_id)
+            data = annagnps.read_all_annagnps_output_files(output_folder, prepare_for_db=True, thuc_id=thuc_id, note=note)
         except Exception as e:
             log_to_file(log_file_path, f"Error reading AnnAGNPS files: {e}\n{traceback.format_exc()}", add_timestamp=True)
             sys.exit(1)
