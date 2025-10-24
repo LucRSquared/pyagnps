@@ -378,8 +378,8 @@ class AIMSWatershed:
 
         perform_data_checks = kwargs.get('perform_data_checks', True)
 
-        soil_ids_list = self.df_cells['soil_id'].unique()
-        soil_ids_string = ", ".join(map(str, soil_ids_list.tolist()))
+        soil_ids_list = [x for x in self.df_cells['soil_id'].unique() if not pd.isna(x)]
+        soil_ids_string = ", ".join(map(str, soil_ids_list))
 
         query_soil = f"""SELECT * FROM usa_valid_soil_data WHERE "Soil_ID" in ({soil_ids_string})"""
         query_soil_layers = f"""SELECT * FROM usa_valid_soil_layers_data WHERE "Soil_ID" in ({soil_ids_string})"""
