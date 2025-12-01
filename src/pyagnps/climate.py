@@ -2580,7 +2580,9 @@ def query_annagnps_climate_timeseries_db(**kwargs):
             AND date >= '{start_date}' AND date <= '{end_date}';
             """
     
-    df = pd.read_sql(sql=sql_text(query), con=engine.connect())
+    with engine.connect() as connection:
+        df = pd.read_sql(sql_text(query), con=connection)
+    # df = pd.read_sql(sql=sql_text(query), con=engine.connect())
 
     return df
 
