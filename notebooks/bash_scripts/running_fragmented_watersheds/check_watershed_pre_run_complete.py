@@ -12,26 +12,27 @@ import argparse
 
 import traceback
 
-def get_thuc_num_cells_in_db_output_table(table_name, thuc_id, engine):
+def get_thuc_num_cells_in_db_output_table(table_name, thuc_id, note, engine):
+    # note = 'unforced_potet'
     match table_name:
         case 'pre_runs_annagnps_aa':
             query = f"""
-            SELECT COUNT(cell_id) FROM {table_name} WHERE thuc_id = '{thuc_id}'
+            SELECT COUNT(cell_id) FROM {table_name} WHERE thuc_id = '{thuc_id}' AND note = '{note}'
             """
         case 'pre_runs_annagnps_aa_water_yield_ua_rr_total':
             query = f"""
-            SELECT COUNT(cell_id) FROM {table_name} WHERE thuc_id = '{thuc_id}'
+            SELECT COUNT(cell_id) FROM {table_name} WHERE thuc_id = '{thuc_id}' AND note = '{note}'
             """
         case 'pre_runs_annagnps_aa_sediment_yield_ua_rr_total':
             query = f"""
             SELECT COUNT(cell_id) FROM {table_name}
-            WHERE thuc_id = '{thuc_id}'
+            WHERE thuc_id = '{thuc_id}' AND note = '{note}'
             AND description = 'Sediment_Total_All_Sources'
             """
         case 'pre_runs_annagnps_aa_sediment_erosion_ua_rr_total':
             query = f"""
             SELECT COUNT(cell_id) FROM {table_name}
-            WHERE thuc_id = '{thuc_id}'
+            WHERE thuc_id = '{thuc_id}' AND note = '{note}'
             AND description = 'Erosion_Total_All_Sources'
             """
     
@@ -58,6 +59,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--credentials',   type=str, help='Path to the credentials JSON file')
     parser.add_argument('--thuc_id',       type=str, help='THUC ID to check outputs for')
+    parser.add_argument('--note'   ,       type=str, help='Note for the specific collection of preruns ([forced|unforced]_potet)')
     # parser.add_argument('--')
     parser.add_argument('--table',         type=str, help='AnnAGNPS AA table to use',                  default='pre_runs_annagnps_aa')
     parser.add_argument('--log_file',      type=str, help='Path to the log file',                      default="generate_watershed_files.log")
@@ -72,12 +74,23 @@ def main():
     # success_thucs = Path(args.success_thucs)
 
     thuc_id  = args.thuc_id
+    note     = args.note
 
     db_table = args.table
 
     db_url = aims.create_db_url_object(credentials)
 
-    engine = aims.create_engine(db_url)
+    connect_args = {
+        'keepalives': 1,
+        'keepalives_idle': 60,  # Seconds before sending keepalive probe
+        'keepalives_interval': 10,  # Seconds between probes
+        'keepalives_count': 5  # Probes before considering dead
+    }
+    engine = aims.create_engine(db_url, connect_args=connect_args,
+                                        pool_pre_ping=True,
+                                        pool_recycle=300)
+
+    # engine = aims.create_engine(db_url)
 
 
     log_to_file(log_file_path, f"Checking pre run tables for {thuc_id}...", add_timestamp=True)
@@ -94,7 +107,7 @@ def main():
 
     try:
         # Getting number of cells in db table
-        num_cells_in_db_table = get_thuc_num_cells_in_db_output_table(db_table, thuc_id, engine)
+        num_cells_in_db_table = get_thuc_num_cells_in_db_output_table(db_table, thuc_id, note, engine)
         log_to_file(log_file_path, f"Number of cells in {db_table} for {thuc_id}: {num_cells_in_db_table}", add_timestamp=True)
 
     except Exception as e:

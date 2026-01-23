@@ -56,6 +56,7 @@ note="unforced_potet" # Note added to the note column of the pre runs tables
 pyagnps_dir="/aims-nas/luc/code/pyagnps" # the location of the python scripts are defined with respect to this
 
 path_to_db_credentials="/aims-nas/luc/code/pyagnps/inputs/db_credentials.json"
+# path_to_db_credentials="/aims-nas/luc/code/pyagnps/inputs/db_credentials_old_before_proxmox.json"
 
 path_to_nldas2_centroids="/aims-nas/data/datasets/CLIMATE/NLDAS2/NLDAS2_GRID_CENTROIDS_epsg4326.gpkg"
 path_to_scs_storm_types="/aims-nas/data/datasets/TR-55/scs_storm_types.gpkg"
@@ -65,13 +66,13 @@ path_to_precip_zones="/aims-nas/data/datasets/RUSLE2/Climate/precip_zones_RUSLE2
 partition="aims-highperf-oversubscribe"
 
 # Nodes to exclude
-# exclude="aims-node4"
+# exclude="aims-node4,aims-node7,aims-node10"
+
 # exclude="aims-node4,aims-node8,aims-node9,aims-node10,aims-node12"
 #exclude="aims-node4,aims-node5,aims-node6,aims-node7,aims-node8,aims-node9,aims-node10,aims-node12"
 # exclude="aims-node10,aims-node12"
-# exclude="aims-node4,aims-node5,aims-node6,aims-node7,aims-node8,aims-node9,aims-node10,aims-node11,aims-node12"
-exclude="aims-node4,aims-node5,aims-node6,aims-node9,aims-node10,aims-node12"
-# exclude="aims-node6,aims-node5,aims-node11"
+# exclude="aims-node4,aims-node5,aims-node6,aims-node7,aims-node8,aims-node9,aims-node10,aims-node11"
+exclude="aims-node4,aims-node7,aims-node9"
 
 
 # Batch size for job simulations submissions
@@ -80,6 +81,7 @@ maxiter=1000
 num_processes=32
 
 postproc_save_method="files" # "files" or "db". If "db", the results will be uploaded to the database directly for each reach
+# postproc_save_method="db" # "files" or "db". If "db", the results will be uploaded to the database directly for each reach
 # if "files", for each thuc the results will be written to parquet files and then uploaded to the database all at once
 postproc_batch_size=210 # number of reaches to postprocess at once
 
@@ -283,6 +285,7 @@ for ((thuc_index = 1; thuc_index <= num_jobs; thuc_index += 1)); do
         --pyagnps_dir "$pyagnps_dir" \
         --py_bash_dir "$PY_BASH_DIR" \
         --thuc_id "$thuc_id" \
+        --note "$note" \
         --credentials "$path_to_db_credentials" \
         --check_tables "$check_tables" \
         --log_file "$THUC_LOG_FILE" \

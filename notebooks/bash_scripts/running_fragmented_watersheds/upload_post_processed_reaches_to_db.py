@@ -35,17 +35,28 @@ def main():
         delete_post_processed_files = False
 
     db_table_unique_columns = {
-            'pre_runs_annagnps_aa': ['thuc_id', 'cell_id'],
-            'pre_runs_annagnps_aa_sediment_erosion_ua_rr_total': ['thuc_id', 'cell_id', 'description'],
-            'pre_runs_annagnps_aa_sediment_yield_ua_rr_total': ['thuc_id', 'cell_id', 'description'],
-            'pre_runs_annagnps_aa_water_yield_ua_rr_total': ['thuc_id', 'cell_id', 'description'],
+            'pre_runs_annagnps_aa': ['thuc_id', 'cell_id', 'note'],
+            'pre_runs_annagnps_aa_sediment_erosion_ua_rr_total': ['thuc_id', 'cell_id', 'description', 'note'],
+            'pre_runs_annagnps_aa_sediment_yield_ua_rr_total': ['thuc_id', 'cell_id', 'description', 'note'],
+            'pre_runs_annagnps_aa_water_yield_ua_rr_total': ['thuc_id', 'cell_id', 'description', 'note'],
         }
 
     try:
         log_to_file(log_file_path, f"Reading post-processing files from {post_processing_dir}...", add_timestamp=True)
 
         db_url = aims.create_db_url_object(credentials)
-        engine = aims.create_engine(db_url)
+
+        connect_args = {
+            'keepalives': 1,
+            'keepalives_idle': 60,  # Seconds before sending keepalive probe
+            'keepalives_interval': 10,  # Seconds between probes
+            'keepalives_count': 5  # Probes before considering dead
+        }
+        engine = aims.create_engine(db_url, connect_args=connect_args,
+                                            pool_pre_ping=True,
+                                            pool_recycle=300)
+
+        # engine = aims.create_engine(db_url)
 
         for table_folder in post_processing_dir.iterdir():
             if not table_folder.is_dir():

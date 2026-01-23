@@ -32,6 +32,10 @@ parse_arguments() {
         thuc_id="$2"
         shift 2
         ;;
+      --note)
+        note="$2"
+        shift 2
+        ;;
       --credentials)
         credentials="$2"
         shift 2
@@ -97,6 +101,10 @@ if [ -z "$thuc_id" ]; then
   thuc_id=""
 fi
 
+if [ -z "$note" ]; then
+  note="unforced_potet"
+fi
+
 if [ -z "$credentials" ]; then
   path_to_db_credentials=""
 else
@@ -105,6 +113,7 @@ fi
 
 # Print all input arguments to the log file
 echo "$(date '+%Y-%m-%d %H:%M:%S') - thuc_id: $thuc_id" | tee -a "$LOG_FILE"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - note: $note" | tee -a "$LOG_FILE"
 echo "$(date '+%Y-%m-%d %H:%M:%S') - credentials: $path_to_db_credentials" | tee -a "$LOG_FILE"
 echo "$(date '+%Y-%m-%d %H:%M:%S') - check_tables: $check_tables" | tee -a "$LOG_FILE"
 echo "$(date '+%Y-%m-%d %H:%M:%S') - log_file: $LOG_FILE" | tee -a "$LOG_FILE"
@@ -129,6 +138,7 @@ for table in "${check_tables_array[@]}"; do
   python -u "${PY_BASH_DIR}/check_watershed_pre_run_complete.py" \
     --credentials "$path_to_db_credentials" \
     --thuc_id "$thuc_id" \
+    --note "$note" \
     --table "$table" \
     --log_file "$LOG_FILE"
 

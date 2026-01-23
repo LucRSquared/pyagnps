@@ -12,7 +12,8 @@ import requests
 import pandas as pd
 import geopandas as gpd
 
-from sqlalchemy import Table, MetaData, text as sql_text
+from sqlalchemy import Table, MetaData, exc, text as sql_text
+from sqlalchemy.dialects.postgresql import insert
 
 import shutil, os, glob, sys
 import time
@@ -407,7 +408,7 @@ def download_files_from_url(session, urls, out_dir):
 
     return responses
 
-def upsert_dataframe(engine, df, table_name, schema=None, unique_columns=None):
+def upsert_dataframe_old(engine, df, table_name, schema=None, unique_columns=None):
     """
     Perform upsert using raw SQL when no database constraint exists
     
@@ -472,3 +473,55 @@ def upsert_dataframe(engine, df, table_name, schema=None, unique_columns=None):
             
             # Execute the upsert
             connection.execute(upsert_sql, record)
+
+def upsert_dataframe(engine, df, table_name, unique_columns, schema=None):
+    """
+    Perform a high-performance batch upsert in PostgreSQL using ON CONFLICT.
+    
+    Ensures that existing records are updated with new values from the DF.
+    """
+    if df.empty:
+        return
+
+    # 1. Reflect metadata 
+    # Note: If you call this function 1000 times, reflect the table OUTSIDE 
+    # and pass the table object in to avoid the original SSL error.
+    metadata = MetaData(schema=schema)
+    try:
+        table = Table(table_name, metadata, autoload_with=engine)
+    except exc.NoSuchTableError:
+        raise ValueError(f"Table '{table_name}' not found in database.")
+
+    # 2. Convert DataFrame to records (list of dicts)
+    records = df.to_dict(orient='records')
+
+    # 3. Define the INSERT statement
+    stmt = insert(table).values(records)
+
+    # 4. Define the UPDATE logic (The "Upsert" part)
+    # Only update columns that exist in the DataFrame and are NOT part of the unique key
+    # We get column names from the first record in the DF to ensure we only update what we sent.
+    columns_to_update = [c for c in records[0].keys() if c not in unique_columns]
+    
+    update_dict = {
+        c: stmt.excluded[c]
+        for c in columns_to_update
+    }
+
+    # If there are no columns to update (i.e., the DF only contains the unique key),
+    # we essentially want "DO NOTHING", but to satisfy the "upsert" requirement
+    # we only run this block if there are actually columns to update.
+    if update_dict:
+        upsert_stmt = stmt.on_conflict_do_update(
+            index_elements=unique_columns, # This constraint MUST exist in the DB
+            set_=update_dict
+        )
+    else:
+        # Fallback for when DF only has the PK columns (rare, but possible)
+        upsert_stmt = stmt.on_conflict_do_nothing(
+            index_elements=unique_columns
+        )
+
+    # 5. Execute in a single transaction
+    with engine.begin() as connection:
+        connection.execute(upsert_stmt)

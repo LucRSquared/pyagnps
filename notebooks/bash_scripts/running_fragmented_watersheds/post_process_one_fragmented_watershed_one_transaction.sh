@@ -134,6 +134,32 @@ if [ -z "$note" ]; then
   note="unforced_potet"
 fi
 
+
+# ------------------------------------------------------------------------------
+# OPTIMIZATION FIX 1: Pre-create output directories to prevent IO Race Conditions
+# ------------------------------------------------------------------------------
+if [ "$save_method" == "files" ]; then
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Pre-creating output directories for parquet files..." | tee -a "$LOG_FILE"
+    
+    # These must match the table names used in your python script
+    tables=(
+      "pre_runs_annagnps_aa" 
+      "pre_runs_annagnps_aa_water_yield_ua_rr_total" 
+      "pre_runs_annagnps_aa_sediment_yield_ua_rr_total" 
+      "pre_runs_annagnps_aa_sediment_erosion_ua_rr_total"
+    )
+    
+    POSTPROC_BASE="${MINI_WATERSHEDS_DIR}/post_processed_files"
+    
+    for table in "${tables[@]}"; do
+        mkdir -p "${POSTPROC_BASE}/${table}"
+    done
+fi
+# ------------------------------------------------------------------------------
+
+
+
+
 # Calculate the total number of jobs based on directory count
 num_jobs=0
 
@@ -168,7 +194,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
          --array="${start_index}-${end_index}" \
          --partition="$partition" \
          --exclude="$exclude" \
-         --job-name="postproc_${start_index}-${end_index}" \
+         --job-name="${THUC_ID}_postproc_${start_index}-${end_index}" \
          --output="/dev/null" \
          "${PY_BASH_DIR}/postproc_reach_func.sh" \
          --thuc_id "$THUC_ID" \
@@ -183,6 +209,7 @@ for ((start_index = 0; start_index < num_jobs; start_index += batch_size)); do
          --py_bash_dir "$PY_BASH_DIR" \
          --pyagnps_dir "$PYAGNPS_DIR" \
          --log_file "$LOG_FILE" \
+         --use_local_log "true" \
          --failed_log_file "$FAILED_THUCS" &
 
   sleep 5
@@ -210,7 +237,7 @@ done
 if [ "$save_method" != "db" ]; then
     srun --partition="$partition" \
          --exclude="$exclude" \
-         --job-name="postproc_collect" \
+         --job-name="${THUC_ID}_pop" \
          --output="/dev/null" \
          --export=ALL \
          bash -c "

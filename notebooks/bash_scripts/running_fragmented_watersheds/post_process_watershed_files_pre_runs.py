@@ -66,10 +66,10 @@ def main():
             sys.exit(1)
 
         db_table_unique_columns = {
-            'pre_runs_annagnps_aa': ['thuc_id', 'cell_id'],
-            'pre_runs_annagnps_aa_sediment_erosion_ua_rr_total': ['thuc_id', 'cell_id', 'description'],
-            'pre_runs_annagnps_aa_sediment_yield_ua_rr_total': ['thuc_id', 'cell_id', 'description'],
-            'pre_runs_annagnps_aa_water_yield_ua_rr_total': ['thuc_id', 'cell_id', 'description'],
+            'pre_runs_annagnps_aa': ['thuc_id', 'cell_id', 'note'],
+            'pre_runs_annagnps_aa_sediment_erosion_ua_rr_total': ['thuc_id', 'cell_id', 'description', 'note'],
+            'pre_runs_annagnps_aa_sediment_yield_ua_rr_total': ['thuc_id', 'cell_id', 'description', 'note'],
+            'pre_runs_annagnps_aa_water_yield_ua_rr_total': ['thuc_id', 'cell_id', 'description', 'note'],
         }
 
         for label, db_table in zip(data_output_labels, [annagnps_aa_table, aa_sediment_erosion_table, aa_sediment_yield_table, aa_water_yield_table]):
@@ -88,9 +88,14 @@ def main():
                 case 'files':
                     reach_name = output_folder.absolute().name
                     table_output_folder = save_results_folder / db_table
-                    table_output_folder.mkdir(exist_ok=True, parents=True)
+                    # table_output_folder.mkdir(exist_ok=True, parents=True) UNCOMMENT FOR STANDALONE USE (unlikely)
 
-                    df.to_parquet(table_output_folder / f"{thuc_id}_{db_table}_{reach_name}.parquet", engine='pyarrow', compression='snappy', index=False)
+                    log_to_file(log_file_path, f"Writing {thuc_id}_{db_table}_{reach_name}.parquet", add_timestamp=True)
+                    
+                    tmp_parquet_file = table_output_folder / f"{thuc_id}_{db_table}_{reach_name}.parquet"
+
+                    if not(tmp_parquet_file.exists()):
+                        df.to_parquet(tmp_parquet_file, engine='pyarrow', compression='snappy', index=False)
                 case _:
                     raise ValueError(f"Invalid save_method: {save_method}")
 

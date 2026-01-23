@@ -36,6 +36,10 @@ parse_arguments() {
         LOG_FILE="$2"
         shift 2
         ;;
+      --use_local_log)
+        USE_LOCAL_LOG="$2"
+        shift 2
+        ;;
       --failed_log_file)
         FAILED_THUCS="$2"
         shift 2
@@ -75,6 +79,12 @@ parse_arguments "$@"
 if [ -z "$LOG_FILE" ]; then
   LOG_FILE="/dev/null"
 fi
+
+# Make a default value of the LOG_FILE in case it is not specified so that it doesn't log to a file
+if [ -z "$USE_LOCAL_LOG" ]; then
+  USE_LOCAL_LOG="false"
+fi
+
 
 # Make a default value of the FAILED_THUCS in case it is not specified so that it doesn't log to a file
 if [ -z "$FAILED_THUCS" ]; then
@@ -129,10 +139,14 @@ if [ -z "$aa_sediment_erosion_table" ]; then
   aa_sediment_erosion_table="pre_runs_annagnps_aa_sediment_erosion_ua_rr_total"
 fi
 
+# Store the global log path for failure reporting, but don't write to it routinely
+GLOBAL_LOG_FILE="$LOG_FILE"
+GLOBAL_FAILED_LOG="$FAILED_THUCS"
+
 # Get the index of the directory to process from the job array
 dir_index=$((SLURM_ARRAY_TASK_ID))
 
-echo "$(date '+%Y-%m-%d %H:%M:%S') - Reading list of directories: $csv_file" | tee -a "$LOG_FILE"
+echo "$(date '+%Y-%m-%d %H:%M:%S') - Reading list of directories: $csv_file" # | tee -a "$LOG_FILE"
 
 # Read the contents of dir_list.csv into an array
 readarray -t dir_list < "$csv_file"
@@ -146,8 +160,16 @@ source "$PYAGNPS_DIR/venv/bin/activate" || { echo "$(date '+%Y-%m-%d %H:%M:%S') 
 if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
     
     job_name=$(basename "${dir_list[$dir_index]}")
+
+    # If the special flag is passed, create a local log inside the reach folder
+    if [ "$USE_LOCAL_LOG" == "true" ]; then
+        LOCAL_LOG_FILE="${dir_list[$dir_index]}/postproc_${thuc_id}.log"
+    else
+        # Fallback if run manually
+        LOCAL_LOG_FILE="$LOG_FILE"
+    fi
     
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - Post Processing directory: $job_name" | tee -a "$LOG_FILE"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - Post Processing directory: $job_name" | tee -a "$LOCAL_LOG_FILE"
     
     cd "${dir_list[$dir_index]}" || exit 1
 
@@ -162,22 +184,26 @@ if [ $dir_index -ge 0 ] && [ $dir_index -lt "${#dir_list[@]}" ]; then
         --aa_water_yield_table "$aa_water_yield_table" \
         --aa_sediment_yield_table "$aa_sediment_yield_table" \
         --aa_sediment_erosion_table "$aa_sediment_erosion_table" \
-        --log_file "$LOG_FILE"
+        --log_file "$LOCAL_LOG_FILE"
     exit_status=$?
     cd ..
 
-    # If the python code finished successfully then delete the current directory
     if [ $exit_status -eq 0 ]; then
-        echo "$(date '+%Y-%m-%d %H:%M:%S') - Post processing finished successfully: ${dir_list[$dir_index]}" | tee -a "$LOG_FILE"
-        
-        # echo "$(date '+%Y-%m-%d %H:%M:%S') - Post processing finished successfully, deleting directory ${dir_list[$dir_index]}" | tee -a "$LOG_FILE"
-        # rm -rf "${dir_list[$dir_index]}"
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - SUCCESS: ${job_name}" >> "$LOCAL_LOG_FILE"
+        # Optional: You could rm the directory here if save_method=db
     else
-        ERROR_LOG_FILE="${LOG_FILE%.*}_failed_post_process.log"
-        echo "${dir_list[$dir_index]}" | tee -a "$ERROR_LOG_FILE"
-        echo "$(date '+%Y-%m-%d %H:%M:%S') - Post processing failed: ${dir_list[$dir_index]}" | tee -a "$LOG_FILE"
-
-        echo "$(date '+%Y-%m-%d %H:%M:%S'),$thuc_id,failed_postprocessing" | tee -a "$FAILED_THUCS"
+        # ------------------------------------------------------------------------------
+        # FAILURE HANDLING - Only touch global files if something breaks
+        # ------------------------------------------------------------------------------
+        if [ "$GLOBAL_LOG_FILE" != "/dev/null" ] && [ "$GLOBAL_LOG_FILE" != "USE_LOCAL_LOG" ]; then
+             echo "${dir_list[$dir_index]}" >> "${GLOBAL_LOG_FILE%.*}_failed_post_process.log"
+        fi
+        
+        if [ "$GLOBAL_FAILED_LOG" != "/dev/null" ]; then
+             echo "$(date '+%Y-%m-%d %H:%M:%S'),$thuc_id,failed_postprocessing_${job_name}" >> "$GLOBAL_FAILED_LOG"
+        fi
+        
+        echo "$(date '+%Y-%m-%d %H:%M:%S') - FAILED: ${job_name}" >> "$LOCAL_LOG_FILE"
     fi
 
 
