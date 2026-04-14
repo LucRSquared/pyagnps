@@ -1,6 +1,12 @@
 # PyAGNPS
 
-PyAGNPS is a series of scripts and notebooks that helps in the creation of input files for TopAGNPS and AnnAGNPS
+PyAGNPS is a series of scripts and notebooks that helps in the creation of input files for TopAGNPS and AnnAGNPS.
+
+This code was developed by Luc Rébillout during his tenure as Postdoctoral Research Associate and Research Scientist at the National Center for Computational Hydroscience and Engineering ([NCCHE](https://www.ncche.olemiss.edu)). Portions of this code have been used and internally modified in the development of the Agricultural Integrated Management System ([AIMS](https://aims.ncche.olemiss.edu)), a decision support system for watershed modeling across the United States.
+
+This work has been presented at AGU204: 
+
+> Rébillout, L., Ozeren, Y., Al-Hamdan, O., & Bingner, R. (2023). PyAGNPS: A Python Toolbox for Watershed Modeling with AnnAGNPS [Poster [IN41C-2235](https://agu.confex.com/agu/agu24/meetingapp.cgi/Paper/1759644)]
 
 This README outlines the steps to install the `pyagnps` package along with its GDAL dependencies.
 
