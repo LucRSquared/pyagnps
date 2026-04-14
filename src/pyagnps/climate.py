@@ -1501,6 +1501,8 @@ class ClimateAnnAGNPSCoords:
             }
         )
 
+        df = df.sort_values(by=['Year', 'Month', 'Day'])
+
         if output_filepath is not None:
             if saveformat == "csv":
                 df.to_csv(output_filepath, index=False, float_format=float_format)
@@ -2557,7 +2559,8 @@ def query_annagnps_climate_timeseries_db(**kwargs):
             FROM {table}
             WHERE 
                 station_id = (SELECT station_id FROM find_nearest_nldas2_station({lon}, {lat}))
-            AND date >= '{start_date}' AND date <= '{end_date}';
+            AND date >= '{start_date}' AND date <= '{end_date}'
+            ORDER BY year ASC, month ASC, day ASC;
             """
     else:
         query =f"""
@@ -2577,7 +2580,8 @@ def query_annagnps_climate_timeseries_db(**kwargs):
             FROM {table}
             WHERE 
                 station_id = '{station_id}'
-            AND date >= '{start_date}' AND date <= '{end_date}';
+            AND date >= '{start_date}' AND date <= '{end_date}'
+            ORDER BY year ASC, month ASC, day ASC;
             """
     
     with engine.connect() as connection:
