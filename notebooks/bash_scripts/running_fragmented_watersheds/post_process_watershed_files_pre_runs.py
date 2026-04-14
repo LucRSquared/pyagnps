@@ -94,8 +94,8 @@ def main():
                     
                     tmp_parquet_file = table_output_folder / f"{thuc_id}_{db_table}_{reach_name}.parquet"
 
-                    if not(tmp_parquet_file.exists()):
-                        df.to_parquet(tmp_parquet_file, engine='pyarrow', compression='snappy', index=False)
+                    # if not(tmp_parquet_file.exists()):
+                    df.to_parquet(tmp_parquet_file, engine='pyarrow', compression='snappy', index=False)
                 case _:
                     raise ValueError(f"Invalid save_method: {save_method}")
 

@@ -248,6 +248,7 @@ if [ "$save_method" != "db" ]; then
              python -u \"${PY_BASH_DIR}/upload_post_processed_reaches_to_db.py\" \
                  --post_processing_dir \"$MINI_WATERSHEDS_DIR/post_processed_files\" \
                  --delete_post_processed_files_on_success \"yes\" \
+                 --file_batch_size \"500\" \
                  --credentials \"$path_to_db_credentials\" \
                  --log_file \"$LOG_FILE\" &&
              deactivate"
