@@ -49,6 +49,9 @@ def format_mgmt_schedule_for_output(df):
     df['Event_Month'] = df['Event_Month'].astype('Int64')
     df['Event_Day'] = df['Event_Day'].astype('Int64')
 
+    # Sort by Name, then by Year, then by Monthm then by day in Ascending order
+    df.sort_values(by=['Mgmt_Schd_ID', 'Event_Year', 'Event_Month', 'Event_Day'], inplace=True, ignore_index=True)
+
     return df
 
 def check_cell_data(df):
